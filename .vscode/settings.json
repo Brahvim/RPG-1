@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "*.s": "asm-intel-x86-generic",
+        "*.asm": "asm-intel-x86-generic",
+        "*.luac": "lua",
+        "stb_image.h": "c",
+        "stb_vorbis.h": "c",
+        "window1.h": "c",
+        "game.h": "c"
+    },
+    "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/compile_commands.json"
+}
