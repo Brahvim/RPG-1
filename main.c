@@ -93,9 +93,17 @@ void gameTexesLoad(void) {
 		void *ptr = g_gameTexesData[i];
 		ifl(ptr) {
 
+			// You can set these HERE, but can generate a mipmap *only* after binding, yes:
+			ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+			ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+			ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+
 			ERRORGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[i]));
 			ERRORGL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, g_gameTexesW[i], g_gameTexesH[i], 0, GL_RGBA, GL_UNSIGNED_BYTE, g_gameTexesData[i]));
-			// stbi_image_free(ptr);
+			ERRORGL(glGenerateMipmap(GL_TEXTURE_2D));
+
+			stbi_image_free(ptr);
 
 		} else {
 
@@ -104,6 +112,8 @@ void gameTexesLoad(void) {
 		}
 
 	}
+
+	ERRORGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[GAME_TEX_NULL]));
 }
 
 void gameSetup() {
@@ -148,15 +158,15 @@ void gameSetup() {
 
 	GLchar slogBuf[16384]; GLsizei slogLen = 16384, slogStrlen;
 
-	memset(slogBuf, 0, slogLen);
+	memset(slogBuf, 0, slogLen); // NOLINT
 	ERRORGL(glGetShaderInfoLog(svgl, 16384, &slogLen, slogBuf));
 	printf("Vertex shader log: %s.\n", slogBuf);
 
-	memset(slogBuf, 0, slogLen);
+	memset(slogBuf, 0, slogLen); // NOLINT
 	ERRORGL(glGetShaderInfoLog(sfgl, 16384, &slogLen, slogBuf));
 	printf("Fragment shader log: %s.\n", slogBuf);
 
-	memset(slogBuf, 0, slogLen);
+	memset(slogBuf, 0, slogLen); // NOLINT
 	ERRORGL(glGetProgramInfoLog(pgl, 16384, &slogLen, slogBuf));
 	printf("Program log: %s.\n", slogBuf);
 
@@ -164,16 +174,11 @@ void gameSetup() {
 	ERRORGL(glUseProgram(pgl));
 
 	ERRORGL(glBindVertexArray(vao));
-	ERRORGL(glGenerateMipmap(GL_TEXTURE_2D));
 	ERRORGL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-
-	ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-	ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-	ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-	ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 
 	ERRORGL(glActiveTexture(GL_TEXTURE0));
 	enum GameTex const tex = GAME_TEX_NULL;
+
 	ERRORGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[tex]));
 	ERRORGL(glUniform1i(glGetUniformLocation(pgl, "u_tex"), 0));
 	ERRORGL(glUniform2f(glGetUniformLocation(pgl, "u_texRes"), g_gameTexesW[tex], g_gameTexesH[tex]));
@@ -186,9 +191,27 @@ void gameSetup() {
 }
 
 void gameDraw() {
+	static int frameCount = 0;
+	static enum GameTex tex = 0;
+
+	ifu(frameCount % 75 == 0) {
+
+		++tex;
+
+		ifu(tex == GAME_TEX_TOTAL) {
+
+			tex = GAME_TEX_NULL;
+
+		}
+
+		ERRORGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[tex]));
+
+	}
+
 	ERRORGL(glClearColor(0.8f, 0.6f, 1.0f, 0.1f));
 	ERRORGL(glClear(GL_COLOR_BUFFER_BIT));
 	ERRORGL(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+	++frameCount;
 }
 
 int main(int const p_count, char const **p_args) {

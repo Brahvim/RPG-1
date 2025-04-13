@@ -1,8 +1,7 @@
 #pragma once
-#include <stdio.h>
 
+extern char g_cwd[];
 extern size_t g_cwdLen;
-extern char g_cwd[FILENAME_MAX];
 
 #pragma region // Exiting.
 enum GameExit {
@@ -23,6 +22,7 @@ enum GameTex {
 	GAME_TEX_NULL,
 	GAME_TEX_TEST0,
 	GAME_TEX_TEST1,
+	GAME_TEX_TEST2,
 	GAME_TEX_TOTAL
 
 };
@@ -32,6 +32,7 @@ char const *g_gameTexesPaths[GAME_TEX_TOTAL] = {
 	"assets/null.png",
 	"assets/test0.png",
 	"assets/test1.png",
+	"assets/test2.png",
 
 };
 
