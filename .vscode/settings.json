@@ -6,7 +6,9 @@
         "stb_image.h": "c",
         "stb_vorbis.h": "c",
         "window1.h": "c",
-        "game.h": "c"
+        "game.h": "c",
+        "glfw3.h": "c",
+        "ifs.h": "c"
     },
     "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/compile_commands.json"
 }

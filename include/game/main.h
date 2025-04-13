@@ -4,6 +4,7 @@
 extern size_t g_cwdLen;
 extern char g_cwd[FILENAME_MAX];
 
+#pragma region // Exiting.
 enum GameExit {
 
 	GAME_EXIT_OKAY,
@@ -13,6 +14,7 @@ enum GameExit {
 };
 
 void gameExit(int const reason);
+#pragma endregion
 
 #pragma region // Textures.
 enum GameTex {
@@ -32,6 +34,7 @@ char const *g_gameTexesPaths[GAME_TEX_TOTAL] = {
 
 int g_gameTexesW[GAME_TEX_TOTAL];
 int g_gameTexesH[GAME_TEX_TOTAL];
+GLuint g_gameTexesGl[GAME_TEX_TOTAL];
 unsigned char *g_gameTexes[GAME_TEX_TOTAL];
 
 void gameTexesLoad(void);
