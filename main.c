@@ -20,12 +20,12 @@
 char g_cwd[FILENAME_MAX];
 size_t g_cwdLen = FILENAME_MAX;
 
-GLint shRead(GLchar const** buffer, char const *path);
-GLint shRead(GLchar const** p_buffer, char const *p_path) {
+GLint shRead(GLchar const **buffer, char const *path);
+GLint shRead(GLchar const **p_buffer, char const *p_path) {
 	GLint read = 0;
 	GLint next = 4096;
 	FILE *file = fopen(p_path, "r");
-	char *buffer = calloc(4096, sizeof(char));
+	GLchar *buffer = calloc(4096, sizeof(GLchar));
 
 reading:
 	for (; read < next && !feof(file); ++read) {
@@ -35,8 +35,10 @@ reading:
 	}
 
 	if (!feof(file)) {
-		buffer = realloc(buffer, sizeof(char) * (next = read + 4096));
+
+		buffer = realloc(buffer, sizeof(GLchar) * (next = read + 4096));
 		goto reading;
+
 	}
 
 	*p_buffer = buffer;
@@ -214,7 +216,7 @@ void gameDraw() {
 	++frameCount;
 }
 
-int main(int const p_count, char const **p_args) {
+int mainGame(int const p_count, char const **p_args) {
 	glfwInit();
 	glfwSwapInterval(0);
 	g_window1 = glfwCreateWindow(g_window1WDef, g_window1HDef, "Game", NULL, NULL);
@@ -252,4 +254,63 @@ int main(int const p_count, char const **p_args) {
 
 	glfwDestroyWindow(g_window1);
 	glfwTerminate();
+}
+
+int main(int const p_count, char const **p_args) {
+	int unsigned const chunkReadSize = 1; // 256;
+	int unsigned const chunkGlSize = 4; // INT32_MAX;
+	int unsigned const chunksReadForChunkGl = chunkGlSize / chunkReadSize;
+
+	char **codeRead = malloc(1);
+	size_t *lengthsRead = malloc(1);
+	size_t chunksRead = 0, charsRead = 1;
+
+	FILE *file = fopen("shader.vert", "r");
+
+	for (size_t i = 0; charsRead > 0; ++i, ++chunksRead) {
+
+		codeRead = realloc(codeRead, (1 + i) * sizeof(char*));
+		codeRead[i] = malloc(chunkReadSize * sizeof(char));
+		lengthsRead = realloc(lengthsRead, (1 + i) * sizeof(size_t));
+		charsRead = lengthsRead[i] = fread(codeRead[i], sizeof(GLchar), chunkReadSize, file);
+
+	}
+
+	fclose(file);
+
+	size_t chunksGl = 1 + (charsRead / INT32_MAX);
+
+	GLint *lengthsGl = calloc(1, chunksGl);
+	GLchar **codeGl = calloc(1 + chunksGl, sizeof(char*));
+
+	for (size_t i = 0; i < chunksGl; ++i) {
+
+		int unsigned const chunksToSum = (chunksRead < chunksReadForChunkGl) ? chunksRead : chunksReadForChunkGl;
+		for (size_t j = 0; j < chunksGl; ++j) {
+
+			lengthsGl[i] += lengthsRead[j];
+
+		}
+
+	}
+
+	puts("Shader source:");
+
+	for (size_t i = 0; i < chunksRead; i++) {
+
+		fwrite(codeRead[i], 1, lengthsRead[i], stdout);
+
+	}
+
+	putchar('\n');
+
+	for (size_t i = 0; i < chunksRead; i++) {
+
+		free(codeRead[i]);
+
+	}
+
+	free(lengthsRead);
+	free(codeRead);
+
 }
