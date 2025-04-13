@@ -64,7 +64,50 @@ if ((errorGl = glGetError()) != GL_NO_ERROR) {\
 	printf("OpenGL error `%d` (%s), %s:%d.\n", errorGl, glGetErrorString(errorGl), __FILE__, __LINE__);\
 }\
 
+void gameExit(int const p_reason) {
+	exit(p_reason);
+}
+
+void gameTexesLoad(void) {
+	stbi_set_flip_vertically_on_load(1);
+	ERRORGL(glActiveTexture(GL_TEXTURE0));
+	ERRORGL(glGenTextures(GAME_TEX_TOTAL, g_gameTexesGl));
+
+	for (int i = 0; i < GAME_TEX_TOTAL; ++i) {
+
+		char fname[FILENAME_MAX];
+		// NOLINTBEGIN
+		memset(fname, 0, FILENAME_MAX);
+		strncat(fname, g_cwd, g_cwdLen);
+		strncat(fname, "/", g_cwdLen);
+		strncat(fname + 1 + g_cwdLen, g_gameTexesPaths[i], g_cwdLen);
+		// NOLINTEND
+
+		g_gameTexesData[i] = stbi_load(fname, &g_gameTexesW[i], &g_gameTexesH[i], NULL, STBI_rgb_alpha);
+		printf("Loaded texture `%s` with width `%d` and height `%d`.\n", g_gameTexesPaths[i], g_gameTexesW[i], g_gameTexesH[i]);
+	}
+
+	// Check and free!...:
+	for (int i = 0; i < GAME_TEX_TOTAL; ++i) {
+
+		void *ptr = g_gameTexesData[i];
+		ifl(ptr) {
+
+			ERRORGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[i]));
+			ERRORGL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, g_gameTexesW[i], g_gameTexesH[i], 0, GL_RGBA, GL_UNSIGNED_BYTE, g_gameTexesData[i]));
+			// stbi_image_free(ptr);
+
+		} else {
+
+			printf("Failed to load texture `%s`.\n", g_gameTexesPaths[i]);
+
+		}
+
+	}
+}
+
 void gameSetup() {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	GLfloat data[] = {
 
 		-0.5f, -0.5f, // V
@@ -80,7 +123,6 @@ void gameSetup() {
 		+1.0f, +1.0f, // T
 
 	};
-
 
 	GLuint vao, vbo;
 	GLuint pgl = ERRORGL(glCreateProgram());
@@ -122,6 +164,7 @@ void gameSetup() {
 	ERRORGL(glUseProgram(pgl));
 
 	ERRORGL(glBindVertexArray(vao));
+	ERRORGL(glGenerateMipmap(GL_TEXTURE_2D));
 	ERRORGL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
 
 	ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
@@ -130,9 +173,9 @@ void gameSetup() {
 	ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 
 	ERRORGL(glActiveTexture(GL_TEXTURE0));
-	enum GameTex const tex = GAME_TEX_TEST;
+	enum GameTex const tex = GAME_TEX_NULL;
 	ERRORGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[tex]));
-	ERRORGL(glUniform1i(glGetUniformLocation(pgl, "u_tex"), GL_TEXTURE0 - GL_TEXTURE0));
+	ERRORGL(glUniform1i(glGetUniformLocation(pgl, "u_tex"), 0));
 	ERRORGL(glUniform2f(glGetUniformLocation(pgl, "u_texRes"), g_gameTexesW[tex], g_gameTexesH[tex]));
 
 	ERRORGL(glEnableVertexAttribArray(0));
@@ -146,52 +189,6 @@ void gameDraw() {
 	ERRORGL(glClearColor(0.8f, 0.6f, 1.0f, 0.1f));
 	ERRORGL(glClear(GL_COLOR_BUFFER_BIT));
 	ERRORGL(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
-}
-
-void gameExit(int const p_reason) {
-	exit(p_reason);
-}
-
-void gameTexesLoad(void) {
-	stbi_set_flip_vertically_on_load(1);
-	ERRORGL(glGenTextures(GAME_TEX_TOTAL, g_gameTexesGl));
-
-	for (int i = 0; i < GAME_TEX_TOTAL; ++i) {
-
-		char fname[FILENAME_MAX];
-		// NOLINTBEGIN
-		memset(fname, 0, FILENAME_MAX);
-		strncat(fname, g_cwd, g_cwdLen);
-		strncat(fname, "/", g_cwdLen);
-		strncat(fname + 1 + g_cwdLen, g_gameTexesPaths[i], g_cwdLen);
-		// NOLINTEND
-
-		g_gameTexesData[i] = stbi_load(fname, &g_gameTexesW[i], &g_gameTexesH[i], NULL, STBI_rgb_alpha);
-		// printf("Loaded texture `%s` with width `%d` and height `%d`.\n", g_gameTexesPaths[i], g_gameTexesW[i], g_gameTexesH[i]);
-		printf("First pixel: %d %d %d %d\n", g_gameTexesData[0], g_gameTexesData[1], g_gameTexesData[2], g_gameTexesData[3]);
-		printf("Second pixel: %d %d %d %d\n", g_gameTexesData[4], g_gameTexesData[5], g_gameTexesData[6], g_gameTexesData[7]);
-
-	}
-
-	ERRORGL(glActiveTexture(GL_TEXTURE0));
-
-	// Check and free!...:
-	for (int i = 0; i < GAME_TEX_TOTAL; ++i) {
-
-		void *ptr = g_gameTexesData[i];
-		ifl(ptr) {
-
-			ERRORGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[i]));
-			ERRORGL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, g_gameTexesW[i], g_gameTexesH[i], 0, GL_RGBA, GL_UNSIGNED_BYTE, g_gameTexesData[i]));
-			stbi_image_free(ptr);
-
-		} else {
-
-			printf("Failed to load texture `%s`.\n", g_gameTexesPaths[i]);
-
-		}
-
-	}
 }
 
 int main(int const p_count, char const **p_args) {

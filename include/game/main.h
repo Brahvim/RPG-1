@@ -10,6 +10,7 @@ enum GameExit {
 	GAME_EXIT_OKAY,
 	GAME_EXIT_FAILED, // For when you don't know *why!*
 	GAME_EXIT_GET_CWD,
+	GAME_EXIT_TOTAL
 
 };
 
@@ -19,16 +20,18 @@ void gameExit(int const reason);
 #pragma region // Textures.
 enum GameTex {
 
-	GAME_TEX_TEST,
 	GAME_TEX_NULL,
-	GAME_TEX_TOTAL // Can also be treated as a `NULL` handle!
+	GAME_TEX_TEST0,
+	GAME_TEX_TEST1,
+	GAME_TEX_TOTAL
 
 };
 
 char const *g_gameTexesPaths[GAME_TEX_TOTAL] = {
 
-	"assets/test.png",
 	"assets/null.png",
+	"assets/test0.png",
+	"assets/test1.png",
 
 };
 
@@ -38,5 +41,4 @@ GLuint g_gameTexesGl[GAME_TEX_TOTAL];
 unsigned char *g_gameTexesData[GAME_TEX_TOTAL];
 
 void gameTexesLoad(void);
-void gameTexesFree(void);
 #pragma endregion
