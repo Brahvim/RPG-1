@@ -20,22 +20,49 @@
 char g_cwd[FILENAME_MAX];
 size_t g_cwdLen = FILENAME_MAX;
 
-GLchar const *const svsrc =
-"#version 330 core" \
-"layout (location = 0) in vec2 in_position;" \
-"layout (location = 1) in vec2 in_uv;" \
-"void main() {" \
-"    gl_Position = vec4(in_position, 0.0, 1.0);" \
-"}";
+GLint shRead(GLchar const** buffer, char const *path);
+GLint shRead(GLchar const** p_buffer, char const *p_path) {
+	GLint read = 0;
+	GLint next = 4096;
+	FILE *file = fopen(p_path, "r");
+	char *buffer = calloc(4096, sizeof(char));
 
-GLchar const *const sfsrc =
-"#version 330 core" \
-"out vec4 o_fragColor;" \
-"void main() {" \
-"    gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);" \
-"}";
+reading:
+	for (; read < next && !feof(file); ++read) {
 
-int svlen = 0, sflen = 0;
+		buffer[read] = fgetc(file);
+
+	}
+
+	if (!feof(file)) {
+		buffer = realloc(buffer, sizeof(char) * (next = read + 4096));
+		goto reading;
+	}
+
+	*p_buffer = buffer;
+	return read;
+}
+
+char const* glGetErrorString(GLenum error);
+char const* glGetErrorString(GLenum p_error) {
+	switch (p_error) {
+
+		case GL_INVALID_ENUM: return "GL_INVALID_ENUM";
+		case GL_INVALID_VALUE: return "GL_INVALID_VALUE";
+		case GL_OUT_OF_MEMORY: return "GL_OUT_OF_MEMORY";
+		case GL_INVALID_OPERATION: return "GL_INVALID_OPERATION";
+		case GL_INVALID_FRAMEBUFFER_OPERATION: return "GL_INVALID_FRAMEBUFFER_OPERATION";
+
+	}
+
+	return "GL_NO_ERROR";
+}
+
+GLenum errorGl;
+#define ERRORGL(x) x;\
+if ((errorGl = glGetError()) != GL_NO_ERROR) {\
+	printf("OpenGL error `%d` (%s), %s:%d.\n", errorGl, glGetErrorString(errorGl), __FILE__, __LINE__);\
+}\
 
 void gameSetup() {
 	GLfloat data[] = {
@@ -44,68 +71,81 @@ void gameSetup() {
 		+0.0f, +0.0f, // T
 
 		-0.5f, +0.5f, // V
-		+0.0f, +0.0f, // T
+		+0.0f, +1.0f, // T
 
 		+0.5f, -0.5f, // V
-		+0.0f, +0.0f, // T
+		+1.0f, +0.0f, // T
 
 		+0.5f, +0.5f, // V
-		+0.0f, +0.0f, // T
+		+1.0f, +1.0f, // T
 
 	};
 
-	GLuint vao, vbo, tex;
-	GLuint pgl = glCreateProgram();
-	GLuint svgl = glCreateShader(GL_VERTEX_SHADER);
-	GLuint sfgl = glCreateShader(GL_FRAGMENT_SHADER);
 
-	glGenBuffers(1, &vbo);
-	glGenTextures(1, &tex);
-	glGenVertexArrays(1, &vao);
-	glGenTextures(GAME_TEX_TOTAL, g_gameTexesGl);
+	GLuint vao, vbo;
+	GLuint pgl = ERRORGL(glCreateProgram());
+	GLuint svgl = ERRORGL(glCreateShader(GL_VERTEX_SHADER));
+	GLuint sfgl = ERRORGL(glCreateShader(GL_FRAGMENT_SHADER));
 
-	svlen = strlen(svsrc);
-	sflen = strlen(sfsrc);
+	ERRORGL(glGenBuffers(1, &vbo));
+	ERRORGL(glGenVertexArrays(1, &vao));
 
-	glShaderSource(svgl, 1, &svsrc, &svlen);
-	glShaderSource(sfgl, 1, &sfsrc, &sflen);
+	GLchar const *svsrc, *sfsrc;
+	GLint const svlen = shRead(&svsrc, "shader.vert");
+	GLint const sflen = shRead(&sfsrc, "shader.frag");
 
-	glAttachShader(pgl, svgl);
-	glAttachShader(pgl, sfgl);
+	ERRORGL(glShaderSource(svgl, 1, &svsrc, &svlen));
+	ERRORGL(glShaderSource(sfgl, 1, &sfsrc, &sflen));
 
-	glCompileShader(svgl);
-	glCompileShader(sfgl);
+	ERRORGL(glCompileShader(svgl));
+	ERRORGL(glCompileShader(sfgl));
 
-	// GLsizei lens[10];
-	// GLchar buf[BUFSIZ];
-	// glGetShaderInfoLog(GL_VERTEX_SHADER, BUFSIZ, lens, buf);
-	// printf("Vertex shader log: %s.\n", buf);
-	// buf = { 0 };
-	// glGetShaderInfoLog(GL_FRAGMENT_SHADER, BUFSIZ, lens, buf);
-	// printf("Fragment shader log: %s.\n", buf);
+	// Attach *after* compilation:
+	ERRORGL(glAttachShader(pgl, svgl));
+	ERRORGL(glAttachShader(pgl, sfgl));
 
-	glLinkProgram(pgl);
-	glUseProgram(pgl);
+	GLchar slogBuf[16384]; GLsizei slogLen = 16384, slogStrlen;
 
-	// glActiveTexture(GL_TEXTURE1);
-	// glUniform1i(glGetUniformLocation(sfgl, "u_tex"), GL_TEXTURE1 - GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, g_gameTexesW[0], g_gameTexesH[0], 0, GL_RGBA, GL_UNSIGNED_BYTE, g_gameTexes[0]);
+	memset(slogBuf, 0, slogLen);
+	ERRORGL(glGetShaderInfoLog(svgl, 16384, &slogLen, slogBuf));
+	printf("Vertex shader log: %s.\n", slogBuf);
 
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	memset(slogBuf, 0, slogLen);
+	ERRORGL(glGetShaderInfoLog(sfgl, 16384, &slogLen, slogBuf));
+	printf("Fragment shader log: %s.\n", slogBuf);
 
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*) (2 * sizeof(GLfloat)));
+	memset(slogBuf, 0, slogLen);
+	ERRORGL(glGetProgramInfoLog(pgl, 16384, &slogLen, slogBuf));
+	printf("Program log: %s.\n", slogBuf);
+
+	ERRORGL(glLinkProgram(pgl));
+	ERRORGL(glUseProgram(pgl));
+
+	ERRORGL(glBindVertexArray(vao));
+	ERRORGL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
+
+	ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+	ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+	ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+	ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+
+	ERRORGL(glActiveTexture(GL_TEXTURE0));
+	enum GameTex const tex = GAME_TEX_TEST;
+	ERRORGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[tex]));
+	ERRORGL(glUniform1i(glGetUniformLocation(pgl, "u_tex"), GL_TEXTURE0 - GL_TEXTURE0));
+	ERRORGL(glUniform2f(glGetUniformLocation(pgl, "u_texRes"), g_gameTexesW[tex], g_gameTexesH[tex]));
+
+	ERRORGL(glEnableVertexAttribArray(0));
+	ERRORGL(glEnableVertexAttribArray(1));
+	ERRORGL(glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW));
+	ERRORGL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0));
+	ERRORGL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*) (2 * sizeof(GLfloat))));
 }
 
 void gameDraw() {
-	glClearColor(0.8f, 0.6f, 1.0f, 0.1f);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	ERRORGL(glClearColor(0.8f, 0.6f, 1.0f, 0.1f));
+	ERRORGL(glClear(GL_COLOR_BUFFER_BIT));
+	ERRORGL(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 }
 
 void gameExit(int const p_reason) {
@@ -113,6 +153,8 @@ void gameExit(int const p_reason) {
 }
 
 void gameTexesLoad(void) {
+	stbi_set_flip_vertically_on_load(1);
+	ERRORGL(glGenTextures(GAME_TEX_TOTAL, g_gameTexesGl));
 
 	for (int i = 0; i < GAME_TEX_TOTAL; ++i) {
 
@@ -124,29 +166,28 @@ void gameTexesLoad(void) {
 		strncat(fname + 1 + g_cwdLen, g_gameTexesPaths[i], g_cwdLen);
 		// NOLINTEND
 
-		g_gameTexes[i] = stbi_load(fname, &g_gameTexesW[i], &g_gameTexesH[i], 0, STBI_rgb_alpha);
+		g_gameTexesData[i] = stbi_load(fname, &g_gameTexesW[i], &g_gameTexesH[i], NULL, STBI_rgb_alpha);
+		// printf("Loaded texture `%s` with width `%d` and height `%d`.\n", g_gameTexesPaths[i], g_gameTexesW[i], g_gameTexesH[i]);
+		printf("First pixel: %d %d %d %d\n", g_gameTexesData[0], g_gameTexesData[1], g_gameTexesData[2], g_gameTexesData[3]);
+		printf("Second pixel: %d %d %d %d\n", g_gameTexesData[4], g_gameTexesData[5], g_gameTexesData[6], g_gameTexesData[7]);
 
 	}
 
-	// CHECK!:
+	ERRORGL(glActiveTexture(GL_TEXTURE0));
+
+	// Check and free!...:
 	for (int i = 0; i < GAME_TEX_TOTAL; ++i) {
 
-		ifu(!g_gameTexes[i]) {
-
-			printf("Failed to load texture `%s`.\n", g_gameTexesPaths[i]);
-
-		}
-
-	}
-}
-
-void gameTexesFree(void) {
-	for (int i = 0; i < GAME_TEX_TOTAL; ++i) {
-
-		void *ptr = g_gameTexes[i];
+		void *ptr = g_gameTexesData[i];
 		ifl(ptr) {
 
+			ERRORGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[i]));
+			ERRORGL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, g_gameTexesW[i], g_gameTexesH[i], 0, GL_RGBA, GL_UNSIGNED_BYTE, g_gameTexesData[i]));
 			stbi_image_free(ptr);
+
+		} else {
+
+			printf("Failed to load texture `%s`.\n", g_gameTexesPaths[i]);
 
 		}
 
@@ -181,6 +222,7 @@ int main(int const p_count, char const **p_args) {
 
 		glfwPollEvents();
 		gameWindow1UpdateVars();
+		ERRORGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
 
 		gameDraw();
 
@@ -189,6 +231,5 @@ int main(int const p_count, char const **p_args) {
 	}
 
 	glfwDestroyWindow(g_window1);
-	gameTexesFree();
 	glfwTerminate();
 }
