@@ -1,15 +1,16 @@
 #pragma region // Headers.
 #pragma region // Not my headers!
-#include "glad.h"
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+
 #include <AL/al.h>
 
-#include "stb/stb_image.h"
+#include <stb/stb_image.h>
 
 #define STB_VORBIS_HEADER_ONLY
-#include "stb/stb_vorbis.h"
+#include <stb/stb_vorbis.h>
 #pragma endregion
 
 #include "ifs.h"
@@ -17,35 +18,48 @@
 #include "game/window1.h"
 #pragma endregion
 
+GLenum g_errorGl;
 char g_cwd[FILENAME_MAX];
 size_t g_cwdLen = FILENAME_MAX;
 
-GLint shRead(GLchar const **buffer, char const *path);
-GLint shRead(GLchar const **p_buffer, char const *p_path) {
-	GLint read = 0;
-	GLint next = 4096;
-	FILE *file = fopen(p_path, "r");
-	GLchar *buffer = calloc(4096, sizeof(GLchar));
+GLint gameShaderFromFile(GLchar const **p_buffer, char const *p_path) {
+	FILE *file = fopen(p_path, "rb");
 
-reading:
-	for (; read < next && !feof(file); ++read) {
+	ifu(!file) {
 
-		buffer[read] = fgetc(file);
+		return -1;
 
 	}
 
-	if (!feof(file)) {
+	fseek(file, 0, SEEK_END);
+	GLint const length = ftell(file);
 
-		buffer = realloc(buffer, sizeof(GLchar) * (next = read + 4096));
-		goto reading;
+	ifu(!length) {
+
+		fclose(file);
+		return -1;
 
 	}
 
+	GLchar *buffer = malloc(sizeof(GLchar) * (1 + length));
+
+	ifu(!buffer) {
+
+		fclose(file);
+		return -1;
+
+	}
+
+	rewind(file);
+	fread(buffer, 1, length, file);
+	fclose(file);
+
+	buffer[length] = '\0';
 	*p_buffer = buffer;
-	return read;
+
+	return length;
 }
 
-char const* glGetErrorString(GLenum error);
 char const* glGetErrorString(GLenum p_error) {
 	switch (p_error) {
 
@@ -59,12 +73,6 @@ char const* glGetErrorString(GLenum p_error) {
 
 	return "GL_NO_ERROR";
 }
-
-GLenum errorGl;
-#define ERRORGL(x) x;\
-if ((errorGl = glGetError()) != GL_NO_ERROR) {\
-	printf("OpenGL error `%d` (%s), %s:%d.\n", errorGl, glGetErrorString(errorGl), __FILE__, __LINE__);\
-}\
 
 void gameExit(int const p_reason) {
 	exit(p_reason);
@@ -118,7 +126,7 @@ void gameTexesLoad(void) {
 	ERRORGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[GAME_TEX_NULL]));
 }
 
-void gameSetup() {
+void gameSetup(void) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	GLfloat data[] = {
 
@@ -145,8 +153,8 @@ void gameSetup() {
 	ERRORGL(glGenVertexArrays(1, &vao));
 
 	GLchar const *svsrc, *sfsrc;
-	GLint const svlen = shRead(&svsrc, "shader.vert");
-	GLint const sflen = shRead(&sfsrc, "shader.frag");
+	GLint const svlen = gameShaderFromFile(&svsrc, "shader.vert");
+	GLint const sflen = gameShaderFromFile(&sfsrc, "shader.frag");
 
 	ERRORGL(glShaderSource(svgl, 1, &svsrc, &svlen));
 	ERRORGL(glShaderSource(sfgl, 1, &sfsrc, &sflen));
@@ -181,8 +189,30 @@ void gameSetup() {
 	ERRORGL(glActiveTexture(GL_TEXTURE0));
 	enum GameTex const tex = GAME_TEX_NULL;
 
+	// float const time = (float) glfwGetTime();
+	// float const angleY = sinf(time), angleZ = cosf(time);
+
+	// float mat[16] = {
+
+	// 	+cosf(angleZ),	-sinf(angleZ), 	0.2f * +sinf(angleY),	0.0f,
+	// 	+sinf(angleZ),	+cosf(angleZ), 	0.2f * +cosf(angleY),	0.0f,
+	// 	0.0f,			0.0f, 			1.0f, 					0.0f,
+	// 	0.0f, 			0.0f,			0.0f, 					1.0f,
+
+	// };
+
+	float mat[16] = {
+
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,
+
+	};
+
 	ERRORGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[tex]));
 	ERRORGL(glUniform1i(glGetUniformLocation(pgl, "u_tex"), 0));
+	ERRORGL(glUniformMatrix4fv(glGetUniformLocation(pgl, "u_transform"), 1, GL_TRUE, mat));
 	ERRORGL(glUniform2f(glGetUniformLocation(pgl, "u_texRes"), g_gameTexesW[tex], g_gameTexesH[tex]));
 
 	ERRORGL(glEnableVertexAttribArray(0));
@@ -192,7 +222,7 @@ void gameSetup() {
 	ERRORGL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*) (2 * sizeof(GLfloat))));
 }
 
-void gameDraw() {
+void gameDraw(void) {
 	static int frameCount = 0;
 	static enum GameTex tex = 0;
 
@@ -216,7 +246,7 @@ void gameDraw() {
 	++frameCount;
 }
 
-int mainGame(int const p_count, char const **p_args) {
+int main(int const p_count, char const **p_args) {
 	glfwInit();
 	glfwSwapInterval(0);
 	g_window1 = glfwCreateWindow(g_window1WDef, g_window1HDef, "Game", NULL, NULL);
@@ -254,63 +284,4 @@ int mainGame(int const p_count, char const **p_args) {
 
 	glfwDestroyWindow(g_window1);
 	glfwTerminate();
-}
-
-int main(int const p_count, char const **p_args) {
-	int unsigned const chunkReadSize = 1; // 256;
-	int unsigned const chunkGlSize = 4; // INT32_MAX;
-	int unsigned const chunksReadForChunkGl = chunkGlSize / chunkReadSize;
-
-	char **codeRead = malloc(1);
-	size_t *lengthsRead = malloc(1);
-	size_t chunksRead = 0, charsRead = 1;
-
-	FILE *file = fopen("shader.vert", "r");
-
-	for (size_t i = 0; charsRead > 0; ++i, ++chunksRead) {
-
-		codeRead = realloc(codeRead, (1 + i) * sizeof(char*));
-		codeRead[i] = malloc(chunkReadSize * sizeof(char));
-		lengthsRead = realloc(lengthsRead, (1 + i) * sizeof(size_t));
-		charsRead = lengthsRead[i] = fread(codeRead[i], sizeof(GLchar), chunkReadSize, file);
-
-	}
-
-	fclose(file);
-
-	size_t chunksGl = 1 + (charsRead / INT32_MAX);
-
-	GLint *lengthsGl = calloc(1, chunksGl);
-	GLchar **codeGl = calloc(1 + chunksGl, sizeof(char*));
-
-	for (size_t i = 0; i < chunksGl; ++i) {
-
-		int unsigned const chunksToSum = (chunksRead < chunksReadForChunkGl) ? chunksRead : chunksReadForChunkGl;
-		for (size_t j = 0; j < chunksGl; ++j) {
-
-			lengthsGl[i] += lengthsRead[j];
-
-		}
-
-	}
-
-	puts("Shader source:");
-
-	for (size_t i = 0; i < chunksRead; i++) {
-
-		fwrite(codeRead[i], 1, lengthsRead[i], stdout);
-
-	}
-
-	putchar('\n');
-
-	for (size_t i = 0; i < chunksRead; i++) {
-
-		free(codeRead[i]);
-
-	}
-
-	free(lengthsRead);
-	free(codeRead);
-
 }

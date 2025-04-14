@@ -1,4 +1,5 @@
 #pragma once
+#include <glad.h>
 
 extern char g_cwd[];
 extern size_t g_cwdLen;
@@ -43,3 +44,12 @@ unsigned char *g_gameTexesData[GAME_TEX_TOTAL];
 
 void gameTexesLoad(void);
 #pragma endregion
+
+extern GLenum g_errorGl;
+#define ERRORGL(x) x;\
+if ((g_errorGl = glGetError()) != GL_NO_ERROR) {\
+	printf("OpenGL error `%d` (%s), %s:%d.\n", g_errorGl, glGetErrorString(g_errorGl), __FILE__, __LINE__);\
+}\
+
+char const* glGetErrorString(GLenum error);
+GLint gameShaderFromFile(GLchar const **buffer, char const *path);
