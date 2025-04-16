@@ -8,7 +8,8 @@
         "window1.h": "c",
         "game.h": "c",
         "glfw3.h": "c",
-        "ifs.h": "c"
+        "ifs.h": "c",
+        "sml.h": "c"
     },
     "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/compile_commands.json"
 }

@@ -15,6 +15,7 @@
 
 #include "ifs.h"
 #include "game/main.h"
+#include "game/graphics.h"
 #include "game/window1.h"
 #pragma endregion
 
@@ -34,7 +35,7 @@ GLint gameShaderFromFile(GLchar const **p_buffer, char const *p_path) {
 	fseek(file, 0, SEEK_END);
 	GLint const length = ftell(file);
 
-	ifu(!length) {
+	ifu(length < 0) {
 
 		fclose(file);
 		return -1;

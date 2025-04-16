@@ -3,7 +3,6 @@ project(RpgGame1)
 
 find_package(glfw3 REQUIRED)
 find_package(OpenAL REQUIRED)
-# find_package(OpenGL REQUIRED)
 
 include_directories("include")
 add_executable(
@@ -11,7 +10,7 @@ add_executable(
   "stb/stb_vorbis.c" #
   "stb/stb_image.c" #
   "glad.c" #
-  #
+  # My own:
   "window1.c" #
   "main.c" #
 )
@@ -21,4 +20,6 @@ target_link_libraries(
   # OpenGL::GL
   OpenAL::OpenAL #
   /usr/lib/x86_64-linux-gnu/libglfw.so #
+  # My own:
+  ${CMAKE_SOURCE_DIR}/libs/libSimpleMathLibrary.so #
 )
