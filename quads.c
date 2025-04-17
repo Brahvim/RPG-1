@@ -1,57 +1,74 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
 
 #include "ifs.h"
 #include "sml.h"
-#include "game/main.h"
-#include "game/graphics/quads.h"
+#include "game/quads.h"
 
-struct GameGraphicsQuadsCtx* gameGraphicsQuadsCtxCreate() {
-	struct GameGraphicsQuadsCtx *ctx = malloc(sizeof(struct GameGraphicsQuadAos2));
+game_size_t g_gameQuadsCtxDefaultCapacity = 4;
 
-	memset(ctx, 0, sizeof(struct GameGraphicsQuadsCtx));
-	ctx->inactiveCapacity = g_gameGraphicsQuadsCtxDefaultCapacity;
-	ctx->inactive = calloc(ctx->inactiveCapacity, sizeof(game_quad_t));
+struct GameQuadsCtx* gameQuadsCtxAlloc() {
+	struct GameQuadsCtx *ctx = malloc(sizeof(struct GameQuadsCtx));
 
-	sizeof(float);
-	sizeof(enum GameTex);
-	sizeof(unsigned int);
-	sizeof(game_size_t);
-	sizeof(struct SmlVec2);
+	memset(ctx, 0, sizeof(struct GameQuadsCtx)); // NOLINT
+	ctx->maxId = g_gameQuadsCtxDefaultCapacity;
+	ctx->activeCapacity = g_gameQuadsCtxDefaultCapacity;
+	ctx->inactiveCapacity = g_gameQuadsCtxDefaultCapacity;
+	CALLOC_ARRAY(ctx->active, ctx->activeCapacity, game_quad_t);
+	CALLOC_ARRAY(ctx->inactive, ctx->inactiveCapacity, game_quad_t);
+
+	CALLOC_ARRAY(ctx->flips, ctx->inactiveCapacity, unsigned char);
+	CALLOC_ARRAY(ctx->texture, ctx->inactiveCapacity, enum GameTex);
+	CALLOC_ARRAY(ctx->position, ctx->inactiveCapacity, struct SmlVec3);
+	CALLOC_ARRAY(ctx->scaleAndAngle, ctx->inactiveCapacity, struct SmlVec3);
 
 	return ctx;
 }
 
-game_quad_t gameGraphicsQuadsCreate(struct GameGraphicsQuadsCtx *const p_ctx) {
-	game_quad_t const id = p_ctx->maxId;
+void gameQuadsCtxDraw(struct GameQuadsCtx const *const p_ctx) {
 
-	ifl(p_ctx->inactiveCount > 0) {
+}
 
-		--p_ctx->inactiveCount;
-		p_ctx->inactive[p_ctx->inactiveCount];
+void gameQuadsDestroy(struct GameQuadsCtx *const p_ctx, game_quad_t const *p_quads, game_size_t const p_count) {
 
-	} else 	ifu(p_ctx->maxId >= p_ctx->activeCapacity) {
+}
 
+game_quad_t* gameQuadsCreate(struct GameQuadsCtx *const p_ctx, game_quad_t *const p_out, game_size_t const p_many) {
+	ifl(p_ctx->inactiveCount >= p_many) {
+
+		game_size_t const inactive = p_ctx->inactiveCount - 1;
+		p_ctx->inactiveCount -= p_many;
+
+		foru(size_t i = 0, i < p_many, ++i) {
+
+			p_out[i] = p_ctx->inactive[inactive - i];
+
+		}
+
+
+	} else {
+
+		game_size_t const oldCount = p_ctx->activeCount;
+		p_ctx->activeCount += p_many;
 		p_ctx->activeCapacity *= 2;
 
-		p_ctx->texes = realloc(p_ctx->texes, sizeof(enum GameTex) * p_ctx->activeCapacity);
-		p_ctx->flips = realloc(p_ctx->flips, sizeof(unsigned char) * p_ctx->activeCapacity);
-		p_ctx->active = realloc(p_ctx->active, sizeof(game_quad_t) * p_ctx->activeCapacity);
-		p_ctx->scales = realloc(p_ctx->scales, sizeof(struct SmlVec2) * p_ctx->activeCapacity);
-		p_ctx->rotations = realloc(p_ctx->rotations, sizeof(struct SmlVec2) * p_ctx->activeCapacity);
-		p_ctx->positions = realloc(p_ctx->positions, sizeof(struct SmlVec2) * p_ctx->activeCapacity);
+		// NOLINTBEGIN
+		REALLOC_ARRAY(p_ctx->active, p_ctx->activeCapacity, game_quad_t); memset(p_ctx->active, 0, p_ctx->activeCount - oldCount);
+		REALLOC_ARRAY(p_ctx->active, p_ctx->activeCapacity, game_quad_t); memset(p_ctx->active, 0, p_ctx->activeCount - oldCount);
+		REALLOC_ARRAY(p_ctx->flips, p_ctx->activeCapacity, unsigned char); memset(p_ctx->flips, 0, p_ctx->activeCount - oldCount);
+		REALLOC_ARRAY(p_ctx->texture, p_ctx->activeCapacity, enum GameTex); memset(p_ctx->texture, 0, p_ctx->activeCount - oldCount);
+		REALLOC_ARRAY(p_ctx->position, p_ctx->activeCapacity, struct SmlVec3); memset(p_ctx->position, 0, p_ctx->activeCount - oldCount);
+		REALLOC_ARRAY(p_ctx->scaleAndAngle, p_ctx->activeCapacity, struct SmlVec3); memset(p_ctx->scaleAndAngle, 0, p_ctx->activeCount - oldCount);
+		// NOLINTEND
+
+		foru(size_t i = 0, i < p_many, ++i) {
+
+			p_out[i] = p_ctx->maxId++;
+
+		}
 
 	}
 
-	++p_ctx->maxId;
-	++p_ctx->activeCount;
-	return id;
-}
-
-void gameGraphicsQuadsCtxDraw(struct GameGraphicsQuadsCtx const *const p_ctx) {
-
-}
-
-void gameGraphicsQuadsDestroy(struct GameGraphicsQuadsCtx *p_ctx, game_quad_t const p_quad) {
-
+	return p_out;
 }

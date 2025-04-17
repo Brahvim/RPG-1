@@ -9,7 +9,10 @@
         "game.h": "c",
         "glfw3.h": "c",
         "ifs.h": "c",
-        "sml.h": "c"
+        "sml.h": "c",
+        "graphics.h": "c",
+        "main.h": "c"
     },
-    "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/compile_commands.json"
+    "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/compile_commands.json",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
 }

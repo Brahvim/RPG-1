@@ -10,5 +10,5 @@
 #define whileu(x) while (__builtin_expect((long) (x), 0))
 #define whilel(x) while (__builtin_expect((long) (x), 1))
 
-#define foru(a, b, c) for (a, __builtin_expect((long) (b), 0), c)
-#define forl(a, b, c) for (a, __builtin_expect((long) (b), 1), c)
+#define foru(a, b, c) for (a; __builtin_expect((long) (b), 0); c)
+#define forl(a, b, c) for (a; __builtin_expect((long) (b), 1); c)

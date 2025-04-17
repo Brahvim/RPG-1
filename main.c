@@ -75,10 +75,6 @@ char const* glGetErrorString(GLenum p_error) {
 	return "GL_NO_ERROR";
 }
 
-void gameExit(int const p_reason) {
-	exit(p_reason);
-}
-
 void gameTexesLoad(void) {
 	stbi_set_flip_vertically_on_load(1);
 	ERRORGL(glActiveTexture(GL_TEXTURE0));
@@ -261,7 +257,7 @@ int main(int const p_count, char const **p_args) {
 	} else {
 
 		perror("Failed to `getcwd()` the current working directory.\n");
-		gameExit(GAME_EXIT_GET_CWD);
+		exit(GAME_EXIT_GET_CWD);
 
 	}
 

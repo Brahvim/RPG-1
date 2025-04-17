@@ -1,5 +1,6 @@
 #pragma once
 #include <glad.h>
+#include "main.h"
 
 extern GLenum g_errorGl;
 #define ERRORGL(x) x;\
@@ -18,6 +19,16 @@ enum GameTex {
 	GAME_TEX_TEST1,
 	GAME_TEX_TEST2,
 	GAME_TEX_TOTAL
+
+};
+
+enum GameTexFlips {
+
+	GAME_TEX_FLIP_NONE,
+	GAME_TEX_FLIP_BOTH,
+	GAME_TEX_FLIP_VERTICAL,
+	GAME_TEX_FLIP_HORIZONTAL,
+	GAME_TEX_FLIP_TOTAL
 
 };
 
