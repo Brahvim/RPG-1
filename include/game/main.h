@@ -1,3 +1,4 @@
+#include <stddef.h>
 #pragma once
 
 typedef unsigned long long game_size_t;

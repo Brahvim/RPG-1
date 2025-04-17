@@ -15,7 +15,7 @@
 
 #include "ifs.h"
 #include "game/main.h"
-#include "game/graphics.h"
+#include "game/quads.h"
 #include "game/window1.h"
 #pragma endregion
 
@@ -124,6 +124,9 @@ void gameTexesLoad(void) {
 }
 
 void gameSetup(void) {
+	struct GameQuadsCtx *ctx = gameQuadsCtxAlloc();
+	gameQuadsCtxInit(ctx);
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	GLfloat data[] = {
 

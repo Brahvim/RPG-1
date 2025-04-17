@@ -34,16 +34,9 @@ enum GameTexFlips {
 
 void gameTexesLoad(void);
 
-int g_gameTexesW[GAME_TEX_TOTAL];
-int g_gameTexesH[GAME_TEX_TOTAL];
-GLuint g_gameTexesGl[GAME_TEX_TOTAL];
-unsigned char *g_gameTexesData[GAME_TEX_TOTAL];
-char const *g_gameTexesPaths[GAME_TEX_TOTAL] = {
-
-	"assets/null.png",
-	"assets/test0.png",
-	"assets/test1.png",
-	"assets/test2.png",
-
-};
+extern int g_gameTexesW[GAME_TEX_TOTAL];
+extern int g_gameTexesH[GAME_TEX_TOTAL];
+extern GLuint g_gameTexesGl[GAME_TEX_TOTAL];
+extern char const *g_gameTexesPaths[GAME_TEX_TOTAL];
+extern unsigned char *g_gameTexesData[GAME_TEX_TOTAL];
 #pragma endregion

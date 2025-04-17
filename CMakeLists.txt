@@ -21,7 +21,9 @@ add_executable(
   "stb/stb_image.c" #
   "glad.c" #
   # My own:
+  "graphics.c" #
   "window1.c" #
+  "quads.c" #
   "main.c" #
 )
 target_link_libraries(

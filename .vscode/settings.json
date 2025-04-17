@@ -11,7 +11,8 @@
         "ifs.h": "c",
         "sml.h": "c",
         "graphics.h": "c",
-        "main.h": "c"
+        "main.h": "c",
+        "stddef.h": "c"
     },
     "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/compile_commands.json",
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
