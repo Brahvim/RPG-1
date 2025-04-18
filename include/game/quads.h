@@ -15,8 +15,8 @@ extern game_size_t g_gameQuadsCtxDefaultCapacity;
 struct GameQuadsVbo {
 
 	struct SmlVec3 scaleAndAngle;
-	struct SmlVec3 pos;
 	struct SmlVec2 uv[4];
+	struct SmlVec3 pos;
 
 };
 

@@ -127,6 +127,8 @@ void gameSetup(void) {
 	struct GameQuadsCtx *ctx = gameQuadsCtxAlloc();
 	gameQuadsCtxInit(ctx);
 
+	
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	GLfloat data[] = {
 
