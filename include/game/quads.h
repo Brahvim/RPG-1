@@ -10,6 +10,7 @@ extern GLchar const *g_gameQuadsVertSrc;
 extern GLchar const *g_gameQuadsFragSrc;
 extern char const *const g_gameQuadsFragPath;
 extern char const *const g_gameQuadsVertPath;
+extern struct SmlVec2 g_gameQuadsVertexOffs[4];
 extern game_size_t g_gameQuadsCtxDefaultCapacity;
 
 struct GameQuadsVbo {

@@ -10,6 +10,14 @@ GLint g_gameQuadsFragLen = 0;
 GLint g_gameQuadsVertLen = 0;
 GLchar const *g_gameQuadsVertSrc = NULL;
 GLchar const *g_gameQuadsFragSrc = NULL;
+struct SmlVec2 g_gameQuadsVertexOffs[4] = {
+
+	{-0.5f, -0.5f},
+	{-0.5f, +0.5f},
+	{+0.5f, -0.5f},
+	{+0.5f, +0.5f},
+
+};
 game_size_t g_gameQuadsCtxDefaultCapacity = 4;
 char const *const g_gameQuadsFragPath = "assets/quads.vert";
 char const *const g_gameQuadsVertPath = "assets/quads.frag";
@@ -207,6 +215,7 @@ void gameQuadsCtxDraw(struct GameQuadsCtx const *const p_ctx) {
 
 	}
 
+	ERRGL(glUseProgram(p_ctx->shPid));
 	ERRGL(glBindVertexArray(p_ctx->vao));
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vbo));
 	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(struct GameQuadsVbo) * *vboDataCapacity, vboData, p_ctx->vboUsage));
@@ -215,9 +224,9 @@ void gameQuadsCtxDraw(struct GameQuadsCtx const *const p_ctx) {
 	enum GameTex const tex = GAME_TEX_NULL;
 	ERRGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[tex]));
 	ERRGL(glUniform1i(glGetUniformLocation(p_ctx->shPid, "u_atlas"), 0));
-	ERRGL(glUniform2fv(glGetUniformLocation(p_ctx->shPid, "u_vertexOffs"), 0, 0));
+	ERRGL(glUniform2fv(glGetUniformLocation(p_ctx->shPid, "u_vertexOffs"), sizeof(g_gameQuadsVertexOffs), (GLfloat*) g_gameQuadsVertexOffs));
 
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, *vboDataCapacity);
+	ERRGL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, *vboDataCapacity));
 }
 
 void gameQuadsDestroy(struct GameQuadsCtx *const p_ctx, game_quad_t const *p_quads, game_size_t const p_count) {
