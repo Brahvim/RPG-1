@@ -47,9 +47,9 @@ struct GameQuadsCtx* gameQuadsCtxAlloc() {
 }
 
 void gameQuadsCtxInit(struct GameQuadsCtx *const p_ctx) {
-	p_ctx->shPid = ERRORGL(glCreateProgram());
-	p_ctx->shVid = ERRORGL(glCreateShader(GL_VERTEX_SHADER));
-	p_ctx->shFid = ERRORGL(glCreateShader(GL_FRAGMENT_SHADER));
+	p_ctx->shPid = ERRGL(glCreateProgram());
+	p_ctx->shVid = ERRGL(glCreateShader(GL_VERTEX_SHADER));
+	p_ctx->shFid = ERRGL(glCreateShader(GL_FRAGMENT_SHADER));
 
 	glShaderSource(p_ctx->shVid, 1, &(p_ctx->shVsrc), &(p_ctx->shVlen));
 	glShaderSource(p_ctx->shFid, 1, &(p_ctx->shFsrc), &(p_ctx->shFlen));
@@ -66,36 +66,30 @@ void gameQuadsCtxInit(struct GameQuadsCtx *const p_ctx) {
 	GLsizei slogLen = 16384, slogStrlen;
 
 	memset(slogBuf, 0, slogLen); // NOLINT
-	ERRORGL(glGetShaderInfoLog(p_ctx->shVid, 16384, &slogLen, slogBuf));
+	ERRGL(glGetShaderInfoLog(p_ctx->shVid, 16384, &slogLen, slogBuf));
 	printf("Quads vertex shader log: %s.\n", slogBuf);
 
 	memset(slogBuf, 0, slogLen); // NOLINT
-	ERRORGL(glGetShaderInfoLog(p_ctx->shFid, 16384, &slogLen, slogBuf));
+	ERRGL(glGetShaderInfoLog(p_ctx->shFid, 16384, &slogLen, slogBuf));
 	printf("Quads fragment shader log: %s.\n", slogBuf);
 
 	memset(slogBuf, 0, slogLen); // NOLINT
-	ERRORGL(glGetProgramInfoLog(p_ctx->shPid, 16384, &slogLen, slogBuf));
+	ERRGL(glGetProgramInfoLog(p_ctx->shPid, 16384, &slogLen, slogBuf));
 	printf("Quads program log: %s.\n", slogBuf);
 
-	ERRORGL(glBindVertexArray(p_ctx->vao));
-	ERRORGL(glUniform1i(glGetUniformLocation(p_ctx->shPid, "u_atlas"), 0));
-	ERRORGL(glUniform2fv(glGetUniformLocation(p_ctx->shPid, "u_vertexOffs"), 0, 0));
+	ERRGL(glBindVertexArray(p_ctx->vao));
 
-	ERRORGL(glActiveTexture(GL_TEXTURE0));
-	enum GameTex const tex = GAME_TEX_NULL;
-	ERRORGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[tex]));
+	ERRGL(glVertexAttribDivisor(0, 0));
+	ERRGL(glVertexAttribDivisor(1, 0));
+	ERRGL(glVertexAttribDivisor(2, 0));
 
-	ERRORGL(glVertexAttribDivisor(0, 0));
-	ERRORGL(glVertexAttribDivisor(1, 0));
-	ERRORGL(glVertexAttribDivisor(2, 0));
+	ERRGL(glEnableVertexAttribArray(0));
+	ERRGL(glEnableVertexAttribArray(1));
+	ERRGL(glEnableVertexAttribArray(2));
 
-	ERRORGL(glEnableVertexAttribArray(0));
-	ERRORGL(glEnableVertexAttribArray(1));
-	ERRORGL(glEnableVertexAttribArray(2));
-
-	ERRORGL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), 0));
-	ERRORGL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) (6 * sizeof(GLfloat))));
-	ERRORGL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) (12 * sizeof(GLfloat))));
+	ERRGL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), 0));
+	ERRGL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) (6 * sizeof(GLfloat))));
+	ERRGL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) (12 * sizeof(GLfloat))));
 }
 
 void gameQuadsCtxDraw(struct GameQuadsCtx const *const p_ctx) {
@@ -213,11 +207,15 @@ void gameQuadsCtxDraw(struct GameQuadsCtx const *const p_ctx) {
 
 	}
 
-	glBindVertexArray(p_ctx->vao);
-	glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(struct GameQuadsVbo) * *vboDataCapacity, vboData, p_ctx->vboUsage);
+	ERRGL(glBindVertexArray(p_ctx->vao));
+	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vbo));
+	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(struct GameQuadsVbo) * *vboDataCapacity, vboData, p_ctx->vboUsage));
 
-
+	ERRGL(glActiveTexture(GL_TEXTURE0));
+	enum GameTex const tex = GAME_TEX_NULL;
+	ERRGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[tex]));
+	ERRGL(glUniform1i(glGetUniformLocation(p_ctx->shPid, "u_atlas"), 0));
+	ERRGL(glUniform2fv(glGetUniformLocation(p_ctx->shPid, "u_vertexOffs"), 0, 0));
 
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, *vboDataCapacity);
 }

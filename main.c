@@ -77,8 +77,8 @@ char const* glGetErrorString(GLenum p_error) {
 
 void gameTexesLoad(void) {
 	stbi_set_flip_vertically_on_load(1);
-	ERRORGL(glActiveTexture(GL_TEXTURE0));
-	ERRORGL(glGenTextures(GAME_TEX_TOTAL, g_gameTexesGl));
+	ERRGL(glActiveTexture(GL_TEXTURE0));
+	ERRGL(glGenTextures(GAME_TEX_TOTAL, g_gameTexesGl));
 
 	for (int i = 0; i < GAME_TEX_TOTAL; ++i) {
 
@@ -101,14 +101,14 @@ void gameTexesLoad(void) {
 		ifl(ptr) {
 
 			// You can set these HERE, but can generate a mipmap *only* after binding, yes:
-			ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-			ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-			ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-			ERRORGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+			ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+			ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+			ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 
-			ERRORGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[i]));
-			ERRORGL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, g_gameTexesW[i], g_gameTexesH[i], 0, GL_RGBA, GL_UNSIGNED_BYTE, g_gameTexesData[i]));
-			ERRORGL(glGenerateMipmap(GL_TEXTURE_2D));
+			ERRGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[i]));
+			ERRGL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, g_gameTexesW[i], g_gameTexesH[i], 0, GL_RGBA, GL_UNSIGNED_BYTE, g_gameTexesData[i]));
+			ERRGL(glGenerateMipmap(GL_TEXTURE_2D));
 
 			stbi_image_free(ptr);
 
@@ -120,7 +120,7 @@ void gameTexesLoad(void) {
 
 	}
 
-	ERRORGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[GAME_TEX_NULL]));
+	ERRGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[GAME_TEX_NULL]));
 }
 
 void gameSetup(void) {
@@ -147,48 +147,48 @@ void gameSetup(void) {
 	};
 
 	GLuint vao, vbo;
-	GLuint pgl = ERRORGL(glCreateProgram());
-	GLuint svgl = ERRORGL(glCreateShader(GL_VERTEX_SHADER));
-	GLuint sfgl = ERRORGL(glCreateShader(GL_FRAGMENT_SHADER));
+	GLuint pgl = ERRGL(glCreateProgram());
+	GLuint svgl = ERRGL(glCreateShader(GL_VERTEX_SHADER));
+	GLuint sfgl = ERRGL(glCreateShader(GL_FRAGMENT_SHADER));
 
-	ERRORGL(glGenBuffers(1, &vbo));
-	ERRORGL(glGenVertexArrays(1, &vao));
+	ERRGL(glGenBuffers(1, &vbo));
+	ERRGL(glGenVertexArrays(1, &vao));
 
 	GLchar const *svsrc, *sfsrc;
 	GLint const svlen = gameShaderFromFile(&svsrc, "shader.vert");
 	GLint const sflen = gameShaderFromFile(&sfsrc, "shader.frag");
 
-	ERRORGL(glShaderSource(svgl, 1, &svsrc, &svlen));
-	ERRORGL(glShaderSource(sfgl, 1, &sfsrc, &sflen));
+	ERRGL(glShaderSource(svgl, 1, &svsrc, &svlen));
+	ERRGL(glShaderSource(sfgl, 1, &sfsrc, &sflen));
 
-	ERRORGL(glCompileShader(svgl));
-	ERRORGL(glCompileShader(sfgl));
+	ERRGL(glCompileShader(svgl));
+	ERRGL(glCompileShader(sfgl));
 
 	// Attach *after* compilation:
-	ERRORGL(glAttachShader(pgl, svgl));
-	ERRORGL(glAttachShader(pgl, sfgl));
+	ERRGL(glAttachShader(pgl, svgl));
+	ERRGL(glAttachShader(pgl, sfgl));
 
 	GLchar slogBuf[16384]; GLsizei slogLen = 16384, slogStrlen;
 
 	memset(slogBuf, 0, slogLen); // NOLINT
-	ERRORGL(glGetShaderInfoLog(svgl, 16384, &slogLen, slogBuf));
+	ERRGL(glGetShaderInfoLog(svgl, 16384, &slogLen, slogBuf));
 	printf("Vertex shader log: %s.\n", slogBuf);
 
 	memset(slogBuf, 0, slogLen); // NOLINT
-	ERRORGL(glGetShaderInfoLog(sfgl, 16384, &slogLen, slogBuf));
+	ERRGL(glGetShaderInfoLog(sfgl, 16384, &slogLen, slogBuf));
 	printf("Fragment shader log: %s.\n", slogBuf);
 
 	memset(slogBuf, 0, slogLen); // NOLINT
-	ERRORGL(glGetProgramInfoLog(pgl, 16384, &slogLen, slogBuf));
+	ERRGL(glGetProgramInfoLog(pgl, 16384, &slogLen, slogBuf));
 	printf("Program log: %s.\n", slogBuf);
 
-	ERRORGL(glLinkProgram(pgl));
-	ERRORGL(glUseProgram(pgl));
+	ERRGL(glLinkProgram(pgl));
+	ERRGL(glUseProgram(pgl));
 
-	ERRORGL(glBindVertexArray(vao));
-	ERRORGL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
+	ERRGL(glBindVertexArray(vao));
+	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
 
-	ERRORGL(glActiveTexture(GL_TEXTURE0));
+	ERRGL(glActiveTexture(GL_TEXTURE0));
 	enum GameTex const tex = GAME_TEX_NULL;
 
 	// float const time = (float) glfwGetTime();
@@ -212,16 +212,16 @@ void gameSetup(void) {
 
 	};
 
-	ERRORGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[tex]));
-	ERRORGL(glUniform1i(glGetUniformLocation(pgl, "u_tex"), 0));
-	ERRORGL(glUniformMatrix4fv(glGetUniformLocation(pgl, "u_transform"), 1, GL_TRUE, mat));
-	ERRORGL(glUniform2f(glGetUniformLocation(pgl, "u_texRes"), g_gameTexesW[tex], g_gameTexesH[tex]));
+	ERRGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[tex]));
+	ERRGL(glUniform1i(glGetUniformLocation(pgl, "u_tex"), 0));
+	ERRGL(glUniformMatrix4fv(glGetUniformLocation(pgl, "u_transform"), 1, GL_TRUE, mat));
+	ERRGL(glUniform2f(glGetUniformLocation(pgl, "u_texRes"), g_gameTexesW[tex], g_gameTexesH[tex]));
 
-	ERRORGL(glEnableVertexAttribArray(0));
-	ERRORGL(glEnableVertexAttribArray(1));
-	ERRORGL(glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW));
-	ERRORGL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0));
-	ERRORGL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*) (2 * sizeof(GLfloat))));
+	ERRGL(glEnableVertexAttribArray(0));
+	ERRGL(glEnableVertexAttribArray(1));
+	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW));
+	ERRGL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0));
+	ERRGL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*) (2 * sizeof(GLfloat))));
 }
 
 void gameDraw(void) {
@@ -238,13 +238,13 @@ void gameDraw(void) {
 
 		}
 
-		ERRORGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[tex]));
+		ERRGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[tex]));
 
 	}
 
-	ERRORGL(glClearColor(0.8f, 0.6f, 1.0f, 0.1f));
-	ERRORGL(glClear(GL_COLOR_BUFFER_BIT));
-	ERRORGL(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+	ERRGL(glClearColor(0.8f, 0.6f, 1.0f, 0.1f));
+	ERRGL(glClear(GL_COLOR_BUFFER_BIT));
+	ERRGL(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 	++frameCount;
 }
 
@@ -276,7 +276,7 @@ int main(int const p_count, char const **p_args) {
 
 		glfwPollEvents();
 		gameWindow1UpdateVars();
-		ERRORGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
+		ERRGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
 
 		gameDraw();
 
