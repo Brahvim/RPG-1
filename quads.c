@@ -10,17 +10,17 @@ GLint g_gameQuadsFragLen = 0;
 GLint g_gameQuadsVertLen = 0;
 GLchar const *g_gameQuadsVertSrc = NULL;
 GLchar const *g_gameQuadsFragSrc = NULL;
-struct SmlVec2 g_gameQuadsVertexOffs[4] = {
 
-	{-0.5f, -0.5f},
-	{-0.5f, +0.5f},
-	{+0.5f, -0.5f},
-	{+0.5f, +0.5f},
+struct SmlVec2 g_gameQuadsVertexOffs[4] = {
+	{ -0.5f, -0.5f },
+	{ -0.5f, +0.5f },
+	{ +0.5f, -0.5f },
+	{ +0.5f, +0.5f },
 
 };
 game_size_t g_gameQuadsCtxDefaultCapacity = 4;
-char const *const g_gameQuadsFragPath = "assets/quads.vert";
-char const *const g_gameQuadsVertPath = "assets/quads.frag";
+char const *const g_gameQuadsVertPath = "assets/quads.vert";
+char const *const g_gameQuadsFragPath = "assets/quads.frag";
 #pragma endregion
 
 void gameQuadsInit() {
@@ -39,14 +39,16 @@ struct GameQuadsCtx* gameQuadsCtxAlloc() {
 	ctx->shVlen = g_gameQuadsVertLen;
 	ctx->shFlen = g_gameQuadsFragLen;
 
+	ctx->vboData = NULL;
+	ctx->vboDataCapacity = 0;
 	ctx->vboUsage = GL_DYNAMIC_DRAW;
 	ctx->maxId = g_gameQuadsCtxDefaultCapacity;
 	ctx->activeCapacity = g_gameQuadsCtxDefaultCapacity;
 	ctx->inactiveCapacity = g_gameQuadsCtxDefaultCapacity;
-	CALLOC_ARRAY(ctx->active, ctx->activeCapacity, game_quad_t);
-	CALLOC_ARRAY(ctx->inactive, ctx->inactiveCapacity, game_quad_t);
 
+	CALLOC_ARRAY(ctx->active, ctx->activeCapacity, game_quad_t);
 	CALLOC_ARRAY(ctx->flips, ctx->inactiveCapacity, unsigned char);
+	CALLOC_ARRAY(ctx->inactive, ctx->inactiveCapacity, game_quad_t);
 	CALLOC_ARRAY(ctx->textures, ctx->inactiveCapacity, enum GameTex);
 	CALLOC_ARRAY(ctx->positions, ctx->inactiveCapacity, struct SmlVec3);
 	CALLOC_ARRAY(ctx->scalesAndAngles, ctx->inactiveCapacity, struct SmlVec3);
@@ -59,16 +61,16 @@ void gameQuadsCtxInit(struct GameQuadsCtx *const p_ctx) {
 	p_ctx->shVid = ERRGL(glCreateShader(GL_VERTEX_SHADER));
 	p_ctx->shFid = ERRGL(glCreateShader(GL_FRAGMENT_SHADER));
 
-	glShaderSource(p_ctx->shVid, 1, &(p_ctx->shVsrc), &(p_ctx->shVlen));
-	glShaderSource(p_ctx->shFid, 1, &(p_ctx->shFsrc), &(p_ctx->shFlen));
+	ERRGL(glShaderSource(p_ctx->shVid, 1, &(p_ctx->shVsrc), &(p_ctx->shVlen)));
+	ERRGL(glShaderSource(p_ctx->shFid, 1, &(p_ctx->shFsrc), &(p_ctx->shFlen)));
 
-	glCompileShader(p_ctx->shVid);
-	glCompileShader(p_ctx->shFid);
+	ERRGL(glCompileShader(p_ctx->shVid));
+	ERRGL(glCompileShader(p_ctx->shFid));
 
-	glAttachShader(p_ctx->shPid, p_ctx->shVid);
-	glAttachShader(p_ctx->shPid, p_ctx->shFid);
+	ERRGL(glAttachShader(p_ctx->shPid, p_ctx->shVid));
+	ERRGL(glAttachShader(p_ctx->shPid, p_ctx->shFid));
 
-	glLinkProgram(p_ctx->shPid);
+	ERRGL(glLinkProgram(p_ctx->shPid));
 
 	GLchar slogBuf[16384];
 	GLsizei slogLen = 16384, slogStrlen;
@@ -86,6 +88,7 @@ void gameQuadsCtxInit(struct GameQuadsCtx *const p_ctx) {
 	printf("Quads program log: %s.\n", slogBuf);
 
 	ERRGL(glBindVertexArray(p_ctx->vao));
+	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vbo));
 
 	ERRGL(glVertexAttribDivisor(0, 0));
 	ERRGL(glVertexAttribDivisor(1, 0));
@@ -95,12 +98,12 @@ void gameQuadsCtxInit(struct GameQuadsCtx *const p_ctx) {
 	ERRGL(glEnableVertexAttribArray(1));
 	ERRGL(glEnableVertexAttribArray(2));
 
-	ERRGL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), 0));
-	ERRGL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) (6 * sizeof(GLfloat))));
-	ERRGL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) (12 * sizeof(GLfloat))));
+	ERRGL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) offsetof(struct GameQuadsVbo, scaleAndAngle)));
+	ERRGL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) offsetof(struct GameQuadsVbo, pos)));
+	ERRGL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) offsetof(struct GameQuadsVbo, uv)));
 }
 
-void gameQuadsCtxDraw(struct GameQuadsCtx const *const p_ctx) {
+void gameQuadsCtxDraw(struct GameQuadsCtx *const p_ctx) {
 	struct GameQuadsVbo *vboData = p_ctx->vboData;
 	unsigned char const *const flips = p_ctx->flips;
 	enum GameTex const *const textures = p_ctx->textures;
@@ -108,8 +111,13 @@ void gameQuadsCtxDraw(struct GameQuadsCtx const *const p_ctx) {
 	game_size_t *const vboDataCapacity = &p_ctx->vboDataCapacity;
 	struct SmlVec3 const *const scalesAndAngles = p_ctx->scalesAndAngles;
 
-	*vboDataCapacity = p_ctx->activeLength;
-	REALLOC_ARRAY(vboData, *vboDataCapacity, struct GameQuadsVbo);
+	ifu(*vboDataCapacity != p_ctx->activeLength) {
+
+		*vboDataCapacity = p_ctx->activeLength;
+		REALLOC_ARRAY(vboData, *vboDataCapacity, struct GameQuadsVbo);
+		p_ctx->vboData = vboData;
+
+	}
 
 	// Flips:
 	foru(size_t i = 0, i < *vboDataCapacity, ++i) {
@@ -118,65 +126,148 @@ void gameQuadsCtxDraw(struct GameQuadsCtx const *const p_ctx) {
 
 			case GAME_TEX_FLIP_NONE: {
 
-				vboData->uv[0].y = 0;
-				vboData->uv[0].y = 0;
+				switch (i % 4) {
 
-				vboData->uv[1].x = 0;
-				vboData->uv[1].y = 1;
+					case 0: {
 
-				vboData->uv[2].x = 1;
-				vboData->uv[2].y = 0;
+						vboData->uv.y = 0;
+						vboData->uv.y = 0;
 
-				vboData->uv[3].x = 1;
-				vboData->uv[3].y = 1;
+					} break;
+
+					case 1: {
+
+						vboData->uv.x = 0;
+						vboData->uv.y = 1;
+
+					} break;
+
+					case 2: {
+
+						vboData->uv.x = 1;
+						vboData->uv.y = 0;
+					} break;
+
+					case 3: {
+
+						vboData->uv.x = 1;
+						vboData->uv.y = 1;
+
+					} break;
+
+				}
 
 			} break;
 
 			case GAME_TEX_FLIP_BOTH: {
 
-				vboData->uv[0].x = 1;
-				vboData->uv[0].y = 1;
+				switch (i % 4) {
 
-				vboData->uv[1].x = 1;
-				vboData->uv[1].y = 0;
+					case 0: {
 
-				vboData->uv[2].x = 0;
-				vboData->uv[2].y = 1;
+						vboData->uv.x = 1;
+						vboData->uv.y = 1;
 
-				vboData->uv[3].x = 0;
-				vboData->uv[3].y = 0;
+					} break;
+
+					case 1: {
+
+						vboData->uv.x = 1;
+						vboData->uv.y = 0;
+
+					} break;
+
+
+					case 2: {
+
+						vboData->uv.x = 0;
+						vboData->uv.y = 1;
+
+					} break;
+
+
+					case 3: {
+
+						vboData->uv.x = 0;
+						vboData->uv.y = 0;
+
+					} break;
+
+				}
 
 			} break;
 
 			case GAME_TEX_FLIP_VERTICAL: {
 
-				vboData->uv[0].x = 0;
-				vboData->uv[0].y = 1;
+				switch (i % 4) {
 
-				vboData->uv[1].x = 0;
-				vboData->uv[1].y = 0;
+					case 0: {
 
-				vboData->uv[2].x = 1;
-				vboData->uv[2].y = 1;
+						vboData->uv.x = 0;
+						vboData->uv.y = 1;
 
-				vboData->uv[3].x = 1;
-				vboData->uv[3].y = 0;
+					} break;
+
+					case 1: {
+						vboData->uv.x = 0;
+						vboData->uv.y = 0;
+
+					} break;
+
+
+					case 2: {
+
+						vboData->uv.x = 1;
+						vboData->uv.y = 1;
+
+					} break;
+
+					case 3: {
+
+						vboData->uv.x = 1;
+						vboData->uv.y = 0;
+
+					} break;
+
+				}
 
 			} break;
 
 			case GAME_TEX_FLIP_HORIZONTAL: {
 
-				vboData->uv[0].x = 1;
-				vboData->uv[0].y = 0;
+				switch (i % 4) {
 
-				vboData->uv[1].x = 1;
-				vboData->uv[1].y = 1;
+					case 0: {
 
-				vboData->uv[2].x = 0;
-				vboData->uv[2].y = 0;
+						vboData->uv.x = 1;
+						vboData->uv.y = 0;
 
-				vboData->uv[3].x = 0;
-				vboData->uv[3].y = 1;
+					} break;
+
+
+					case 1: {
+
+						vboData->uv.x = 1;
+						vboData->uv.y = 1;
+
+					} break;
+
+
+					case 2: {
+
+						vboData->uv.x = 0;
+						vboData->uv.y = 0;
+
+					} break;
+
+					case 3: {
+
+						vboData->uv.x = 0;
+						vboData->uv.y = 1;
+
+					} break;
+
+				}
 
 			} break;
 
@@ -184,27 +275,21 @@ void gameQuadsCtxDraw(struct GameQuadsCtx const *const p_ctx) {
 
 	}
 
-	// Textures:
+	// Multiply UVs by texture position in atlas:
 	foru(size_t i = 0, i < *vboDataCapacity, ++i) {
 
-		vboData->uv[0].x *= 1;
-		vboData->uv[0].y *= 1;
-
-		vboData->uv[1].x *= 1;
-		vboData->uv[1].y *= 1;
-
-		vboData->uv[2].x *= 1;
-		vboData->uv[2].y *= 1;
-
-		vboData->uv[3].x *= 1;
-		vboData->uv[3].y *= 1;
+		// There is not atlas right now LOL:
+		vboData->uv.x *= 1;
+		vboData->uv.y *= 1;
 
 	}
 
 	// Positions:
 	foru(size_t i = 0, i < *vboDataCapacity, ++i) {
 
-		vboData->pos = positions[i];
+		vboData->pos.x = positions[i].x + g_gameQuadsVertexOffs[i % 4].x;
+		vboData->pos.y = positions[i].y + g_gameQuadsVertexOffs[i % 4].y;
+		vboData->pos.z = positions[i].z;
 
 	}
 
@@ -215,16 +300,50 @@ void gameQuadsCtxDraw(struct GameQuadsCtx const *const p_ctx) {
 
 	}
 
+	// GLfloat const data[] = {
+	//
+	// 	-0.5f, -0.5f, // V
+	// 	+0.0f, +0.0f, // T
+	//
+	// 	-0.5f, +0.5f, // V
+	// 	+0.0f, +1.0f, // T
+	//
+	//  +0.5f, -0.5f, // V
+	// 	+1.0f, +0.0f, // T
+	//
+	// 	+0.5f, +0.5f, // V
+	// 	+1.0f, +1.0f, // T
+	//
+	// };
+
+	printf(
+		"\n"\
+		"`scaleAndAngle`: { %f, %f, %f },\n"\
+		"`pos` { %f, %f, %f },\n"\
+		"`uv`: { %f, %f }.\n"\
+		"\n",
+
+		vboData->scaleAndAngle.x,
+		vboData->scaleAndAngle.y,
+		vboData->scaleAndAngle.z,
+
+		vboData->pos.x,
+		vboData->pos.y,
+		vboData->pos.z,
+
+		vboData->uv.x,
+		vboData->uv.y
+	);
+
 	ERRGL(glUseProgram(p_ctx->shPid));
 	ERRGL(glBindVertexArray(p_ctx->vao));
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vbo));
 	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(struct GameQuadsVbo) * *vboDataCapacity, vboData, p_ctx->vboUsage));
 
 	ERRGL(glActiveTexture(GL_TEXTURE0));
-	enum GameTex const tex = GAME_TEX_NULL;
-	ERRGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[tex]));
+	ERRGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[GAME_TEX_TEST0]));
 	ERRGL(glUniform1i(glGetUniformLocation(p_ctx->shPid, "u_atlas"), 0));
-	ERRGL(glUniform2fv(glGetUniformLocation(p_ctx->shPid, "u_vertexOffs"), sizeof(g_gameQuadsVertexOffs), (GLfloat*) g_gameQuadsVertexOffs));
+	ERRGL(glUniform2fv(glGetUniformLocation(p_ctx->shPid, "u_vertexOffs"), 8, (GLfloat*) g_gameQuadsVertexOffs));
 
 	ERRGL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, *vboDataCapacity));
 }
@@ -264,6 +383,8 @@ game_quad_t* gameQuadsCreate(struct GameQuadsCtx *const p_ctx, game_quad_t *cons
 		foru(size_t i = 0, i < p_many, ++i) {
 
 			p_out[i] = p_ctx->maxId++;
+			p_ctx->scalesAndAngles[i].x = 1;
+			p_ctx->scalesAndAngles[i].y = 1;
 
 		}
 

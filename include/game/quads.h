@@ -16,8 +16,8 @@ extern game_size_t g_gameQuadsCtxDefaultCapacity;
 struct GameQuadsVbo {
 
 	struct SmlVec3 scaleAndAngle;
-	struct SmlVec2 uv[4];
 	struct SmlVec3 pos;
+	struct SmlVec2 uv;
 
 };
 
@@ -62,7 +62,7 @@ struct GameQuadsCtx {
 
 void gameQuadsInit();
 struct GameQuadsCtx* gameQuadsCtxAlloc();
+void gameQuadsCtxDraw(struct GameQuadsCtx *const ctx);
 void gameQuadsCtxInit(struct GameQuadsCtx *const ctx);
-void gameQuadsCtxDraw(struct GameQuadsCtx const *const ctx);
 void gameQuadsDestroy(struct GameQuadsCtx *const ctx, game_quad_t const *quads, game_size_t const count);
 game_quad_t* gameQuadsCreate(struct GameQuadsCtx *const ctx, game_quad_t *const out, game_size_t const count);

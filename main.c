@@ -21,6 +21,7 @@
 
 GLenum g_errorGl;
 char g_cwd[FILENAME_MAX];
+struct GameQuadsCtx *ctx;
 size_t g_cwdLen = FILENAME_MAX;
 
 GLint gameShaderFromFile(GLchar const **p_buffer, char const *p_path) {
@@ -91,7 +92,7 @@ void gameTexesLoad(void) {
 		// NOLINTEND
 
 		g_gameTexesData[i] = stbi_load(fname, &g_gameTexesW[i], &g_gameTexesH[i], NULL, STBI_rgb_alpha);
-		printf("Loaded texture `%s` with width `%d` and height `%d`.\n", g_gameTexesPaths[i], g_gameTexesW[i], g_gameTexesH[i]);
+		printf("Attempted loading `%s`, width `%d`, height `%d`...\n", g_gameTexesPaths[i], g_gameTexesW[i], g_gameTexesH[i]);
 	}
 
 	// Check and free!...:
@@ -107,9 +108,8 @@ void gameTexesLoad(void) {
 			ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 
 			ERRGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[i]));
-			ERRGL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, g_gameTexesW[i], g_gameTexesH[i], 0, GL_RGBA, GL_UNSIGNED_BYTE, g_gameTexesData[i]));
+			ERRGL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, g_gameTexesW[i], g_gameTexesH[i], 0, GL_RGBA, GL_UNSIGNED_BYTE, ptr));
 			ERRGL(glGenerateMipmap(GL_TEXTURE_2D));
-
 			stbi_image_free(ptr);
 
 		} else {
@@ -124,104 +124,16 @@ void gameTexesLoad(void) {
 }
 
 void gameSetup(void) {
-	struct GameQuadsCtx *ctx = gameQuadsCtxAlloc();
+	gameQuadsInit();
+	ctx = gameQuadsCtxAlloc();
+	ERRGL(glGenBuffers(1, &ctx->vbo));
+	ERRGL(glGenVertexArrays(1, &ctx->vao));
+
+	game_quad_t quads[1];
 	gameQuadsCtxInit(ctx);
-
-	
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	GLfloat data[] = {
-
-		-0.5f, -0.5f, // V
-		+0.0f, +0.0f, // T
-
-		-0.5f, +0.5f, // V
-		+0.0f, +1.0f, // T
-
-		+0.5f, -0.5f, // V
-		+1.0f, +0.0f, // T
-
-		+0.5f, +0.5f, // V
-		+1.0f, +1.0f, // T
-
-	};
-
-	GLuint vao, vbo;
-	GLuint pgl = ERRGL(glCreateProgram());
-	GLuint svgl = ERRGL(glCreateShader(GL_VERTEX_SHADER));
-	GLuint sfgl = ERRGL(glCreateShader(GL_FRAGMENT_SHADER));
-
-	ERRGL(glGenBuffers(1, &vbo));
-	ERRGL(glGenVertexArrays(1, &vao));
-
-	GLchar const *svsrc, *sfsrc;
-	GLint const svlen = gameShaderFromFile(&svsrc, "shader.vert");
-	GLint const sflen = gameShaderFromFile(&sfsrc, "shader.frag");
-
-	ERRGL(glShaderSource(svgl, 1, &svsrc, &svlen));
-	ERRGL(glShaderSource(sfgl, 1, &sfsrc, &sflen));
-
-	ERRGL(glCompileShader(svgl));
-	ERRGL(glCompileShader(sfgl));
-
-	// Attach *after* compilation:
-	ERRGL(glAttachShader(pgl, svgl));
-	ERRGL(glAttachShader(pgl, sfgl));
-
-	GLchar slogBuf[16384]; GLsizei slogLen = 16384, slogStrlen;
-
-	memset(slogBuf, 0, slogLen); // NOLINT
-	ERRGL(glGetShaderInfoLog(svgl, 16384, &slogLen, slogBuf));
-	printf("Vertex shader log: %s.\n", slogBuf);
-
-	memset(slogBuf, 0, slogLen); // NOLINT
-	ERRGL(glGetShaderInfoLog(sfgl, 16384, &slogLen, slogBuf));
-	printf("Fragment shader log: %s.\n", slogBuf);
-
-	memset(slogBuf, 0, slogLen); // NOLINT
-	ERRGL(glGetProgramInfoLog(pgl, 16384, &slogLen, slogBuf));
-	printf("Program log: %s.\n", slogBuf);
-
-	ERRGL(glLinkProgram(pgl));
-	ERRGL(glUseProgram(pgl));
-
-	ERRGL(glBindVertexArray(vao));
-	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-
-	ERRGL(glActiveTexture(GL_TEXTURE0));
-	enum GameTex const tex = GAME_TEX_NULL;
-
-	// float const time = (float) glfwGetTime();
-	// float const angleY = sinf(time), angleZ = cosf(time);
-
-	// float mat[16] = {
-
-	// 	+cosf(angleZ),	-sinf(angleZ), 	0.2f * +sinf(angleY),	0.0f,
-	// 	+sinf(angleZ),	+cosf(angleZ), 	0.2f * +cosf(angleY),	0.0f,
-	// 	0.0f,			0.0f, 			1.0f, 					0.0f,
-	// 	0.0f, 			0.0f,			0.0f, 					1.0f,
-
-	// };
-
-	float mat[16] = {
-
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f,
-
-	};
-
-	ERRGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[tex]));
-	ERRGL(glUniform1i(glGetUniformLocation(pgl, "u_tex"), 0));
-	ERRGL(glUniformMatrix4fv(glGetUniformLocation(pgl, "u_transform"), 1, GL_TRUE, mat));
-	ERRGL(glUniform2f(glGetUniformLocation(pgl, "u_texRes"), g_gameTexesW[tex], g_gameTexesH[tex]));
-
-	ERRGL(glEnableVertexAttribArray(0));
-	ERRGL(glEnableVertexAttribArray(1));
-	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW));
-	ERRGL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0));
-	ERRGL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*) (2 * sizeof(GLfloat))));
+	gameQuadsCreate(ctx, quads, 1);
+	// gameQuadsDestroy(ctx, quads, 1);
+	smlVec3Set(&ctx->positions[quads[0]], 0, 0, 0);
 }
 
 void gameDraw(void) {
@@ -238,13 +150,13 @@ void gameDraw(void) {
 
 		}
 
-		ERRGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[tex]));
+		ctx->textures[0] = tex;
 
 	}
 
 	ERRGL(glClearColor(0.8f, 0.6f, 1.0f, 0.1f));
 	ERRGL(glClear(GL_COLOR_BUFFER_BIT));
-	ERRGL(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+	gameQuadsCtxDraw(ctx);
 	++frameCount;
 }
 
@@ -279,7 +191,6 @@ int main(int const p_count, char const **p_args) {
 		ERRGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
 
 		gameDraw();
-
 		glfwSwapBuffers(g_window1);
 
 	}

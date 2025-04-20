@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25.1)
-project(RpgGame1)
+project(Rpg1)
 
 # -march=native\
 set(CMAKE_C_FLAGS
@@ -16,7 +16,7 @@ find_package(OpenAL REQUIRED)
 
 include_directories("include")
 add_executable(
-  RpgGame1
+  Rpg1
   "stb/stb_vorbis.c" #
   "stb/stb_image.c" #
   "glad.c" #
@@ -27,7 +27,7 @@ add_executable(
   "main.c" #
 )
 target_link_libraries(
-  RpgGame1 #
+  Rpg1 #
   m #
   # OpenGL::GL
   OpenAL::OpenAL #

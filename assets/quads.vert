@@ -18,5 +18,6 @@ void main() {
 	vec3 world = in_pos + vec3(local, 0.0);
 
 	v_uv = in_uv;
+	// gl_Position = vec4(in_pos, 0.0);
 	gl_Position = u_cam * vec4(world, 1.0);
 }
