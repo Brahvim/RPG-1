@@ -15,6 +15,16 @@ GLFWwindow *g_window1 = NULL;
 int const g_window1WDef = 640;
 int const g_window1HDef = 480;
 
+void gameWindow1Create(void) {
+	g_window1 = glfwCreateWindow(g_window1WDef, g_window1HDef, "Game", NULL, NULL);
+	glfwSetKeyCallback(g_window1, gameWindow1CbckKey);
+	gameWindow1UpdateVars();
+}
+
+void gameWindow1Destroy(void) {
+	glfwDestroyWindow(g_window1);
+}
+
 void gameWindow1UpdateVars(void) {
 	glfwGetWindowPos(g_window1, &g_window1X, &g_window1Y);
 	glfwGetWindowSize(g_window1, &g_window1W, &g_window1H);

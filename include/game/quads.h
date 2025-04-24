@@ -52,7 +52,7 @@ struct GameQuadsCtx {
 
 	// Actual data:
 	unsigned char *flips;
-	enum GameTex *textures;
+	unsigned int *textures;
 	struct SmlVec3 *positions;
 	struct SmlVec3 *scalesAndAngles;
 	// These were going to be in an AoS TILL I realized that user-access is like...
@@ -64,5 +64,6 @@ void gameQuadsInit();
 struct GameQuadsCtx* gameQuadsCtxAlloc();
 void gameQuadsCtxDraw(struct GameQuadsCtx *const ctx);
 void gameQuadsCtxInit(struct GameQuadsCtx *const ctx);
+void gameQuadsCtxFree(struct GameQuadsCtx *const ctx);
 void gameQuadsDestroy(struct GameQuadsCtx *const ctx, game_quad_t const *quads, game_size_t const count);
 game_quad_t* gameQuadsCreate(struct GameQuadsCtx *const ctx, game_quad_t *const out, game_size_t const count);

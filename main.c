@@ -62,6 +62,22 @@ GLint gameShaderFromFile(GLchar const **p_buffer, char const *p_path) {
 	return length;
 }
 
+int main(int const p_count, char const **p_args) {
+	gameSetup();
+
+	whilel(!glfwWindowShouldClose(g_window1)) {
+
+		glfwPollEvents();
+		gameWindow1UpdateVars();
+
+		gameDraw();
+		glfwSwapBuffers(g_window1);
+
+	}
+
+	gameExit();
+}
+
 char const* glGetErrorString(GLenum p_error) {
 	switch (p_error) {
 
@@ -81,7 +97,7 @@ void gameTexesLoad(void) {
 	ERRGL(glActiveTexture(GL_TEXTURE0));
 	ERRGL(glGenTextures(GAME_TEX_TOTAL, g_gameTexesGl));
 
-	for (int i = 0; i < GAME_TEX_TOTAL; ++i) {
+	foru(unsigned int i = 0, i < GAME_TEX_TOTAL, ++i) {
 
 		char fname[FILENAME_MAX];
 		// NOLINTBEGIN
@@ -96,7 +112,7 @@ void gameTexesLoad(void) {
 	}
 
 	// Check and free!...:
-	for (int i = 0; i < GAME_TEX_TOTAL; ++i) {
+	foru(unsigned int i = 0, i < GAME_TEX_TOTAL, ++i) {
 
 		void *ptr = g_gameTexesData[i];
 		ifl(ptr) {
@@ -124,6 +140,27 @@ void gameTexesLoad(void) {
 }
 
 void gameSetup(void) {
+	glfwInit();
+	glfwSwapInterval(0);
+
+	ifl(getcwd(g_cwd, sizeof(g_cwd)) != NULL) {
+
+		printf("Current working directory: `%s`.\n", g_cwd);
+		g_cwdLen = strlen(g_cwd);
+
+	} else {
+
+		perror("Failed to `getcwd()` the current working directory.\n");
+		exit(GAME_EXIT_GET_CWD);
+
+	}
+
+	gameWindow1Create();
+
+	glfwMakeContextCurrent(g_window1);
+	gladLoadGL(glfwGetProcAddress);
+	gameTexesLoad();
+
 	gameQuadsInit();
 	ctx = gameQuadsCtxAlloc();
 	ERRGL(glGenBuffers(1, &ctx->vbo));
@@ -138,7 +175,7 @@ void gameSetup(void) {
 
 void gameDraw(void) {
 	static int frameCount = 0;
-	static enum GameTex tex = 0;
+	static unsigned int tex = 0;
 
 	ifu(frameCount % 75 == 0) {
 
@@ -154,47 +191,15 @@ void gameDraw(void) {
 
 	}
 
+	ERRGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
 	ERRGL(glClearColor(0.8f, 0.6f, 1.0f, 0.1f));
 	ERRGL(glClear(GL_COLOR_BUFFER_BIT));
 	gameQuadsCtxDraw(ctx);
 	++frameCount;
 }
 
-int main(int const p_count, char const **p_args) {
-	glfwInit();
-	glfwSwapInterval(0);
-	g_window1 = glfwCreateWindow(g_window1WDef, g_window1HDef, "Game", NULL, NULL);
-	glfwSetKeyCallback(g_window1, gameWindow1CbckKey);
-
-	ifl(getcwd(g_cwd, sizeof(g_cwd)) != NULL) {
-
-		printf("Current working directory: `%s`.\n", g_cwd);
-		g_cwdLen = strlen(g_cwd);
-
-	} else {
-
-		perror("Failed to `getcwd()` the current working directory.\n");
-		exit(GAME_EXIT_GET_CWD);
-
-	}
-
-	glfwMakeContextCurrent(g_window1);
-	gladLoadGL(glfwGetProcAddress);
-	gameWindow1UpdateVars();
-	gameTexesLoad();
-	gameSetup();
-
-	whilel(!glfwWindowShouldClose(g_window1)) {
-
-		glfwPollEvents();
-		gameWindow1UpdateVars();
-		ERRGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
-
-		gameDraw();
-		glfwSwapBuffers(g_window1);
-
-	}
-
-	glfwDestroyWindow(g_window1);
+void gameExit(void) {
+	gameQuadsCtxFree(ctx);
+	gameWindow1Destroy();
 	glfwTerminate();
 }

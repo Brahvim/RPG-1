@@ -1,10 +1,14 @@
-#include <stddef.h>
 #pragma once
+#include <stddef.h>
 
 typedef unsigned long long game_size_t;
 
 extern size_t g_cwdLen;
 extern char g_cwd[];
+
+void gameSetup(void);
+void gameDraw(void);
+void gameExit(void);
 
 #define CALLOC_ARRAY(array, count, type)\
 {\

@@ -17,5 +17,7 @@ extern GLFWwindow *g_window1;
 extern int const g_window1WDef;
 extern int const g_window1HDef;
 
+void gameWindow1Create(void);
+void gameWindow1Destroy(void);
 void gameWindow1UpdateVars(void);
 void gameWindow1CbckKey(GLFWwindow *const window, int const key, int const scancode, int const action, int const mods);
