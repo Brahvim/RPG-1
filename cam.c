@@ -2,15 +2,7 @@
 
 #include "cam.h"
 
-struct GameCam *g_cam = &g_camNull;
-
-void gameCamNullUpdate(void) { }
-struct GameCam g_camNull = {
-
-	.transform = { 0 },
-	.update = gameCamNullUpdate,
-
-};
+struct GameCam *g_cam = &g_cam1;
 
 struct GameCam g_cam1 = {
 

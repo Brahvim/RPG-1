@@ -11,9 +11,6 @@ struct GameCam {
 
 extern struct GameCam *g_cam;
 
-void gameCamNullUpdate(void);
-extern struct GameCam g_camNull;
-
 void gameCam1Update(void);
 extern struct GameCam g_cam1;
 extern struct SmlVec3 g_cam1Up;
