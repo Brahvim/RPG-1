@@ -14,6 +14,7 @@
 #pragma endregion
 
 #include "ifs.h"
+#include "game/cam.h"
 #include "game/main.h"
 #include "game/quads.h"
 #include "game/window1.h"
@@ -21,8 +22,10 @@
 
 GLenum g_errorGl;
 char g_cwd[FILENAME_MAX];
-struct GameQuadsCtx *ctx;
 size_t g_cwdLen = FILENAME_MAX;
+
+static game_quad_t s_quads[1];
+static struct GameQuadsCtx *s_ctx;
 
 GLint gameShaderFromFile(GLchar const **p_buffer, char const *p_path) {
 	FILE *file = fopen(p_path, "rb");
@@ -97,7 +100,7 @@ void gameTexesLoad(void) {
 	ERRGL(glActiveTexture(GL_TEXTURE0));
 	ERRGL(glGenTextures(GAME_TEX_TOTAL, g_gameTexesGl));
 
-	foru(unsigned int i = 0, i < GAME_TEX_TOTAL, ++i) {
+	for (unsigned int i = 0; i < GAME_TEX_TOTAL; ++i) {
 
 		char fname[FILENAME_MAX];
 		// NOLINTBEGIN
@@ -112,7 +115,7 @@ void gameTexesLoad(void) {
 	}
 
 	// Check and free!...:
-	foru(unsigned int i = 0, i < GAME_TEX_TOTAL, ++i) {
+	for (unsigned int i = 0; i < GAME_TEX_TOTAL; ++i) {
 
 		void *ptr = g_gameTexesData[i];
 		ifl(ptr) {
@@ -141,7 +144,11 @@ void gameTexesLoad(void) {
 
 void gameSetup(void) {
 	glfwInit();
+	gameQuadsInit();
 	glfwSwapInterval(0);
+	// `0`-out 2D camera stuff:
+	smlVec2Zero(&g_cam2dPosition);
+	smlMat44Identity(&g_cam2dTransform);
 
 	ifl(getcwd(g_cwd, sizeof(g_cwd)) != NULL) {
 
@@ -156,21 +163,18 @@ void gameSetup(void) {
 	}
 
 	gameWindow1Create();
-
 	glfwMakeContextCurrent(g_window1);
+
 	gladLoadGL(glfwGetProcAddress);
 	gameTexesLoad();
 
-	gameQuadsInit();
-	ctx = gameQuadsCtxAlloc();
-	ERRGL(glGenBuffers(1, &ctx->vbo));
-	ERRGL(glGenVertexArrays(1, &ctx->vao));
+	s_ctx = gameQuadsCtxAlloc();
+	ERRGL(glGenBuffers(1, &s_ctx->vbo));
+	ERRGL(glGenVertexArrays(1, &s_ctx->vao));
 
-	game_quad_t quads[1];
-	gameQuadsCtxInit(ctx);
-	gameQuadsCreate(ctx, quads, 1);
-	// gameQuadsDestroy(ctx, quads, 1);
-	smlVec3Set(&ctx->positions[quads[0]], 0, 0, 0);
+	gameQuadsCtxInit(s_ctx);
+	gameQuadsCreate(s_ctx, s_quads, 1);
+	smlVec3Zero(&s_ctx->positions[s_quads[0]]);
 }
 
 void gameDraw(void) {
@@ -187,19 +191,24 @@ void gameDraw(void) {
 
 		}
 
-		ctx->textures[0] = tex;
+		s_ctx->textures[0] = tex;
 
 	}
+
+	ERRGL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 
 	ERRGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
 	ERRGL(glClearColor(0.8f, 0.6f, 1.0f, 0.1f));
 	ERRGL(glClear(GL_COLOR_BUFFER_BIT));
-	gameQuadsCtxDraw(ctx);
+
+	// smlVec3Set(&g_cam2dPosition, 0, 0, 0);
+	// g_cam->update();
+	gameQuadsCtxDraw(s_ctx);
 	++frameCount;
 }
 
 void gameExit(void) {
-	gameQuadsCtxFree(ctx);
+	gameQuadsCtxFree(s_ctx);
 	gameWindow1Destroy();
 	glfwTerminate();
 }

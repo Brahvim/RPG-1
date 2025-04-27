@@ -1,21 +1,25 @@
 #include <stdio.h>
 
-#include "cam.h"
+#include <glad.h>
 
-struct GameCam *g_cam = &g_cam1;
+#include "game/cam.h"
 
-struct GameCam g_cam1 = {
+struct GameCam *g_cam = &GAME_CAM_DEFAULT;
 
-	.transform = { 0 },
-	.update = gameCam1Update,
+struct GameCam g_cam2d = {
+
+	.update = gameCam2dUpdate,
+	.transform = &g_cam2dTransform,
 
 };
 
-struct SmlVec3 g_cam1Up;
-struct SmlVec3 g_cam1Target;
-struct SmlVec3 g_cam1Position;
-struct SmlMat44 g_cam1Transform;
+float g_cam2dRotation = 0;
+struct SmlVec2 g_cam2dPosition = { 0 };
+struct SmlMat44 g_cam2dTransform = { 0 };
 
-void gameCam1Update(void) {
-
+void gameCam2dUpdate(void) {
+	smlMat44Identity(&g_cam2dTransform);
+	g_cam2dTransform.r14 = -g_cam2dPosition.x;
+	g_cam2dTransform.r24 = -g_cam2dPosition.y;
+	smlMat33RotateZ(&g_cam2dTransform.mat33, -g_cam2dRotation);
 }

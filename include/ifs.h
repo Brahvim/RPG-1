@@ -2,12 +2,9 @@
 #define ifu(x) if (__builtin_expect((long) (x), 0))
 #define ifl(x) if (__builtin_expect((long) (x), 1))
 
-// Nope!:
-// #define caseu(x) case __builtin_expect((long) (x), 0):
-// #define casel(x) case __builtin_expect((long) (x), 1):
+#define switchl(p_condition, p_likelyBranch) switch (__builtin_expect((long) (p_condition), p_likelyBranch))
 
 #define whileu(x) while (__builtin_expect((long) (x), 0))
 #define whilel(x) while (__builtin_expect((long) (x), 1))
 
-#define foru(a, b, c) for (a; __builtin_expect((long) (b), 0); c)
-#define forl(a, b, c) for (a; __builtin_expect((long) (b), 1); c)
+// The syntax for `foru()` sucks because you have to use `,`s over `;`s and don't get initialize multiple variables that way!

@@ -3,6 +3,7 @@
 #include <memory.h>
 
 #include "ifs.h"
+#include "game/cam.h"
 #include "game/quads.h"
 
 #pragma region // Globals.
@@ -12,12 +13,14 @@ GLchar const *g_gameQuadsVertSrc = NULL;
 GLchar const *g_gameQuadsFragSrc = NULL;
 
 struct SmlVec2 g_gameQuadsVertexOffs[4] = {
+
 	{ -0.5f, -0.5f },
 	{ -0.5f, +0.5f },
 	{ +0.5f, -0.5f },
 	{ +0.5f, +0.5f },
 
 };
+
 game_size_t g_gameQuadsCtxDefaultCapacity = 4;
 char const *const g_gameQuadsVertPath = "assets/quads.vert";
 char const *const g_gameQuadsFragPath = "assets/quads.frag";
@@ -30,7 +33,6 @@ void gameQuadsInit() {
 
 struct GameQuadsCtx* gameQuadsCtxAlloc() {
 	struct GameQuadsCtx *ctx = malloc(sizeof(struct GameQuadsCtx));
-
 	memset(ctx, 0, sizeof(struct GameQuadsCtx)); // NOLINT
 
 	ctx->shVsrc = g_gameQuadsVertSrc;
@@ -41,7 +43,7 @@ struct GameQuadsCtx* gameQuadsCtxAlloc() {
 
 	ctx->vboData = NULL;
 	ctx->vboDataCapacity = 0;
-	ctx->vboUsage = GL_DYNAMIC_DRAW;
+	ctx->vboUsage = GL_STREAM_DRAW;
 	ctx->maxId = g_gameQuadsCtxDefaultCapacity;
 	ctx->activeCapacity = g_gameQuadsCtxDefaultCapacity;
 	ctx->inactiveCapacity = g_gameQuadsCtxDefaultCapacity;
@@ -90,16 +92,16 @@ void gameQuadsCtxInit(struct GameQuadsCtx *const p_ctx) {
 	ERRGL(glBindVertexArray(p_ctx->vao));
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vbo));
 
-	ERRGL(glVertexAttribDivisor(0, 0));
-	ERRGL(glVertexAttribDivisor(1, 0));
-	ERRGL(glVertexAttribDivisor(2, 0));
-
 	ERRGL(glEnableVertexAttribArray(0));
 	ERRGL(glEnableVertexAttribArray(1));
 	ERRGL(glEnableVertexAttribArray(2));
 
-	ERRGL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) offsetof(struct GameQuadsVbo, scaleAndAngle)));
-	ERRGL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) offsetof(struct GameQuadsVbo, pos)));
+	ERRGL(glVertexAttribDivisor(0, 0));
+	ERRGL(glVertexAttribDivisor(1, 0));
+	ERRGL(glVertexAttribDivisor(2, 0));
+
+	ERRGL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) offsetof(struct GameQuadsVbo, pos)));
+	ERRGL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) offsetof(struct GameQuadsVbo, scaleAndAngle)));
 	ERRGL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) offsetof(struct GameQuadsVbo, uv)));
 }
 
@@ -108,12 +110,28 @@ void gameQuadsCtxDraw(struct GameQuadsCtx *const p_ctx) {
 
 		p_ctx->vboDataCapacity = 4 * p_ctx->activeLength;
 		REALLOC_ARRAY(p_ctx->vboData, p_ctx->vboDataCapacity, struct GameQuadsVbo);
-		p_ctx->vboData = p_ctx->vboData;
+		memset(p_ctx->vboData, 0, sizeof(struct GameQuadsVbo) * p_ctx->vboDataCapacity);
+
+	}
+
+	// Positions:
+	for (size_t i = 0; i < p_ctx->vboDataCapacity; ++i) {
+
+		p_ctx->vboData[i].pos.x = p_ctx->positions[i].x + g_gameQuadsVertexOffs[i % 4].x;
+		p_ctx->vboData[i].pos.y = p_ctx->positions[i].y + g_gameQuadsVertexOffs[i % 4].y;
+		p_ctx->vboData[i].pos.z = p_ctx->positions[i].z;
+
+	}
+
+	// Scales-and-angles:
+	for (size_t i = 0; i < p_ctx->vboDataCapacity; ++i) {
+
+		p_ctx->vboData[i].scaleAndAngle = p_ctx->scalesAndAngles[i];
 
 	}
 
 	// Flips:
-	foru(size_t i = 0, i < p_ctx->vboDataCapacity, ++i) {
+	for (size_t i = 0; i < p_ctx->vboDataCapacity; ++i) {
 
 		switch (p_ctx->flips[i]) {
 
@@ -123,29 +141,29 @@ void gameQuadsCtxDraw(struct GameQuadsCtx *const p_ctx) {
 
 					case 0: {
 
-						p_ctx->vboData->uv.y = 0;
-						p_ctx->vboData->uv.y = 0;
+						p_ctx->vboData[i].uv.x = 0;
+						p_ctx->vboData[i].uv.y = 0;
 
 					} break;
 
 					case 1: {
 
-						p_ctx->vboData->uv.x = 0;
-						p_ctx->vboData->uv.y = 1;
+						p_ctx->vboData[i].uv.x = 0;
+						p_ctx->vboData[i].uv.y = 1;
 
 					} break;
 
 					case 2: {
 
-						p_ctx->vboData->uv.x = 1;
-						p_ctx->vboData->uv.y = 0;
+						p_ctx->vboData[i].uv.x = 1;
+						p_ctx->vboData[i].uv.y = 0;
 
 					} break;
 
 					case 3: {
 
-						p_ctx->vboData->uv.x = 1;
-						p_ctx->vboData->uv.y = 1;
+						p_ctx->vboData[i].uv.x = 1;
+						p_ctx->vboData[i].uv.y = 1;
 
 					} break;
 
@@ -159,31 +177,31 @@ void gameQuadsCtxDraw(struct GameQuadsCtx *const p_ctx) {
 
 					case 0: {
 
-						p_ctx->vboData->uv.x = 1;
-						p_ctx->vboData->uv.y = 1;
+						p_ctx->vboData[i].uv.x = 1;
+						p_ctx->vboData[i].uv.y = 1;
 
 					} break;
 
 					case 1: {
 
-						p_ctx->vboData->uv.x = 1;
-						p_ctx->vboData->uv.y = 0;
+						p_ctx->vboData[i].uv.x = 1;
+						p_ctx->vboData[i].uv.y = 0;
 
 					} break;
 
 
 					case 2: {
 
-						p_ctx->vboData->uv.x = 0;
-						p_ctx->vboData->uv.y = 1;
+						p_ctx->vboData[i].uv.x = 0;
+						p_ctx->vboData[i].uv.y = 1;
 
 					} break;
 
 
 					case 3: {
 
-						p_ctx->vboData->uv.x = 0;
-						p_ctx->vboData->uv.y = 0;
+						p_ctx->vboData[i].uv.x = 0;
+						p_ctx->vboData[i].uv.y = 0;
 
 					} break;
 
@@ -197,29 +215,29 @@ void gameQuadsCtxDraw(struct GameQuadsCtx *const p_ctx) {
 
 					case 0: {
 
-						p_ctx->vboData->uv.x = 0;
-						p_ctx->vboData->uv.y = 1;
+						p_ctx->vboData[i].uv.x = 0;
+						p_ctx->vboData[i].uv.y = 1;
 
 					} break;
 
 					case 1: {
-						p_ctx->vboData->uv.x = 0;
-						p_ctx->vboData->uv.y = 0;
+						p_ctx->vboData[i].uv.x = 0;
+						p_ctx->vboData[i].uv.y = 0;
 
 					} break;
 
 
 					case 2: {
 
-						p_ctx->vboData->uv.x = 1;
-						p_ctx->vboData->uv.y = 1;
+						p_ctx->vboData[i].uv.x = 1;
+						p_ctx->vboData[i].uv.y = 1;
 
 					} break;
 
 					case 3: {
 
-						p_ctx->vboData->uv.x = 1;
-						p_ctx->vboData->uv.y = 0;
+						p_ctx->vboData[i].uv.x = 1;
+						p_ctx->vboData[i].uv.y = 0;
 
 					} break;
 
@@ -233,31 +251,31 @@ void gameQuadsCtxDraw(struct GameQuadsCtx *const p_ctx) {
 
 					case 0: {
 
-						p_ctx->vboData->uv.x = 1;
-						p_ctx->vboData->uv.y = 0;
+						p_ctx->vboData[i].uv.x = 1;
+						p_ctx->vboData[i].uv.y = 0;
 
 					} break;
 
 
 					case 1: {
 
-						p_ctx->vboData->uv.x = 1;
-						p_ctx->vboData->uv.y = 1;
+						p_ctx->vboData[i].uv.x = 1;
+						p_ctx->vboData[i].uv.y = 1;
 
 					} break;
 
 
 					case 2: {
 
-						p_ctx->vboData->uv.x = 0;
-						p_ctx->vboData->uv.y = 0;
+						p_ctx->vboData[i].uv.x = 0;
+						p_ctx->vboData[i].uv.y = 0;
 
 					} break;
 
 					case 3: {
 
-						p_ctx->vboData->uv.x = 0;
-						p_ctx->vboData->uv.y = 1;
+						p_ctx->vboData[i].uv.x = 0;
+						p_ctx->vboData[i].uv.y = 1;
 
 					} break;
 
@@ -270,26 +288,12 @@ void gameQuadsCtxDraw(struct GameQuadsCtx *const p_ctx) {
 	}
 
 	// Multiply UVs by texture position in atlas:
-	foru(size_t i = 0, i < p_ctx->vboDataCapacity, ++i) {
+	for (size_t i = 0; i < p_ctx->vboDataCapacity; ++i) {
 
-		p_ctx->vboData->uv.x *= 1;
-		p_ctx->vboData->uv.y *= 1;
+		// enum GameTex const tex = p_ctx->textures[i / 4];
 
-	}
-
-	// Positions:
-	foru(size_t i = 0, i < p_ctx->vboDataCapacity, ++i) {
-
-		p_ctx->vboData->pos.x = p_ctx->positions[i].x + g_gameQuadsVertexOffs[i % 4].x;
-		p_ctx->vboData->pos.y = p_ctx->positions[i].y + g_gameQuadsVertexOffs[i % 4].y;
-		p_ctx->vboData->pos.z = p_ctx->positions[i].z;
-
-	}
-
-	// Scales-and-angles:
-	foru(size_t i = 0, i < p_ctx->vboDataCapacity, ++i) {
-
-		p_ctx->vboData->scaleAndAngle = p_ctx->scalesAndAngles[i];
+		p_ctx->vboData[i].uv.x *= 1; // g_gameTexes[tex];
+		p_ctx->vboData[i].uv.y *= 1; // g_gameTexes[tex];
 
 	}
 
@@ -299,10 +303,53 @@ void gameQuadsCtxDraw(struct GameQuadsCtx *const p_ctx) {
 	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(struct GameQuadsVbo) * p_ctx->vboDataCapacity, p_ctx->vboData, p_ctx->vboUsage));
 
 	ERRGL(glActiveTexture(GL_TEXTURE0));
-	ERRGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[GAME_TEX_TEST0]));
-	ERRGL(glUniform1i(glGetUniformLocation(p_ctx->shPid, "u_cam"), 0));
+	ERRGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[GAME_TEX_TEST1]));
 	ERRGL(glUniform1i(glGetUniformLocation(p_ctx->shPid, "u_atlas"), 0));
 	ERRGL(glUniform2fv(glGetUniformLocation(p_ctx->shPid, "u_vertexOffs"), 8, (GLfloat*) g_gameQuadsVertexOffs));
+	ERRGL(glUniformMatrix4fv(glGetUniformLocation(p_ctx->shPid, "u_cam"), 1, GL_FALSE, (GLfloat*) g_cam->transform));
+
+	struct GameQuadsVbo *v;
+
+	v = p_ctx->vboData + 0;
+	printf("pos = (%f, %f, %f), scaleAndAngle = (%f, %f, %f), uv = (%f, %f)\n",
+		v->pos.x, v->pos.y, v->pos.z,
+		v->scaleAndAngle.x, v->scaleAndAngle.y, v->scaleAndAngle.z,
+		v->uv.x, v->uv.y
+	);
+
+	v = p_ctx->vboData + 1;
+	printf("pos = (%f, %f, %f), scaleAndAngle = (%f, %f, %f), uv = (%f, %f)\n",
+		v->pos.x, v->pos.y, v->pos.z,
+		v->scaleAndAngle.x, v->scaleAndAngle.y, v->scaleAndAngle.z,
+		v->uv.x, v->uv.y
+	);
+
+	v = p_ctx->vboData + 2;
+	printf("pos = (%f, %f, %f), scaleAndAngle = (%f, %f, %f), uv = (%f, %f)\n",
+		v->pos.x, v->pos.y, v->pos.z,
+		v->scaleAndAngle.x, v->scaleAndAngle.y, v->scaleAndAngle.z,
+		v->uv.x, v->uv.y
+	);
+
+	v = p_ctx->vboData + 3;
+	printf("pos = (%f, %f, %f), scaleAndAngle = (%f, %f, %f), uv = (%f, %f)\n",
+		v->pos.x, v->pos.y, v->pos.z,
+		v->scaleAndAngle.x, v->scaleAndAngle.y, v->scaleAndAngle.z,
+		v->uv.x, v->uv.y
+	);
+
+
+	// -0.5f, -0.5f, // V
+	// +0.0f, +0.0f, // T
+
+	// -0.5f, +0.5f, // V
+	// +0.0f, +1.0f, // T
+
+	// +0.5f, -0.5f, // V
+	// +1.0f, +0.0f, // T
+
+	// +0.5f, +0.5f, // V
+	// +1.0f, +1.0f, // T
 
 	ERRGL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, p_ctx->activeLength));
 }
@@ -330,10 +377,10 @@ void gameQuadsCtxFree(struct GameQuadsCtx *const p_ctx) {
 }
 
 void gameQuadsDestroy(struct GameQuadsCtx *const p_ctx, game_quad_t const *p_quads, game_size_t const p_count) {
-	foru(game_size_t i = 0, i < p_ctx->activeLength, ++i) {
+	for (game_size_t i = 0; i < p_ctx->activeLength; ++i) {
 		game_quad_t const id = p_quads[i];
 
-		foru(game_size_t j = 0, j < p_count, ++j) {
+		for (game_size_t j = 0; j < p_count; ++j) {
 
 			ifu(p_ctx->active[j] == id) {
 
@@ -347,7 +394,7 @@ void gameQuadsDestroy(struct GameQuadsCtx *const p_ctx, game_quad_t const *p_qua
 
 	}
 
-	foru(game_size_t i = 0, i < p_count, ++i) {
+	for (game_size_t i = 0; i < p_count; ++i) {
 
 		game_quad_t const id = p_quads[i];
 
@@ -374,7 +421,7 @@ game_quad_t* gameQuadsCreate(struct GameQuadsCtx *const p_ctx, game_quad_t *cons
 		game_size_t const inactive = p_ctx->inactiveLength - 1;
 		p_ctx->inactiveLength -= p_many;
 
-		foru(size_t i = 0, i < p_many, ++i) {
+		for (size_t i = 0; i < p_many; ++i) {
 
 			p_out[i] = p_ctx->inactive[inactive - i];
 
@@ -388,18 +435,23 @@ game_quad_t* gameQuadsCreate(struct GameQuadsCtx *const p_ctx, game_quad_t *cons
 
 		// NOLINTBEGIN
 		REALLOC_ARRAY(p_ctx->active, p_ctx->activeCapacity, game_quad_t); memset(p_ctx->active, 0, p_ctx->activeLength - oldCount);
-		REALLOC_ARRAY(p_ctx->active, p_ctx->activeCapacity, game_quad_t); memset(p_ctx->active, 0, p_ctx->activeLength - oldCount);
+
 		REALLOC_ARRAY(p_ctx->flips, p_ctx->activeCapacity, unsigned char); memset(p_ctx->flips, 0, p_ctx->activeLength - oldCount);
 		REALLOC_ARRAY(p_ctx->textures, p_ctx->activeCapacity, unsigned int); memset(p_ctx->textures, 0, p_ctx->activeLength - oldCount);
 		REALLOC_ARRAY(p_ctx->positions, p_ctx->activeCapacity, struct SmlVec3); memset(p_ctx->positions, 0, p_ctx->activeLength - oldCount);
 		REALLOC_ARRAY(p_ctx->scalesAndAngles, p_ctx->activeCapacity, struct SmlVec3); memset(p_ctx->scalesAndAngles, 0, p_ctx->activeLength - oldCount);
 		// NOLINTEND
 
-		foru(size_t i = 0, i < p_many, ++i) {
+		for (size_t i = 0; i < 4 * p_many; ++i) {
 
-			p_out[i] = p_ctx->maxId++;
 			p_ctx->scalesAndAngles[i].x = 1;
 			p_ctx->scalesAndAngles[i].y = 1;
+
+		}
+
+		for (size_t i = 0; i < p_many; ++i) {
+			p_out[i] = p_ctx->maxId;
+			p_ctx->maxId++;
 
 		}
 

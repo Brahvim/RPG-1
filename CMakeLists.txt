@@ -25,6 +25,7 @@ add_executable(
   "window1.c" #
   "quads.c" #
   "main.c" #
+  "cam.c" #
 )
 target_link_libraries(
   Rpg1 #
