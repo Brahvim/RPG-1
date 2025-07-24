@@ -2,13 +2,19 @@ cmake_minimum_required(VERSION 3.25.1)
 project(Rpg1)
 
 # -march=native\
-set(CMAKE_C_FLAGS
+# set(CMAKE_C_FLAGS
+#     "${CMAKE_C_FLAGS}\
+# 	-O3\
+# 	-ffast-math\
+# 	-funroll-loops\
+# 	-ftree-vectorize\
+# 	-fopt-info-vec-optimized\
+# 	")
+
+  set(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS}\
-	-O3\
-	-ffast-math\
-	-funroll-loops\
-	-ftree-vectorize\
-	-fopt-info-vec-optimized\
+	-O0\
+	-g\
 	")
 
 find_package(glfw3 REQUIRED)
@@ -32,7 +38,7 @@ target_link_libraries(
   m #
   # OpenGL::GL
   OpenAL::OpenAL #
-  /usr/lib/x86_64-linux-gnu/libglfw.so #
+  /usr/lib/x86_64-linux-gnu/libglfw.so.3 #
   # My own:
   ${CMAKE_SOURCE_DIR}/libs/libSimpleMathLibrary.so #
 )

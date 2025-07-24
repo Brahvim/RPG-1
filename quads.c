@@ -22,8 +22,8 @@ struct SmlVec2 g_gameQuadsVertexOffs[4] = {
 };
 
 game_size_t g_gameQuadsCtxDefaultCapacity = 4;
-char const *const g_gameQuadsVertPath = "assets/quads.vert";
-char const *const g_gameQuadsFragPath = "assets/quads.frag";
+char const *const g_gameQuadsVertPath = GAME_QUADS_VERT_PATH;
+char const *const g_gameQuadsFragPath = GAME_QUADS_FRAG_PATH;
 #pragma endregion
 
 void gameQuadsInit() {
@@ -96,21 +96,28 @@ void gameQuadsCtxInit(struct GameQuadsCtx *const p_ctx) {
 	ERRGL(glEnableVertexAttribArray(1));
 	ERRGL(glEnableVertexAttribArray(2));
 
-	ERRGL(glVertexAttribDivisor(0, 0));
-	ERRGL(glVertexAttribDivisor(1, 0));
+	ERRGL(glVertexAttribDivisor(0, 1));
+	ERRGL(glVertexAttribDivisor(1, 1));
 	ERRGL(glVertexAttribDivisor(2, 0));
 
-	ERRGL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) offsetof(struct GameQuadsVbo, pos)));
-	ERRGL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) offsetof(struct GameQuadsVbo, scaleAndAngle)));
+	ERRGL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) offsetof(struct GameQuadsVbo, scaleAndAngle)));
+	ERRGL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) offsetof(struct GameQuadsVbo, pos)));
 	ERRGL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct GameQuadsVbo), (void*) offsetof(struct GameQuadsVbo, uv)));
 }
 
 void gameQuadsCtxDraw(struct GameQuadsCtx *const p_ctx) {
-	ifu(p_ctx->vboDataCapacity != (4 * p_ctx->activeLength)) {
+	ifu(p_ctx->vboDataCapacity != p_ctx->activeLength) {
 
-		p_ctx->vboDataCapacity = 4 * p_ctx->activeLength;
+		p_ctx->vboDataCapacity = p_ctx->activeLength;
 		REALLOC_ARRAY(p_ctx->vboData, p_ctx->vboDataCapacity, struct GameQuadsVbo);
-		memset(p_ctx->vboData, 0, sizeof(struct GameQuadsVbo) * p_ctx->vboDataCapacity);
+		memset(p_ctx->vboData, 0, sizeof(struct GameQuadsVbo) * p_ctx->vboDataCapacity); // NOLINT
+
+	}
+
+	// Scales-and-angles:
+	for (size_t i = 0; i < p_ctx->vboDataCapacity; ++i) {
+
+		p_ctx->vboData[i].scaleAndAngle = p_ctx->scalesAndAngles[i];
 
 	}
 
@@ -120,13 +127,6 @@ void gameQuadsCtxDraw(struct GameQuadsCtx *const p_ctx) {
 		p_ctx->vboData[i].pos.x = p_ctx->positions[i].x + g_gameQuadsVertexOffs[i % 4].x;
 		p_ctx->vboData[i].pos.y = p_ctx->positions[i].y + g_gameQuadsVertexOffs[i % 4].y;
 		p_ctx->vboData[i].pos.z = p_ctx->positions[i].z;
-
-	}
-
-	// Scales-and-angles:
-	for (size_t i = 0; i < p_ctx->vboDataCapacity; ++i) {
-
-		p_ctx->vboData[i].scaleAndAngle = p_ctx->scalesAndAngles[i];
 
 	}
 
@@ -297,6 +297,8 @@ void gameQuadsCtxDraw(struct GameQuadsCtx *const p_ctx) {
 
 	}
 
+	// Multiply UVs by texture position in atlas in a loop here.
+
 	ERRGL(glUseProgram(p_ctx->shPid));
 	ERRGL(glBindVertexArray(p_ctx->vao));
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vbo));
@@ -307,49 +309,6 @@ void gameQuadsCtxDraw(struct GameQuadsCtx *const p_ctx) {
 	ERRGL(glUniform1i(glGetUniformLocation(p_ctx->shPid, "u_atlas"), 0));
 	ERRGL(glUniform2fv(glGetUniformLocation(p_ctx->shPid, "u_vertexOffs"), 8, (GLfloat*) g_gameQuadsVertexOffs));
 	ERRGL(glUniformMatrix4fv(glGetUniformLocation(p_ctx->shPid, "u_cam"), 1, GL_FALSE, (GLfloat*) g_cam->transform));
-
-	struct GameQuadsVbo *v;
-
-	v = p_ctx->vboData + 0;
-	printf("pos = (%f, %f, %f), scaleAndAngle = (%f, %f, %f), uv = (%f, %f)\n",
-		v->pos.x, v->pos.y, v->pos.z,
-		v->scaleAndAngle.x, v->scaleAndAngle.y, v->scaleAndAngle.z,
-		v->uv.x, v->uv.y
-	);
-
-	v = p_ctx->vboData + 1;
-	printf("pos = (%f, %f, %f), scaleAndAngle = (%f, %f, %f), uv = (%f, %f)\n",
-		v->pos.x, v->pos.y, v->pos.z,
-		v->scaleAndAngle.x, v->scaleAndAngle.y, v->scaleAndAngle.z,
-		v->uv.x, v->uv.y
-	);
-
-	v = p_ctx->vboData + 2;
-	printf("pos = (%f, %f, %f), scaleAndAngle = (%f, %f, %f), uv = (%f, %f)\n",
-		v->pos.x, v->pos.y, v->pos.z,
-		v->scaleAndAngle.x, v->scaleAndAngle.y, v->scaleAndAngle.z,
-		v->uv.x, v->uv.y
-	);
-
-	v = p_ctx->vboData + 3;
-	printf("pos = (%f, %f, %f), scaleAndAngle = (%f, %f, %f), uv = (%f, %f)\n",
-		v->pos.x, v->pos.y, v->pos.z,
-		v->scaleAndAngle.x, v->scaleAndAngle.y, v->scaleAndAngle.z,
-		v->uv.x, v->uv.y
-	);
-
-
-	// -0.5f, -0.5f, // V
-	// +0.0f, +0.0f, // T
-
-	// -0.5f, +0.5f, // V
-	// +0.0f, +1.0f, // T
-
-	// +0.5f, -0.5f, // V
-	// +1.0f, +0.0f, // T
-
-	// +0.5f, +0.5f, // V
-	// +1.0f, +1.0f, // T
 
 	ERRGL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, p_ctx->activeLength));
 }
@@ -427,33 +386,34 @@ game_quad_t* gameQuadsCreate(struct GameQuadsCtx *const p_ctx, game_quad_t *cons
 
 		}
 
-	} else {
+	}
+ else {
 
-		game_size_t const oldCount = p_ctx->activeLength;
-		p_ctx->activeLength += p_many;
-		p_ctx->activeCapacity *= 2;
+	 game_size_t const oldCount = p_ctx->activeLength;
+	 p_ctx->activeLength += p_many;
+	 p_ctx->activeCapacity *= 2;
 
-		// NOLINTBEGIN
-		REALLOC_ARRAY(p_ctx->active, p_ctx->activeCapacity, game_quad_t); memset(p_ctx->active, 0, p_ctx->activeLength - oldCount);
+	 // NOLINTBEGIN
+	 REALLOC_ARRAY(p_ctx->active, p_ctx->activeCapacity, game_quad_t); memset(p_ctx->active, 0, p_ctx->activeLength - oldCount);
 
-		REALLOC_ARRAY(p_ctx->flips, p_ctx->activeCapacity, unsigned char); memset(p_ctx->flips, 0, p_ctx->activeLength - oldCount);
-		REALLOC_ARRAY(p_ctx->textures, p_ctx->activeCapacity, unsigned int); memset(p_ctx->textures, 0, p_ctx->activeLength - oldCount);
-		REALLOC_ARRAY(p_ctx->positions, p_ctx->activeCapacity, struct SmlVec3); memset(p_ctx->positions, 0, p_ctx->activeLength - oldCount);
-		REALLOC_ARRAY(p_ctx->scalesAndAngles, p_ctx->activeCapacity, struct SmlVec3); memset(p_ctx->scalesAndAngles, 0, p_ctx->activeLength - oldCount);
-		// NOLINTEND
+	 REALLOC_ARRAY(p_ctx->flips, p_ctx->activeCapacity, unsigned char); memset(p_ctx->flips, 0, p_ctx->activeLength - oldCount);
+	 REALLOC_ARRAY(p_ctx->textures, p_ctx->activeCapacity, unsigned int); memset(p_ctx->textures, 0, p_ctx->activeLength - oldCount);
+	 REALLOC_ARRAY(p_ctx->positions, p_ctx->activeCapacity, struct SmlVec3); memset(p_ctx->positions, 0, p_ctx->activeLength - oldCount);
+	 REALLOC_ARRAY(p_ctx->scalesAndAngles, p_ctx->activeCapacity, struct SmlVec3); memset(p_ctx->scalesAndAngles, 0, p_ctx->activeLength - oldCount);
+	 // NOLINTEND
 
-		for (size_t i = 0; i < 4 * p_many; ++i) {
+	 for (size_t i = 0; i < 4 * p_many; ++i) {
 
-			p_ctx->scalesAndAngles[i].x = 1;
-			p_ctx->scalesAndAngles[i].y = 1;
+		 p_ctx->scalesAndAngles[i].x = 1;
+		 p_ctx->scalesAndAngles[i].y = 1;
 
-		}
+	 }
 
-		for (size_t i = 0; i < p_many; ++i) {
-			p_out[i] = p_ctx->maxId;
-			p_ctx->maxId++;
+	 for (size_t i = 0; i < p_many; ++i) {
+		 p_out[i] = p_ctx->maxId;
+		 p_ctx->maxId++;
 
-		}
+	 }
 
 	}
 

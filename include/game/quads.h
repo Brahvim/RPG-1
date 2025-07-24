@@ -2,6 +2,9 @@
 #include "sml.h"
 #include "game/graphics.h"
 
+#define GAME_QUADS_VERT_PATH "assets/quads.vert"
+#define GAME_QUADS_FRAG_PATH "assets/quads.frag"
+
 typedef unsigned long long game_quad_t;
 
 extern GLint g_gameQuadsFragLen;
@@ -15,8 +18,8 @@ extern game_size_t g_gameQuadsCtxDefaultCapacity;
 
 struct GameQuadsVbo {
 
-	struct SmlVec3 pos;
 	struct SmlVec3 scaleAndAngle;
+	struct SmlVec3 pos;
 	struct SmlVec2 uv;
 
 };

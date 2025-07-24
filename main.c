@@ -13,6 +13,8 @@
 #include <stb/stb_vorbis.h>
 #pragma endregion
 
+#define GAME_QUADS_COUNT 1
+
 #include "ifs.h"
 #include "game/cam.h"
 #include "game/main.h"
@@ -24,8 +26,8 @@ GLenum g_errorGl;
 char g_cwd[FILENAME_MAX];
 size_t g_cwdLen = FILENAME_MAX;
 
-static game_quad_t s_quads[1];
 static struct GameQuadsCtx *s_ctx;
+static game_quad_t s_quads[GAME_QUADS_COUNT];
 
 GLint gameShaderFromFile(GLchar const **p_buffer, char const *p_path) {
 	FILE *file = fopen(p_path, "rb");
@@ -173,28 +175,25 @@ void gameSetup(void) {
 	ERRGL(glGenVertexArrays(1, &s_ctx->vao));
 
 	gameQuadsCtxInit(s_ctx);
-	gameQuadsCreate(s_ctx, s_quads, 1);
-	smlVec3Zero(&s_ctx->positions[s_quads[0]]);
+	gameQuadsCreate(s_ctx, s_quads, GAME_QUADS_COUNT);
+
+	for (size_t i = 0; i < GAME_QUADS_COUNT; ++i) {
+
+		smlVec3Set(
+		&s_ctx->positions[s_quads[i]]
+		, (float) rand() / RAND_MAX
+		, (float) rand() / RAND_MAX
+		, (float) rand() / RAND_MAX
+		);
+
+		s_ctx->flips[s_quads[i]] = i % (GAME_FLIP_TOTAL - 1);
+		s_ctx->textures[s_quads[i]] = i % (GAME_TEX_TOTAL - 1);
+
+	}
 }
 
 void gameDraw(void) {
 	static int frameCount = 0;
-	static unsigned int tex = 0;
-
-	ifu(frameCount % 75 == 0) {
-
-		++tex;
-
-		ifu(tex == GAME_TEX_TOTAL) {
-
-			tex = GAME_TEX_NULL;
-
-		}
-
-		s_ctx->textures[0] = tex;
-
-	}
-
 	ERRGL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 
 	ERRGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
