@@ -133,9 +133,10 @@ void gameTexesLoad(void) {
 			ERRGL(glGenerateMipmap(GL_TEXTURE_2D));
 			stbi_image_free(ptr);
 
-		} else {
+		}
+ else {
 
-			printf("Failed to load texture `%s`.\n", g_gameTexesPaths[i]);
+	 printf("Failed to load texture `%s`.\n", g_gameTexesPaths[i]);
 
 		}
 
@@ -157,17 +158,18 @@ void gameSetup(void) {
 		printf("Current working directory: `%s`.\n", g_cwd);
 		g_cwdLen = strlen(g_cwd);
 
-	} else {
+	}
+ else {
 
-		perror("Failed to `getcwd()` the current working directory.\n");
-		exit(GAME_EXIT_GET_CWD);
+	 perror("Failed to `getcwd()` the current working directory.\n");
+	 exit(GAME_EXIT_GET_CWD);
 
 	}
 
 	gameWindow1Create();
 	glfwMakeContextCurrent(g_window1);
 
-	gladLoadGL(glfwGetProcAddress);
+	gladLoadGLES2(glfwGetProcAddress);
 	gameTexesLoad();
 
 	s_ctx = gameQuadsCtxAlloc();

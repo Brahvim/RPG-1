@@ -1,8 +1,11 @@
 {
     "files.associations": {
-        "*.s": "asm-intel-x86-generic",
         "*.asm": "asm-intel-x86-generic",
+        "*.s": "asm-intel-x86-generic",
+        "*.ts": "typescript",
         "*.luac": "lua",
+        "*.qss": "css",
+        "*.qrc": "xml",
         "stb_image.h": "c",
         "stb_vorbis.h": "c",
         "window1.h": "c",
@@ -51,7 +54,8 @@
         "string_view": "c",
         "unordered_map": "c",
         "utility": "c",
-        "vector": "c"
+        "vector": "c",
+        "glad.h": "c"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/compile_commands.json"
