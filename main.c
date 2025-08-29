@@ -15,16 +15,16 @@
 
 #define GAME_QUADS_COUNT 1
 
-#include "ifs.h"
 #include "game/cam.h"
 #include "game/main.h"
 #include "game/quads.h"
+#include "game/macros.h"
 #include "game/window1.h"
 #pragma endregion
 
-GLenum g_errorGl;
-char g_cwd[FILENAME_MAX];
-size_t g_cwdLen = FILENAME_MAX;
+GLenum volatile g_errorGl;
+char g_gameCwd[FILENAME_MAX];
+size_t g_gameCwdLen = FILENAME_MAX;
 
 static struct GameQuadsCtx *s_ctx;
 static game_quad_t s_quads[GAME_QUADS_COUNT];
@@ -67,21 +67,21 @@ GLint gameShaderFromFile(GLchar const **p_buffer, char const *p_path) {
 	return length;
 }
 
-int main(int const p_count, char const **p_args) {
-	gameSetup();
+// int main(int const p_count, char const **p_args) {
+// 	gameSetup();
 
-	whilel(!glfwWindowShouldClose(g_window1)) {
+// 	whilel(!glfwWindowShouldClose(g_window1)) {
 
-		glfwPollEvents();
-		gameWindow1UpdateVars();
+// 		glfwPollEvents();
+// 		gameWindow1UpdateVars();
 
-		gameDraw();
-		glfwSwapBuffers(g_window1);
+// 		gameDraw();
+// 		glfwSwapBuffers(g_window1);
 
-	}
+// 	}
 
-	gameExit();
-}
+// 	gameExit(GAME_EXIT_OKAY);
+// }
 
 char const* glGetErrorString(GLenum p_error) {
 	switch (p_error) {
@@ -107,9 +107,9 @@ void gameTexesLoad(void) {
 		char fname[FILENAME_MAX];
 		// NOLINTBEGIN
 		memset(fname, 0, FILENAME_MAX);
-		strncat(fname, g_cwd, g_cwdLen);
-		strncat(fname, "/", g_cwdLen);
-		strncat(fname + 1 + g_cwdLen, g_gameTexesPaths[i], g_cwdLen);
+		strncat(fname, g_gameCwd, g_gameCwdLen);
+		strncat(fname, "/", g_gameCwdLen);
+		strncat(fname + 1 + g_gameCwdLen, g_gameTexesPaths[i], g_gameCwdLen);
 		// NOLINTEND
 
 		g_gameTexesData[i] = stbi_load(fname, &g_gameTexesW[i], &g_gameTexesH[i], NULL, STBI_rgb_alpha);
@@ -147,16 +147,16 @@ void gameTexesLoad(void) {
 
 void gameSetup(void) {
 	glfwInit();
-	gameQuadsInit();
+	// gameQuadsInit();
 	glfwSwapInterval(0);
 	// `0`-out 2D camera stuff:
 	smlVec2Zero(&g_cam2dPosition);
 	smlMat44Identity(&g_cam2dTransform);
 
-	ifl(getcwd(g_cwd, sizeof(g_cwd)) != NULL) {
+	ifl(getcwd(g_gameCwd, sizeof(g_gameCwd)) != NULL) {
 
-		printf("Current working directory: `%s`.\n", g_cwd);
-		g_cwdLen = strlen(g_cwd);
+		printf("Current working directory: `%s`.\n", g_gameCwd);
+		g_gameCwdLen = strlen(g_gameCwd);
 
 	}
  else {
@@ -172,12 +172,12 @@ void gameSetup(void) {
 	gladLoadGLES2(glfwGetProcAddress);
 	gameTexesLoad();
 
-	s_ctx = gameQuadsCtxAlloc();
+	// s_ctx = gameQuadsCtxAlloc();
 	ERRGL(glGenBuffers(1, &s_ctx->vbo));
 	ERRGL(glGenVertexArrays(1, &s_ctx->vao));
 
-	gameQuadsCtxInit(s_ctx);
-	gameQuadsCreate(s_ctx, s_quads, GAME_QUADS_COUNT);
+	// gameQuadsCtxInit(s_ctx);
+	// gameQuadsCreate(s_ctx, s_quads, GAME_QUADS_COUNT);
 
 	for (size_t i = 0; i < GAME_QUADS_COUNT; ++i) {
 
@@ -204,12 +204,13 @@ void gameDraw(void) {
 
 	// smlVec3Set(&g_cam2dPosition, 0, 0, 0);
 	// g_cam->update();
-	gameQuadsCtxDraw(s_ctx);
+	// gameQuadsCtxDraw(s_ctx);
 	++frameCount;
 }
 
-void gameExit(void) {
-	gameQuadsCtxFree(s_ctx);
+void gameExit(enum GameExit const p_cause) {
+	// gameQuadsCtxFree(s_ctx);
 	gameWindow1Destroy();
 	glfwTerminate();
+	exit(p_cause);
 }

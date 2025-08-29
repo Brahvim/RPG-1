@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <memory.h>
 
-#include "ifs.h"
 #include "game/cam.h"
 #include "game/quads.h"
+#include "game/macros.h"
 
 #pragma region // Globals.
 GLint g_gameQuadsFragLen = 0;
@@ -21,7 +21,7 @@ struct SmlVec2 g_gameQuadsVertexOffs[4] = {
 
 };
 
-game_size_t g_gameQuadsCtxDefaultCapacity = 4;
+game_t g_gameQuadsCtxDefaultCapacity = 4;
 char const *const g_gameQuadsVertPath = GAME_QUADS_VERT_PATH;
 char const *const g_gameQuadsFragPath = GAME_QUADS_FRAG_PATH;
 #pragma endregion
@@ -35,11 +35,11 @@ struct GameQuadsCtx* gameQuadsCtxAlloc() {
 	struct GameQuadsCtx *ctx = malloc(sizeof(struct GameQuadsCtx));
 	memset(ctx, 0, sizeof(struct GameQuadsCtx)); // NOLINT
 
-	ctx->shVsrc = g_gameQuadsVertSrc;
-	ctx->shFsrc = g_gameQuadsFragSrc;
+	ctx->strShaderVert = g_gameQuadsVertSrc;
+	ctx->strShaderFrag = g_gameQuadsFragSrc;
 
-	ctx->shVlen = g_gameQuadsVertLen;
-	ctx->shFlen = g_gameQuadsFragLen;
+	ctx->lenShaderVert = g_gameQuadsVertLen;
+	ctx->lenShaderFrag = g_gameQuadsFragLen;
 
 	ctx->vboData = NULL;
 	ctx->vboDataCapacity = 0;
@@ -59,34 +59,34 @@ struct GameQuadsCtx* gameQuadsCtxAlloc() {
 }
 
 void gameQuadsCtxInit(struct GameQuadsCtx *const p_ctx) {
-	p_ctx->shPid = ERRGL(glCreateProgram());
-	p_ctx->shVid = ERRGL(glCreateShader(GL_VERTEX_SHADER));
-	p_ctx->shFid = ERRGL(glCreateShader(GL_FRAGMENT_SHADER));
+	p_ctx->idProgram = ERRGL(glCreateProgram());
+	p_ctx->idShaderVert = ERRGL(glCreateShader(GL_VERTEX_SHADER));
+	p_ctx->idShaderFrag = ERRGL(glCreateShader(GL_FRAGMENT_SHADER));
 
-	ERRGL(glShaderSource(p_ctx->shVid, 1, &(p_ctx->shVsrc), &(p_ctx->shVlen)));
-	ERRGL(glShaderSource(p_ctx->shFid, 1, &(p_ctx->shFsrc), &(p_ctx->shFlen)));
+	ERRGL(glShaderSource(p_ctx->idShaderVert, 1, &(p_ctx->strShaderVert), &(p_ctx->lenShaderVert)));
+	ERRGL(glShaderSource(p_ctx->idShaderFrag, 1, &(p_ctx->strShaderFrag), &(p_ctx->lenShaderFrag)));
 
-	ERRGL(glCompileShader(p_ctx->shVid));
-	ERRGL(glCompileShader(p_ctx->shFid));
+	ERRGL(glCompileShader(p_ctx->idShaderVert));
+	ERRGL(glCompileShader(p_ctx->idShaderFrag));
 
-	ERRGL(glAttachShader(p_ctx->shPid, p_ctx->shVid));
-	ERRGL(glAttachShader(p_ctx->shPid, p_ctx->shFid));
+	ERRGL(glAttachShader(p_ctx->idProgram, p_ctx->idShaderVert));
+	ERRGL(glAttachShader(p_ctx->idProgram, p_ctx->idShaderFrag));
 
-	ERRGL(glLinkProgram(p_ctx->shPid));
+	ERRGL(glLinkProgram(p_ctx->idProgram));
 
 	GLchar slogBuf[16384];
 	GLsizei slogLen = 16384, slogStrlen;
 
 	memset(slogBuf, 0, slogLen); // NOLINT
-	ERRGL(glGetShaderInfoLog(p_ctx->shVid, 16384, &slogLen, slogBuf));
+	ERRGL(glGetShaderInfoLog(p_ctx->idShaderVert, 16384, &slogLen, slogBuf));
 	printf("Quads vertex shader log: %s.\n", slogBuf);
 
 	memset(slogBuf, 0, slogLen); // NOLINT
-	ERRGL(glGetShaderInfoLog(p_ctx->shFid, 16384, &slogLen, slogBuf));
+	ERRGL(glGetShaderInfoLog(p_ctx->idShaderFrag, 16384, &slogLen, slogBuf));
 	printf("Quads fragment shader log: %s.\n", slogBuf);
 
 	memset(slogBuf, 0, slogLen); // NOLINT
-	ERRGL(glGetProgramInfoLog(p_ctx->shPid, 16384, &slogLen, slogBuf));
+	ERRGL(glGetProgramInfoLog(p_ctx->idProgram, 16384, &slogLen, slogBuf));
 	printf("Quads program log: %s.\n", slogBuf);
 
 	ERRGL(glBindVertexArray(p_ctx->vao));
@@ -299,16 +299,16 @@ void gameQuadsCtxDraw(struct GameQuadsCtx *const p_ctx) {
 
 	// Multiply UVs by texture position in atlas in a loop here.
 
-	ERRGL(glUseProgram(p_ctx->shPid));
+	ERRGL(glUseProgram(p_ctx->idProgram));
 	ERRGL(glBindVertexArray(p_ctx->vao));
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vbo));
 	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(struct GameQuadsVbo) * p_ctx->vboDataCapacity, p_ctx->vboData, p_ctx->vboUsage));
 
 	ERRGL(glActiveTexture(GL_TEXTURE0));
 	ERRGL(glBindTexture(GL_TEXTURE_2D, g_gameTexesGl[GAME_TEX_TEST1]));
-	ERRGL(glUniform1i(glGetUniformLocation(p_ctx->shPid, "u_atlas"), 0));
-	ERRGL(glUniform2fv(glGetUniformLocation(p_ctx->shPid, "u_vertexOffs"), 8, (GLfloat*) g_gameQuadsVertexOffs));
-	ERRGL(glUniformMatrix4fv(glGetUniformLocation(p_ctx->shPid, "u_cam"), 1, GL_FALSE, (GLfloat*) g_cam->transform));
+	ERRGL(glUniform1i(glGetUniformLocation(p_ctx->idProgram, "u_atlas"), 0));
+	ERRGL(glUniform2fv(glGetUniformLocation(p_ctx->idProgram, "u_vertexOffs"), 8, (GLfloat*) g_gameQuadsVertexOffs));
+	ERRGL(glUniformMatrix4fv(glGetUniformLocation(p_ctx->idProgram, "u_cam"), 1, GL_FALSE, (GLfloat*) g_cam->transform));
 
 	ERRGL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, p_ctx->activeLength));
 }
@@ -316,12 +316,12 @@ void gameQuadsCtxDraw(struct GameQuadsCtx *const p_ctx) {
 void gameQuadsCtxFree(struct GameQuadsCtx *const p_ctx) {
 	glDeleteVertexArrays(1, &p_ctx->vao);
 	glDeleteBuffers(1, &p_ctx->vbo);
-	glDeleteProgram(p_ctx->shPid);
-	glDeleteShader(p_ctx->shFid);
-	glDeleteShader(p_ctx->shVid);
+	glDeleteProgram(p_ctx->idProgram);
+	glDeleteShader(p_ctx->idShaderFrag);
+	glDeleteShader(p_ctx->idShaderVert);
 
-	free((void*) (p_ctx->shVsrc));
-	free((void*) (p_ctx->shFsrc));
+	free((void*) (p_ctx->strShaderVert));
+	free((void*) (p_ctx->strShaderFrag));
 
 	free(p_ctx->scalesAndAngles);
 	free(p_ctx->positions);
@@ -335,11 +335,11 @@ void gameQuadsCtxFree(struct GameQuadsCtx *const p_ctx) {
 	free(p_ctx);
 }
 
-void gameQuadsDestroy(struct GameQuadsCtx *const p_ctx, game_quad_t const *p_quads, game_size_t const p_count) {
-	for (game_size_t i = 0; i < p_ctx->activeLength; ++i) {
+void gameQuadsDestroy(struct GameQuadsCtx *const p_ctx, game_quad_t const *p_quads, game_t const p_count) {
+	for (game_t i = 0; i < p_ctx->activeLength; ++i) {
 		game_quad_t const id = p_quads[i];
 
-		for (game_size_t j = 0; j < p_count; ++j) {
+		for (game_t j = 0; j < p_count; ++j) {
 
 			ifu(p_ctx->active[j] == id) {
 
@@ -353,7 +353,7 @@ void gameQuadsDestroy(struct GameQuadsCtx *const p_ctx, game_quad_t const *p_qua
 
 	}
 
-	for (game_size_t i = 0; i < p_count; ++i) {
+	for (game_t i = 0; i < p_count; ++i) {
 
 		game_quad_t const id = p_quads[i];
 
@@ -374,10 +374,10 @@ void gameQuadsDestroy(struct GameQuadsCtx *const p_ctx, game_quad_t const *p_qua
 	}
 }
 
-game_quad_t* gameQuadsCreate(struct GameQuadsCtx *const p_ctx, game_quad_t *const p_out, game_size_t const p_many) {
+game_quad_t* gameQuadsCreate(struct GameQuadsCtx *const p_ctx, game_quad_t *const p_out, game_t const p_many) {
 	ifl(p_ctx->inactiveLength >= p_many) {
 
-		game_size_t const inactive = p_ctx->inactiveLength - 1;
+		game_t const inactive = p_ctx->inactiveLength - 1;
 		p_ctx->inactiveLength -= p_many;
 
 		for (size_t i = 0; i < p_many; ++i) {
@@ -389,7 +389,7 @@ game_quad_t* gameQuadsCreate(struct GameQuadsCtx *const p_ctx, game_quad_t *cons
 	}
  else {
 
-	 game_size_t const oldCount = p_ctx->activeLength;
+	 game_t const oldCount = p_ctx->activeLength;
 	 p_ctx->activeLength += p_many;
 	 p_ctx->activeCapacity *= 2;
 

@@ -1,6 +1,6 @@
 #pragma once
 #include <GLFW/glfw3.h>
-#include "ifs.h"
+#include "game/macros.h"
 
 extern int g_window1X;
 extern int g_window1Y;
