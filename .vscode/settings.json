@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "*.asm": "asm-intel-x86-generic",
+        "*.s": "asm-intel-x86-generic",
+        "*.ts": "typescript",
+        "*.luac": "lua",
+        "*.qss": "css",
+        "*.qrc": "xml",
+        "*.md": "markdown",
+        "main.h": "c",
+        "stb_image.h": "c",
+        "stdlib.h": "c"
+    }
+}
