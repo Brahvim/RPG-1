@@ -1,4 +1,4 @@
-#include "UtilGl.h"
+#include "Gl.h"
 
 GLenum g_errorGl;
 

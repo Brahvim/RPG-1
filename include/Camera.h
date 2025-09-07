@@ -1,0 +1,20 @@
+#pragma once
+#include "Sml.h"
+
+#define CAMERA_DEFAULT g_camera2d
+
+// Uhhh, not at ALL batch-friendly, but *hey*, how many cameras will you use at once in a single-screen game?:
+struct Camera {
+
+    void (*update)(void);
+    struct SmlMat44 *transform;
+
+};
+
+void cameraUpdate2d(void);
+
+extern struct Camera *g_camera;
+extern struct Camera g_camera2d;
+extern float g_cameraRotation2d;
+extern struct SmlVec2 g_cameraPosition2d;
+extern struct SmlMat44 g_cameraTransform2d;

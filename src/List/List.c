@@ -1,15 +1,17 @@
+#include "UtilMacros.h"
 #include <memory.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "List.h"
-#include "UtilMacros.h"
 
 struct List* listCreate(size_t const p_stride) {
-	struct List *list = calloc(1, sizeof(struct List));
+	struct List *list;
+	CALLOC_STRUCT(list);
 
-	list->size = 0;
-	list->capacity = 1;
+	CALLOC_ARRAY_STRIDE(list->data, 1, p_stride);
 	list->stride = p_stride;
-	list->data = calloc(1, p_stride);
+	list->capacity = 1;
+	list->size = 0;
 
 	return list;
 }

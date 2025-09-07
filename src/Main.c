@@ -1,14 +1,13 @@
 #include <stb/stb_image.h>
+#include <glad/gles2.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "UtilMacros.h"
 #include "Window1.h"
 #include "Assets.h"
-
-#include <glad/gles2.h>
-#include <stdio.h>
-
-#include "UtilGl.h"
+#include "Game.h"
+#include "Gl.h"
 
 int main(int const p_argCount, char const **p_argValues) {
 	glfwInit();
@@ -19,21 +18,19 @@ int main(int const p_argCount, char const **p_argValues) {
 
 	loadCwd();
 	loadTextures();
+	loadAtlases();
+
+	g_gameMillisSetup = glfwGetTime();
+	gameSetup();
 
 	while (likely(!glfwWindowShouldClose(g_window1))) {
 
 		glfwPollEvents();
+		++g_gameFrameCount;
 		window1UpdateVars();
+		g_gameMillisDraw = glfwGetTime();
 
-		static int frameCount = 0;
-		ERRGL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-
-		ERRGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
-		ERRGL(glClearColor(0.8f, 0.6f, 1.0f, 0.1f));
-		ERRGL(glClear(GL_COLOR_BUFFER_BIT));
-
-		++frameCount;
-
+		gameDraw();
 		glfwSwapBuffers(g_window1);
 
 	}
