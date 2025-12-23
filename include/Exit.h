@@ -1,0 +1,16 @@
+#pragma once
+
+enum ExitReason {
+
+	EXIT_REASON_SUCCESS,
+	EXIT_REASON_FAILURE,
+
+	EXIT_REASON_REALLOC,
+	EXIT_REASON_MALLOC,
+	EXIT_REASON_CALLOC
+
+	// ,EXIT_REASONS_TOTAL
+
+};
+
+void gameExit(enum ExitReason const reason);

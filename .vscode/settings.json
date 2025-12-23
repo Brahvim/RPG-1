@@ -17,6 +17,23 @@
         "assets.h": "c",
         "quad.h": "c",
         "utilgl.h": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "exit.h": "c",
+        "__config": "c",
+        "string.h": "c",
+        "wchar.h": "c",
+        "atomic": "c",
+        "compare": "c",
+        "optional": "c",
+        "future": "c",
+        "numeric": "c",
+        "sstream": "c",
+        "cmath": "c",
+        "chrono": "c",
+        "format": "c",
+        "__availability": "c",
+        "deque": "c",
+        "filesystem": "c",
+        "add.h": "c"
     }
 }

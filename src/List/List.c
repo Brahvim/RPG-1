@@ -22,7 +22,7 @@ struct List* listDelete(struct List *const p_list) {
 	return NULL;
 }
 
-char* listRead(struct List *p_list, size_t const p_id) {
+void* listRead(struct List *p_list, size_t const p_id) {
 	return &(p_list->data[p_id * p_list->stride]);
 }
 
@@ -43,7 +43,7 @@ struct List* listDouble(struct List *const p_list, size_t const p_count) {
 struct List* listExpand(struct List *const p_list, size_t const p_count) {
 	listDouble(p_list, p_count);
 	memset(
-		(char*) p_list->data + (p_list->size * p_list->stride),
+		p_list->data + (p_list->size * p_list->stride),
 		0,
 		(p_list->capacity - p_list->size) * p_list->stride
 	);
@@ -58,7 +58,7 @@ struct List* listWrite(struct List *const p_list, size_t const p_count, void *co
 	// 	(p_list->capacity - p_list->size) * p_list->stride
 	// );
 	memmove(
-		(char*) p_list->data + (p_list->size * p_list->stride),
+		p_list->data + (p_list->size * p_list->stride),
 		p_bytes,
 		p_count * p_list->stride
 	);

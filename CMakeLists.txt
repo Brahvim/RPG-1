@@ -9,7 +9,7 @@ set(CMAKE_C_FLAGS
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_EXPORT_COMPILE_COMMANDS true)
 
-file(GLOB SRC_LIST "./src/List/*.c")
+file(GLOB SRC_LIST "./src/List/*.c" "./src/Exit.c")
 file(GLOB SRC_MAIN "./src/*.c")
 
 include_directories("./include")

@@ -9,7 +9,23 @@
 #include "Game.h"
 #include "Gl.h"
 
+void myGpuCheck() {
+	char const *const envGpu = getenv("gpu");
+	char const gpu = envGpu ? envGpu[0] : 'i';
+
+	printf("Running on %cGPU!\n", gpu);
+
+	if (gpu == 'd') {
+
+		system("echo __NV_PRIME_RENDER_OFFLOAD=${__NV_PRIME_RENDER_OFFLOAD}");
+		system("echo __GLX_VENDOR_LIBRARY_NAME=${__GLX_VENDOR_LIBRARY_NAME}");
+
+	}
+}
+
 int main(int const p_argCount, char const **p_argValues) {
+	myGpuCheck();
+
 	glfwInit();
 	window1Create();
 	glfwSwapInterval(0);
@@ -17,6 +33,7 @@ int main(int const p_argCount, char const **p_argValues) {
 	gladLoadGLES2(glfwGetProcAddress);
 
 	loadCwd();
+	loadShaders();
 	loadTextures();
 	loadAtlases();
 
@@ -37,5 +54,6 @@ int main(int const p_argCount, char const **p_argValues) {
 
 	window1Delete();
 	glfwTerminate();
-	return EXIT_SUCCESS;
+
+	gameExit(EXIT_REASON_SUCCESS);
 }

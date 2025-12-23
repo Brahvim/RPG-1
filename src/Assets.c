@@ -18,7 +18,6 @@ int g_atlasTexturesDefault[] = {
 
 };
 
-struct Atlas *g_atlases[ATLAS_TOTAL];
 int *g_atlasTextures[ATLAS_TOTAL] = {
 
 	g_atlasTexturesDefault,
@@ -32,19 +31,57 @@ static inline void mapTextures(void) {
 	M(TEXTURE_NONE, "none.png");
 #undef M
 }
+
+static inline void mapShaders(void) {
+#define M(p_shader, p_vert, p_frag)\
+	g_shaderPathsVert[p_shader] = p_vert; g_shaderPathsFrag[p_shader] = p_frag;\
+	g_shaderPathLengthsVert[p_shader] = sizeof(p_vert); g_shaderPathLengthsFrag[p_shader] = sizeof(p_frag)
+	M(SHADER_QUADS, "quad.vert", "quad.frag");
+#undef M
+}
 #pragma endregion
 
 #pragma region Global!
+size_t g_cwdLen = 0;
 char g_cwd[FILENAME_MAX];
-size_t g_cwdLen = FILENAME_MAX;
+
+struct Atlas *g_atlases[ATLAS_TOTAL];
 
 pixel_t *g_textureData[TEXTURE_TOTAL];
 char const *g_texturePaths[TEXTURE_TOTAL];
 struct Rect g_textureRects[TEXTURE_TOTAL];
 size_t g_texturePathLengths[TEXTURE_TOTAL];
+
+GLuint g_shaderGlIds[SHADER_TOTAL];
+char *g_shaderPathsVert[SHADER_TOTAL];
+char *g_shaderPathsFrag[SHADER_TOTAL];
+GLuint g_shaderGlIdsVert[SHADER_TOTAL];
+GLuint g_shaderGlIdsFrag[SHADER_TOTAL];
+GLchar *g_shaderSourcesVert[SHADER_TOTAL];
+GLchar *g_shaderSourcesFrag[SHADER_TOTAL];
+size_t g_shaderPathLengthsVert[SHADER_TOTAL];
+size_t g_shaderPathLengthsFrag[SHADER_TOTAL];
+GLint g_shaderSourceLengthsVert[SHADER_TOTAL];
+GLint g_shaderSourceLengthsFrag[SHADER_TOTAL];
 #pragma endregion
 
 #pragma region Static.
+static void loadShadersFromFiles(char *p_paths[SHADER_TOTAL], size_t p_pathLengths[SHADER_TOTAL], GLchar *p_sources[SHADER_TOTAL]) {
+	for (size_t i = 0; i < SHADER_TOTAL; i++) {
+
+		char fpath[FILENAME_MAX];
+		char fdir[] = "/shaders/";
+		char const *fname = p_paths[i];
+
+		memset(fpath, 0, FILENAME_MAX);
+		strncat(fpath, g_cwd, sizeof(char) * g_cwdLen);
+		strncat(fpath, fdir, sizeof(char) * sizeof(fdir));
+		strncat(fpath, fname, sizeof(char) * p_pathLengths[i]);
+		loadShaderSource(&p_sources[i], fpath);
+
+	}
+}
+
 static int cmpStbrpRectId(void const *p_first, void const *p_second) {
 	struct stbrp_rect const *second = p_second;
 	struct stbrp_rect const *first = p_first;
@@ -104,7 +141,7 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	// Sort rects based on `enum Texture`:
 	// qsort(rects, sizeof(stbrp_rect), atlas->count, cmpStbrpRectId);
 
-	CALLOC_ARRAY(atlas->pixels, 4 * atlas->height * atlas->width);
+	CALLOC_ARRAY(atlas->pixels, atlas->height * atlas->width);
 	stbrp_init_target(&ctx, width, height, nodes, width);
 
 	int const packed = stbrp_pack_rects(&ctx, rects, atlas->count);
@@ -120,16 +157,17 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	// Blit packed textures into atlas:
 	for (size_t i = 0; i < atlas->count; ++i) {
 
-		int const h = rects[i].h;
+		pixel_t const *const tex = g_textureData[rects[i].id];
+		int const x = rects[i].x;
+		int const y = rects[i].y;
 		int const w = rects[i].w;
-		int const t = rects[i].id;
-		pixel_t const *const tex = g_textureData[t];
+		int const h = rects[i].h;
 
-		for (int row = 0; row < h; ++row) {
+		for (int row = 0; row < y; ++row) {
 
-			pixel_t *dst = atlas->pixels + (row * width + w);
-			pixel_t const *const src = tex + (row * w);
-			memcpy(dst, src, w * sizeof(pixel_t));
+			pixel_t *dst = atlas->pixels + (width * (y + row) + x);
+			pixel_t const *const src = tex + (w * row);
+			memcpy(dst, src, x * sizeof(pixel_t));
 
 		}
 
@@ -160,13 +198,13 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 
 	ERRGL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, atlas->width, atlas->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlas->pixels));
-	// ERRGL(glGenerateMipmap(GL_TEXTURE_2D)); // Not *quite* 3D, are we?!
-	// ERRGL(glBindTexture(GL_TEXTURE_2D, 0)); // Cleaning up? Us? HAH!
+	ERRGL(glGenerateMipmap(GL_TEXTURE_2D)); // Not *quite* 3D, are we?!
+	ERRGL(glBindTexture(GL_TEXTURE_2D, 0)); // Cleaning up? Us? HAH!
 
 	return atlas;
 }
 
-GLint loadShader(GLchar const **p_buffer, char const *p_path) {
+GLint loadShaderSource(GLchar **p_buffer, char const *p_path) {
 	FILE *file = fopen(p_path, "rb");
 
 	if (unlikely(!file)) {
@@ -247,6 +285,55 @@ void loadAtlases(void) {
 #undef M
 }
 
+void loadShaders(void) {
+	mapShaders();
+	loadShadersFromFiles(g_shaderPathsVert, g_shaderPathLengthsVert, g_shaderSourcesVert);
+	loadShadersFromFiles(g_shaderPathsFrag, g_shaderPathLengthsFrag, g_shaderSourcesFrag);
+
+#define FERR(x) F(ERRGL(x))
+#define F(x) for (size_t i = 0; i < SHADER_TOTAL; i++) x
+	F(g_shaderSourceLengthsVert[i] = strlen(g_shaderSourcesVert[i]));
+	F(g_shaderSourceLengthsFrag[i] = strlen(g_shaderSourcesFrag[i]));
+
+	FERR(g_shaderGlIds[i] = glCreateProgram());
+	FERR(g_shaderGlIdsVert[i] = glCreateShader(GL_VERTEX_SHADER));
+	FERR(g_shaderGlIdsFrag[i] = glCreateShader(GL_FRAGMENT_SHADER));
+
+	FERR(glShaderSource(g_shaderGlIdsFrag[i], 1, (const GLchar *const []) { g_shaderSourcesFrag[i] }, g_shaderSourceLengthsFrag + i));
+	FERR(glShaderSource(g_shaderGlIdsVert[i], 1, (const GLchar *const []) { g_shaderSourcesVert[i] }, g_shaderSourceLengthsVert + i));
+
+	FERR(glCompileShader(g_shaderGlIdsVert[i]));
+	FERR(glCompileShader(g_shaderGlIdsFrag[i]));
+
+	FERR(glAttachShader(g_shaderGlIds[i], g_shaderGlIdsVert[i]));
+	FERR(glAttachShader(g_shaderGlIds[i], g_shaderGlIdsFrag[i]));
+
+	FERR(glLinkProgram(g_shaderGlIds[i]));
+#undef F
+#undef FERR
+
+	for (size_t i = 0; i < SHADER_TOTAL; i++) {
+#define L 16384
+
+		GLchar logBuf[L];
+		GLsizei logLen = L;
+
+		memset(logBuf, 0, logLen);
+		ERRGL(glGetShaderInfoLog(g_shaderGlIdsFrag[i], L, &logLen, logBuf));
+		if (logLen)	printf("Fragment shader `%d` log: %s.\n", i, logBuf);
+
+		memset(logBuf, 0, logLen);
+		ERRGL(glGetShaderInfoLog(g_shaderGlIdsVert[i], L, &logLen, logBuf));
+		if (logLen)	printf("Vertex shader `%d` log: %s.\n", i, logBuf);
+
+		memset(logBuf, 0, logLen);
+		ERRGL(glGetProgramInfoLog(g_shaderGlIds[i], L, &logLen, logBuf));
+		if (logLen)	printf("Program `%d` log: %s.\n", i, logBuf);
+
+#undef L
+	}
+}
+
 void loadCwd(void) {
 	if (likely(getcwd(g_cwd, sizeof(g_cwd)) != NULL)) {
 
@@ -257,7 +344,7 @@ void loadCwd(void) {
 	else {
 
 		perror("Failed to `getcwd()` the current working directory.\n");
-		exit(EXIT_FAILURE);
+		gameExit(EXIT_FAILURE);
 
 	}
 }

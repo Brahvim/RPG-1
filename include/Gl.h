@@ -1,10 +1,11 @@
 #pragma once
+#include "UtilMacros.h"
 #include <glad/gles2.h>
 
 extern GLenum g_errorGl;
 
 #define ERRGL(x) x;\
-if ((g_errorGl = glGetError()) != GL_NO_ERROR) {\
+if (likely((g_errorGl = glGetError()) != GL_NO_ERROR)) {\
 	printf("OpenGL error `%d` (%s), %s:%d.\n", g_errorGl, glGetErrorString(g_errorGl), __FILE__, __LINE__);\
 }\
 

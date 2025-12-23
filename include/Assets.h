@@ -31,7 +31,7 @@ enum Flip {
 	FLIP_NONE,
 	FLIP_VERTICAL,
 	FLIP_HORIZONTAL,
-	FLIP_ON_BOTH_AXES,
+	FLIP_ON_BOTH_AXES
 
 };
 
@@ -83,4 +83,34 @@ void loadAtlases(void);
 extern int *g_atlasTextures[ATLAS_TOTAL];
 extern struct Atlas *g_atlases[ATLAS_TOTAL];
 struct Atlas* atlasCreate(size_t const textureCount, int const *const textures);
+#pragma endregion
+
+#pragma region Shaders.
+enum Shader {
+
+	SHADER_QUADS,
+
+	SHADER_TOTAL
+
+};
+
+void loadShaders(void);
+GLint loadShaderSource(GLchar **buffer, char const *path);
+
+extern GLuint g_shaderGlIds[SHADER_TOTAL];
+
+extern char *g_shaderPathsVert[SHADER_TOTAL];
+extern char *g_shaderPathsFrag[SHADER_TOTAL];
+
+extern GLuint g_shaderGlIdsVert[SHADER_TOTAL];
+extern GLuint g_shaderGlIdsFrag[SHADER_TOTAL];
+
+extern GLchar *g_shaderSourcesVert[SHADER_TOTAL];
+extern GLchar *g_shaderSourcesFrag[SHADER_TOTAL];
+
+extern size_t g_shaderPathLengthsVert[SHADER_TOTAL];
+extern size_t g_shaderPathLengthsFrag[SHADER_TOTAL];
+
+extern GLint g_shaderSourceLengthsVert[SHADER_TOTAL];
+extern GLint g_shaderSourceLengthsFrag[SHADER_TOTAL];
 #pragma endregion

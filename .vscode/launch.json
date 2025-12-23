@@ -8,7 +8,12 @@
 			"args": [],
 			"MIMode": "gdb",
 			"type": "cppdbg",
-			"environment": [],
+			"environment": [
+				{
+					"name": "gpu",
+					"value": "i",
+				}
+			],
 			"setupCommands": [
 				{
 					"description": "Enable pretty-printing for gdb",
@@ -23,9 +28,46 @@
 			],
 			"request": "launch",
 			"stopAtEntry": false,
-			"name": "(gdb) Launch",
-			"cwd": "${fileDirname}",
+			"name": "Launch On iGPU",
 			"externalConsole": false,
+			"cwd": "${workspaceFolder}",
+			"program": "${workspaceFolder}/Rpg1",
+		},
+		{
+			"args": [],
+			"MIMode": "gdb",
+			"type": "cppdbg",
+			"environment": [
+				{
+					"name": "gpu",
+					"value": "d",
+				},
+				{
+					"value": "1",
+					"name": "__NV_PRIME_RENDER_OFFLOAD",
+				},
+				{
+					"value": "nvidia",
+					"name": "__GLX_VENDOR_LIBRARY_NAME",
+				},
+			],
+			"setupCommands": [
+				{
+					"description": "Enable pretty-printing for gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true,
+				},
+				{
+					"description": "Set Disassembly Flavor to Intel",
+					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true,
+				},
+			],
+			"request": "launch",
+			"stopAtEntry": false,
+			"name": "Launch On dGPU",
+			"externalConsole": false,
+			"cwd": "${workspaceFolder}",
 			"program": "${workspaceFolder}/Rpg1",
 		},
 	],

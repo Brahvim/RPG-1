@@ -1,0 +1,121 @@
+# .clang-format inferred with clang-unformat (https://www.github.com/alandefreitas/clang-unformat)
+Language: Cpp                                      # single option
+BasedOnStyle: LLVM
+AccessModifierOffset: -8                           # did not affect the output
+AlignAfterOpenBracket: Align                       # did not affect the output
+AlignArrayOfStructures: Right                      # Using default value Right
+AlignConsecutiveAssignments: Consecutive           # Using default value Consecutive
+AlignConsecutiveBitFields: Consecutive             # Using default value Consecutive
+AlignConsecutiveDeclarations: Consecutive          # Using default value Consecutive
+AlignConsecutiveMacros: Consecutive                # Using default value Consecutive
+AlignEscapedNewlines: Right                        # Using default value Right
+AlignOperands: DontAlign                           # did not affect the output
+AlignTrailingComments: true                        # did not affect the output
+AllowAllArgumentsOnNextLine: true                  # did not affect the output
+AllowAllParametersOfDeclarationOnNextLine: true    # did not affect the output
+AllowShortBlocksOnASingleLine: Never               # Using default value Never
+AllowShortCaseLabelsOnASingleLine: true            # did not affect the output
+AllowShortEnumsOnASingleLine: true                 # did not affect the output
+AllowShortFunctionsOnASingleLine: None             # Using default value None
+AllowShortIfStatementsOnASingleLine: Never         # Using default value Never
+AllowShortLambdasOnASingleLine: None               # Using default value None
+AllowShortLoopsOnASingleLine: true                 # did not affect the output
+AlwaysBreakAfterDefinitionReturnType: All          # Using default value All
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: true            # did not affect the output
+AlwaysBreakTemplateDeclarations: Yes               # Using default value Yes
+BinPackArguments: true                             # did not affect the output
+BinPackParameters: true                            # did not affect the output
+BitFieldColonSpacing: Both                         # did not affect the output
+BreakBeforeBraces: Custom                          # did not affect the output
+BraceWrapping:
+  AfterCaseLabel: true                             # did not affect the output
+  AfterClass: true                                 # did not affect the output
+  AfterControlStatement: Never                     # did not affect the output
+  AfterEnum: true                                  # did not affect the output
+  AfterFunction: true                              # did not affect the output
+  AfterNamespace: true                             # did not affect the output
+  AfterObjCDeclaration: true                       # did not affect the output
+  AfterStruct: true                                # did not affect the output
+  AfterUnion: true                                 # did not affect the output
+  AfterExternBlock: true                           # did not affect the output
+  BeforeCatch: true                                # did not affect the output
+  BeforeElse: true                                 # did not affect the output
+  BeforeLambdaBody: true                           # did not affect the output
+  BeforeWhile: true                                # did not affect the output
+  IndentBraces: true                               # did not affect the output
+  SplitEmptyFunction: true                         # did not affect the output
+  SplitEmptyRecord: true                           # did not affect the output
+  SplitEmptyNamespace: true                        # did not affect the output
+BreakAfterJavaFieldAnnotations: true               # did not affect the output
+BreakBeforeBinaryOperators: All                    # Using default value All
+BreakBeforeConceptDeclarations: true               # did not affect the output
+BreakBeforeTernaryOperators: true                  # did not affect the output
+BreakConstructorInitializers: BeforeColon          # did not affect the output
+BreakInheritanceList: BeforeColon                  # did not affect the output
+BreakStringLiterals: true                          # did not affect the output
+ColumnLimit: 40                                    # did not affect the output
+CompactNamespaces: true                            # did not affect the output
+ConstructorInitializerIndentWidth: 0               # did not affect the output
+ContinuationIndentWidth: 0                         # did not affect the output
+Cpp11BracedListStyle: true                         # did not affect the output
+DeriveLineEnding: true                             # did not affect the output
+DerivePointerAlignment: true                       # did not affect the output
+EmptyLineAfterAccessModifier: Always               # Using default value Always
+EmptyLineBeforeAccessModifier: Always              # Using default value Always
+ExperimentalAutoDetectBinPacking: true             # did not affect the output
+FixNamespaceComments: true                         # did not affect the output
+IncludeBlocks: Preserve                            # did not affect the output
+IndentAccessModifiers: true                        # did not affect the output
+IndentCaseBlocks: true                             # did not affect the output
+IndentCaseLabels: true                             # did not affect the output
+IndentExternBlock: AfterExternBlock                # did not affect the output
+IndentGotoLabels: true                             # did not affect the output
+IndentPPDirectives: None                           # did not affect the output
+IndentRequires: true                               # did not affect the output
+IndentWidth: 0                                     # did not affect the output
+IndentWrappedFunctionNames: true                   # did not affect the output
+InsertTrailingCommas: None                         # did not affect the output
+KeepEmptyLinesAtTheStartOfBlocks: true             # did not affect the output
+LambdaBodyIndentation: Signature                   # did not affect the output
+MaxEmptyLinesToKeep: 0                             # did not affect the output
+NamespaceIndentation: None                         # did not affect the output
+PenaltyBreakAssignment: 2                          # did not affect the output
+PenaltyBreakBeforeFirstCallParameter: 2            # did not affect the output
+PenaltyBreakComment: 2                             # did not affect the output
+PenaltyBreakFirstLessLess: 2                       # did not affect the output
+PenaltyBreakString: 2                              # did not affect the output
+PenaltyBreakTemplateDeclaration: 2                 # did not affect the output
+PenaltyExcessCharacter: 2                          # did not affect the output
+PenaltyIndentedWhitespace: 2                       # did not affect the output
+PenaltyReturnTypeOnItsOwnLine: 2                   # did not affect the output
+PointerAlignment: Left                             # did not affect the output
+ReferenceAlignment: Pointer                        # did not affect the output
+ReflowComments: true                               # did not affect the output
+ShortNamespaceLines: 0                             # did not affect the output
+SortIncludes: Never                                # did not affect the output
+SortUsingDeclarations: true                        # did not affect the output
+SpaceAfterCStyleCast: true                         # did not affect the output
+SpaceAfterLogicalNot: true                         # did not affect the output
+SpaceAfterTemplateKeyword: true                    # did not affect the output
+SpaceAroundPointerQualifiers: Default              # did not affect the output
+SpaceBeforeAssignmentOperators: true               # did not affect the output
+SpaceBeforeCaseColon: true                         # did not affect the output
+SpaceBeforeCpp11BracedList: true                   # did not affect the output
+SpaceBeforeCtorInitializerColon: true              # did not affect the output
+SpaceBeforeInheritanceColon: true                  # did not affect the output
+SpaceBeforeParens: Never
+SpaceBeforeRangeBasedForLoopColon: true            # did not affect the output
+SpaceBeforeSquareBrackets: true                    # did not affect the output
+SpaceInEmptyBlock: true                            # did not affect the output
+SpaceInEmptyParentheses: true                      # did not affect the output
+SpacesBeforeTrailingComments: 0                    # did not affect the output
+SpacesInAngles: Never                              # did not affect the output
+SpacesInCStyleCastParentheses: true                # did not affect the output
+SpacesInConditionalStatement: true                 # did not affect the output
+SpacesInContainerLiterals: true                    # did not affect the output
+SpacesInParentheses: false
+Standard: c++03                                    # did not affect the output
+TabWidth: 0                                        # did not affect the output
+UseCRLF: true                                      # did not affect the output
+UseTab: Never                                      # did not affect the output
