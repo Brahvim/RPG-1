@@ -35,7 +35,7 @@ int main(int const p_argCount, char const **p_argValues) {
 	loadCwd();
 	loadShaders();
 	loadTextures();
-	loadAtlases();
+	loadMappedAtlases();
 
 	g_gameMillisSetup = glfwGetTime();
 	gameSetup();

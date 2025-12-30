@@ -38,8 +38,8 @@ enum Flip {
 enum TextureName {
 
 	TEXTURE_NONE,
+	TEXTURE_TEST0,
 	TEXTURE_TEST1,
-	TEXTURE_TEST2,
 
 	TEXTURE_TOTAL
 
@@ -79,7 +79,7 @@ enum AtlasName {
 
 };
 
-void loadAtlases(void);
+void loadMappedAtlases(void);
 extern int *g_atlasTextures[ATLAS_TOTAL];
 extern struct Atlas *g_atlases[ATLAS_TOTAL];
 struct Atlas* atlasCreate(size_t const textureCount, int const *const textures);

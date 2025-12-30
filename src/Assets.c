@@ -12,8 +12,8 @@
 #pragma region Maps.
 int g_atlasTexturesDefault[] = {
 
-	TEXTURE_TEST2,
 	TEXTURE_TEST1,
+	TEXTURE_TEST0,
 	TEXTURE_NONE,
 
 };
@@ -26,8 +26,8 @@ int *g_atlasTextures[ATLAS_TOTAL] = {
 
 static inline void mapTextures(void) {
 #define M(p_texture, p_path) g_texturePaths[p_texture] = p_path; g_texturePathLengths[p_texture] = sizeof(p_path)
-	M(TEXTURE_TEST2, "test1.png");
-	M(TEXTURE_TEST1, "test0.png");
+	M(TEXTURE_TEST1, "test1.png");
+	M(TEXTURE_TEST0, "test0.png");
 	M(TEXTURE_NONE, "none.png");
 #undef M
 }
@@ -120,13 +120,9 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	// Convert data in `Rect`-form to local `stbrp_rect`s:
 	for (size_t i = 0; i < atlas->count; ++i) {
 
-		int const w = g_textureRects[i].w;
-		int const h = g_textureRects[i].h;
-		int const t = p_textures[i];
-
-		rects[i].id = t;
-		rects[i].w = w;
-		rects[i].h = h;
+		rects[i].w = g_textureRects[i].w;
+		rects[i].h = g_textureRects[i].h;
+		rects[i].id = p_textures[i];
 
 	}
 
@@ -141,66 +137,83 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	// Sort rects based on `enum Texture`:
 	// qsort(rects, sizeof(stbrp_rect), atlas->count, cmpStbrpRectId);
 
-	CALLOC_ARRAY(atlas->pixels, atlas->height * atlas->width);
+	// CALLOC_ARRAY(atlas->pixels, atlas->height * atlas->width);
 	stbrp_init_target(&ctx, width, height, nodes, width);
 
 	int const packed = stbrp_pack_rects(&ctx, rects, atlas->count);
+	free(nodes);
 
 	if (!packed) {
 
 		puts("Atlas packing failed!");
+		free(atlas->rects);
+		free(atlas);
+		free(rects);
+		return NULL;
 
 	}
 
-	free(nodes);
+	ERRGL(glActiveTexture(GL_TEXTURE0));
+	ERRGL(glGenTextures(1, &atlas->glTextureId));
+	ERRGL(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
+	ERRGL(glBindTexture(GL_TEXTURE_2D, atlas->glTextureId));
+
+	// ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+	// ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+	// ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+	// ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
+
+	ERRGL(glTexImage2D(
+		GL_TEXTURE_2D,
+		0, GL_RGBA8,
+		atlas->width, atlas->height,
+		0, GL_RGBA,
+		GL_UNSIGNED_BYTE,
+		NULL
+	));
+
+	puts("...In some atlas:");
 
 	// Blit packed textures into atlas:
 	for (size_t i = 0; i < atlas->count; ++i) {
 
-		pixel_t const *const tex = g_textureData[rects[i].id];
 		int const x = rects[i].x;
 		int const y = rects[i].y;
 		int const w = rects[i].w;
 		int const h = rects[i].h;
+		int const texid = rects[i].id;
+		pixel_t const *const texpix = g_textureData[texid];
 
-		for (int row = 0; row < y; ++row) {
+		printf(
+			"Placed `%s`, width `%d`, height `%d` at position `(%d, %d)`.\n",
+			g_texturePaths[texid], w, h, x, y
+		);
 
-			pixel_t *dst = atlas->pixels + (width * (y + row) + x);
-			pixel_t const *const src = tex + (w * row);
-			memcpy(dst, src, x * sizeof(pixel_t));
-
-		}
+		ERRGL(glTexSubImage2D(
+			GL_TEXTURE_2D, 0,
+			x, y, w, h, GL_RGBA,
+			GL_UNSIGNED_BYTE, texpix
+		));
 
 	}
+
+	// ERRGL(glGenerateMipmap(GL_TEXTURE_2D)); 
+	ERRGL(glBindTexture(GL_TEXTURE_2D, 0)); // Cleaning up? Us? HAH!
 
 	// Change back to the `struct Rect` format:
 	for (size_t i = 0; i < atlas->count; ++i) {
 
-		struct stbrp_rect const *const r2 = rects + i;
-		struct Rect *r1 = atlas->rects + i;
+		struct stbrp_rect const *const rs = rects + i;
+		struct Rect *ra = atlas->rects + i;
 
-		r1->x = r2->x;
-		r1->y = r2->y;
-		r1->w = r2->w;
-		r1->h = r2->h;
+		ra->x = rs->x;
+		ra->y = rs->y;
+		ra->w = rs->w;
+		ra->h = rs->h;
 
 	}
 
 	free(rects);
-
-	ERRGL(glActiveTexture(GL_TEXTURE0));
-	ERRGL(glGenTextures(1, &atlas->glTextureId));
-	ERRGL(glBindTexture(GL_TEXTURE_2D, atlas->glTextureId));
-
-	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-
-	ERRGL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, atlas->width, atlas->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlas->pixels));
-	ERRGL(glGenerateMipmap(GL_TEXTURE_2D)); // Not *quite* 3D, are we?!
-	ERRGL(glBindTexture(GL_TEXTURE_2D, 0)); // Cleaning up? Us? HAH!
-
 	return atlas;
 }
 
@@ -278,13 +291,6 @@ void loadTextures(void) {
 	puts("Textures ready to go!");
 }
 
-void loadAtlases(void) {
-#define M(p_enum, p_var) g_atlases[ATLAS_DEFAULT] = atlasCreate(sizeof(p_var) / sizeof(p_var[0]), &(*g_atlasTextures[p_enum]));
-	// #define M(p_enum, p_var) g_atlases[p_enum] = atlasCreate(sizeof(p_var) / sizeof(p_var[0]), g_atlasTextures[p_enum])
-	M(ATLAS_DEFAULT, g_atlasTexturesDefault);
-#undef M
-}
-
 void loadShaders(void) {
 	mapShaders();
 	loadShadersFromFiles(g_shaderPathsVert, g_shaderPathLengthsVert, g_shaderSourcesVert);
@@ -332,6 +338,12 @@ void loadShaders(void) {
 
 #undef L
 	}
+}
+
+void loadMappedAtlases(void) {
+#define M(p_enum, p_var) g_atlases[ATLAS_DEFAULT] = atlasCreate(sizeof(p_var) / sizeof(p_var[0]), &(*g_atlasTextures[p_enum]));
+	M(ATLAS_DEFAULT, g_atlasTexturesDefault);
+#undef M
 }
 
 void loadCwd(void) {
