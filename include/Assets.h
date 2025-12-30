@@ -17,12 +17,10 @@ void loadCwd(void);
 #pragma region Textures.
 struct Rect {
 
-	union {
-
-		int list[4];
-		int x, y, w, h;
-
-	};
+	int x;
+	int y;
+	int w;
+	int h;
 
 };
 
@@ -86,7 +84,7 @@ struct Atlas* atlasCreate(size_t const textureCount, int const *const textures);
 #pragma endregion
 
 #pragma region Shaders.
-enum Shader {
+enum ShaderName {
 
 	SHADER_QUADS,
 
@@ -95,7 +93,7 @@ enum Shader {
 };
 
 void loadShaders(void);
-GLint loadShaderSource(GLchar **buffer, char const *path);
+GLint loadShaderSourceFromPath(GLchar **buffer, char const *path);
 
 extern GLuint g_shaderGlIds[SHADER_TOTAL];
 

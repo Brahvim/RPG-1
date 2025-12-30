@@ -66,8 +66,8 @@ GLint g_shaderSourceLengthsFrag[SHADER_TOTAL];
 #pragma endregion
 
 #pragma region Static.
-static void loadShadersFromFiles(char *p_paths[SHADER_TOTAL], size_t p_pathLengths[SHADER_TOTAL], GLchar *p_sources[SHADER_TOTAL]) {
-	for (size_t i = 0; i < SHADER_TOTAL; i++) {
+static void loadShaderArrays(char *p_paths[SHADER_TOTAL], size_t p_pathLengths[SHADER_TOTAL], GLchar *p_sources[SHADER_TOTAL]) {
+	for (enum ShaderName i = 0; i < SHADER_TOTAL; i++) {
 
 		char fpath[FILENAME_MAX];
 		char fdir[] = "/shaders/";
@@ -77,7 +77,7 @@ static void loadShadersFromFiles(char *p_paths[SHADER_TOTAL], size_t p_pathLengt
 		strncat(fpath, g_cwd, sizeof(char) * g_cwdLen);
 		strncat(fpath, fdir, sizeof(char) * sizeof(fdir));
 		strncat(fpath, fname, sizeof(char) * p_pathLengths[i]);
-		loadShaderSource(&p_sources[i], fpath);
+		loadShaderSourceFromPath(&p_sources[i], fpath);
 
 	}
 }
@@ -101,11 +101,17 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	CALLOC_ARRAY(rects, atlas->count);
 
 	// Find the highest width as well as the sum of heights:
+	// puts("\nIn the loop that finds the highest width as well as the sum of heights:");
 	for (size_t i = 0; i < atlas->count; ++i) {
 
-		int const w = g_textureRects[i].w;
-		int const h = g_textureRects[i].h;
 		int const t = p_textures[i];
+		int const w = g_textureRects[t].w;
+		int const h = g_textureRects[t].h;
+
+		// printf(
+		// 	"`%s`, width `%d`, height `%d`.\n",
+		// 	g_texturePaths[t], w, h
+		// );
 
 		if (w > width) {
 
@@ -117,12 +123,22 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 
 	}
 
+	// puts("\nIn the loop that converts data in `Rect`-form to local `stbrp_rect`s:");
 	// Convert data in `Rect`-form to local `stbrp_rect`s:
 	for (size_t i = 0; i < atlas->count; ++i) {
 
-		rects[i].w = g_textureRects[i].w;
-		rects[i].h = g_textureRects[i].h;
-		rects[i].id = p_textures[i];
+		int const t = p_textures[i];
+		int const w = g_textureRects[t].w;
+		int const h = g_textureRects[t].h;
+
+		// printf(
+		// 	"`%s`, width `%d`, height `%d`.\n",
+		// 	g_texturePaths[t], w, h
+		// );
+
+		rects[i].id = t;
+		rects[i].w = w;
+		rects[i].h = h;
 
 	}
 
@@ -134,11 +150,9 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 
 	CALLOC_ARRAY(nodes, width);
 
-	// Sort rects based on `enum Texture`:
-	// qsort(rects, sizeof(stbrp_rect), atlas->count, cmpStbrpRectId);
-
-	// CALLOC_ARRAY(atlas->pixels, atlas->height * atlas->width);
 	stbrp_init_target(&ctx, width, height, nodes, width);
+	// CALLOC_ARRAY(atlas->pixels, atlas->height * atlas->width);
+	// qsort(rects, sizeof(stbrp_rect), atlas->count, cmpStbrpRectId); // `TextureName`-sort.
 
 	int const packed = stbrp_pack_rects(&ctx, rects, atlas->count);
 	free(nodes);
@@ -158,10 +172,10 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	ERRGL(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
 	ERRGL(glBindTexture(GL_TEXTURE_2D, atlas->glTextureId));
 
-	// ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-	// ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-	// ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-	// ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
+	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
 
 	ERRGL(glTexImage2D(
 		GL_TEXTURE_2D,
@@ -172,32 +186,34 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 		NULL
 	));
 
-	puts("...In some atlas:");
+	puts("\n...In some atlas:");
 
 	// Blit packed textures into atlas:
 	for (size_t i = 0; i < atlas->count; ++i) {
+
+		int const texid = rects[i].id;
+		pixel_t const *const texpix = g_textureData[texid];
 
 		int const x = rects[i].x;
 		int const y = rects[i].y;
 		int const w = rects[i].w;
 		int const h = rects[i].h;
-		int const texid = rects[i].id;
-		pixel_t const *const texpix = g_textureData[texid];
+		int const glY = atlas->height - (y + h); // Feel free *not* to invert the placement of all sprites...!
 
-		printf(
-			"Placed `%s`, width `%d`, height `%d` at position `(%d, %d)`.\n",
-			g_texturePaths[texid], w, h, x, y
-		);
+		// printf(
+		// 	"Placed `%s`, width `%d`, height `%d` at position `(%d, %d)`.\n",
+		// 	g_texturePaths[texid], w, h, x, y
+		// );
 
 		ERRGL(glTexSubImage2D(
 			GL_TEXTURE_2D, 0,
-			x, y, w, h, GL_RGBA,
+			x, glY, w, h, GL_RGBA,
 			GL_UNSIGNED_BYTE, texpix
 		));
 
 	}
 
-	// ERRGL(glGenerateMipmap(GL_TEXTURE_2D)); 
+	ERRGL(glGenerateMipmap(GL_TEXTURE_2D));
 	ERRGL(glBindTexture(GL_TEXTURE_2D, 0)); // Cleaning up? Us? HAH!
 
 	// Change back to the `struct Rect` format:
@@ -217,7 +233,7 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	return atlas;
 }
 
-GLint loadShaderSource(GLchar **p_buffer, char const *p_path) {
+GLint loadShaderSourceFromPath(GLchar **p_buffer, char const *p_path) {
 	FILE *file = fopen(p_path, "rb");
 
 	if (unlikely(!file)) {
@@ -255,6 +271,12 @@ GLint loadShaderSource(GLchar **p_buffer, char const *p_path) {
 	return length;
 }
 
+void loadMappedAtlases(void) {
+#define M(p_enum, p_var) g_atlases[ATLAS_DEFAULT] = atlasCreate(sizeof(p_var) / sizeof(p_var[0]), &(*g_atlasTextures[p_enum]));
+	M(ATLAS_DEFAULT, g_atlasTexturesDefault);
+#undef M
+}
+
 void loadTextures(void) {
 	stbi_set_flip_vertically_on_load(1);
 	mapTextures();
@@ -266,9 +288,17 @@ void loadTextures(void) {
 		char const *fname = g_texturePaths[i];
 
 		memset(fpath, 0, FILENAME_MAX);
-		strncat(fpath, g_cwd, sizeof(char) * g_cwdLen);
-		strncat(fpath, fdir, sizeof(char) * sizeof(fdir));
-		strncat(fpath, fname, sizeof(char) * strlen(fname));
+		// Added `strlen()` safety is good...!:
+		strncat(fpath, g_cwd, g_cwdLen * sizeof(char));
+		strncat(fpath, fdir, strlen(fdir) * sizeof(char));
+		strncat(fpath, fname, strlen(fname) * sizeof(char));
+
+		// THIS helped discover the whole `union` drama inside `struct Rect`.
+		// NEVER rely on `union` abuse. NEVER!!!
+
+		// int w, h, c;
+		// stbi_info(fpath, &w, &h, &c);
+		// printf("`stbi_info()`: `%s`, width `%d`, height `%d`, channels-count `%d`.\n", fpath, w, h, c);
 
 		g_textureData[i] = stbi_load(fpath, &g_textureRects[i].w, &g_textureRects[i].h, NULL, STBI_rgb_alpha);
 		printf("Attempted loading `%s`, width `%d`, height `%d`...\n", g_texturePaths[i], g_textureRects[i].w, g_textureRects[i].h);
@@ -293,8 +323,8 @@ void loadTextures(void) {
 
 void loadShaders(void) {
 	mapShaders();
-	loadShadersFromFiles(g_shaderPathsVert, g_shaderPathLengthsVert, g_shaderSourcesVert);
-	loadShadersFromFiles(g_shaderPathsFrag, g_shaderPathLengthsFrag, g_shaderSourcesFrag);
+	loadShaderArrays(g_shaderPathsVert, g_shaderPathLengthsVert, g_shaderSourcesVert);
+	loadShaderArrays(g_shaderPathsFrag, g_shaderPathLengthsFrag, g_shaderSourcesFrag);
 
 #define FERR(x) F(ERRGL(x))
 #define F(x) for (size_t i = 0; i < SHADER_TOTAL; i++) x
@@ -338,12 +368,6 @@ void loadShaders(void) {
 
 #undef L
 	}
-}
-
-void loadMappedAtlases(void) {
-#define M(p_enum, p_var) g_atlases[ATLAS_DEFAULT] = atlasCreate(sizeof(p_var) / sizeof(p_var[0]), &(*g_atlasTextures[p_enum]));
-	M(ATLAS_DEFAULT, g_atlasTexturesDefault);
-#undef M
 }
 
 void loadCwd(void) {
