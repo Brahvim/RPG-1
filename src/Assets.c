@@ -169,7 +169,6 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 
 	ERRGL(glActiveTexture(GL_TEXTURE0));
 	ERRGL(glGenTextures(1, &atlas->glTextureId));
-	ERRGL(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
 	ERRGL(glBindTexture(GL_TEXTURE_2D, atlas->glTextureId));
 
 	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));

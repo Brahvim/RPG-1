@@ -111,6 +111,7 @@ void quadDraw(struct QuadCtx const *const p_ctx) {
 		p_ctx->quads->data,
 		GL_STREAM_DRAW
 	));
+
 	ERRGL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, p_ctx->quads->size));
 
 	// for (size_t i = 0; i < p_ctx->quads->size; i++)

@@ -54,18 +54,17 @@ extern size_t g_texturePathLengths[TEXTURE_TOTAL];
 #pragma region Atlases.
 struct Atlas {
 
-	// These are all 4 bytes:
+	// These first 4 are all 4 bytes:
 
 	int count;		// ...of *textures* in the atlas!
 	int width;		// ...of the atlas.
 	int height;		// ...of the atlas.
 	GLuint glTextureId;	// ...of the atlas!
 
-	// These are all 8 bytes:
+	// These last 2 are all 8 bytes:
 
-	int *textures; 		// In order of `Atlas::rects`, which textures does this atlas contain?
-	pixel_t *pixels;	// ...All the pixels in the atlas! It's all `pixel_t` in here.
 	struct Rect *rects; // `x`, `y`, `w`, `h`. In order of `Atlas::textures`!
+	enum TextureName *textures; 		// In order of `Atlas::rects`, which textures does this atlas contain?
 
 };
 
