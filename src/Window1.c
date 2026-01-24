@@ -1,7 +1,6 @@
 #include <stdio.h>
-
-#include <UtilMacros.h>
-#include <Window1.h>
+#include "Macros.h"
+#include "Window1.h"
 
 int g_window1X = 0;
 int g_window1Y = 0;

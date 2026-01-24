@@ -3,17 +3,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "UtilMacros.h"
 #include "Window1.h"
+#include "Macros.h"
 #include "Assets.h"
 #include "Game.h"
+#include "Log.h"
 #include "Gl.h"
 
 void myGpuCheck() {
 	char const *const envGpu = getenv("gpu");
 	char const gpu = envGpu ? envGpu[0] : 'i';
 
-	printf("Running on %cGPU!\n", gpu);
+	printi("Running on %cGPU!\n", gpu);
 
 	if (gpu == 'd') {
 

@@ -1,6 +1,6 @@
 #include "Quad.h"
+#include "Macros.h"
 #include <stdlib.h>
-#include "UtilMacros.h"
 
 #pragma region Globals.
 GLuint g_quadModelVbo = 0;
@@ -47,8 +47,8 @@ void quadInit(struct QuadCtx *const p_ctx) {
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vbo));
 
 	// They're valid ONLY when bound, apparently!:
-	// printf("VAO %s\n", glIsBuffer(p_ctx->vao) ? "valid." : "invalid!");
-	// printf("VBO %s\n", glIsBuffer(p_ctx->vbo) ? "valid." : "invalid!");
+	// printi("VAO %s\n", glIsBuffer(p_ctx->vao) ? "valid." : "invalid!");
+	// printi("VBO %s\n", glIsBuffer(p_ctx->vbo) ? "valid." : "invalid!");
 
 	ERRGL(glVertexAttribDivisor(0, 1));
 	ERRGL(glVertexAttribDivisor(1, 1));
@@ -70,7 +70,7 @@ void quadInit(struct QuadCtx *const p_ctx) {
 
 	// ...And we define that "injection" here:
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, g_quadModelVbo));
-	// printf("VBO %s\n", glIsBuffer(g_quadModelVbo) ? "valid." : "invalid!");
+	// printi("VBO %s\n", glIsBuffer(g_quadModelVbo) ? "valid." : "invalid!");
 	ERRGL(glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(struct SmlVec2), (void*) 0));
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, 0));
@@ -78,19 +78,19 @@ void quadInit(struct QuadCtx *const p_ctx) {
 }
 
 void quadDebug(struct Quad const *const p_quad) {
-	printf(
+	printi(
 	"	Angle:	`%.2f`,\n",
 	p_quad->angle
 	);
-	printf(
+	printi(
 		"	Scale:	x: %.2f, y: %.2f,\n",
 		p_quad->scale.x, p_quad->scale.y
 	);
-	printf(
+	printi(
 		"	Pos:	x: %.2f, y: %.2f, z: %.2f,\n",
 		p_quad->pos.x, p_quad->pos.y
 	);
-	printf(
+	printi(
 		"	UVs:	x: %.2f, y: %.2f, z: %.2f, w: %.2f.\n",
 		p_quad->uv.x, p_quad->uv.y, p_quad->uv.z, p_quad->uv.w
 	);

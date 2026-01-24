@@ -13,7 +13,7 @@
         "game.h": "c",
         "stb_rect_pack.h": "c",
         "list.h": "c",
-        "utilmacros.h": "c",
+        "Macros.h": "c",
         "assets.h": "c",
         "quad.h": "c",
         "utilgl.h": "c",

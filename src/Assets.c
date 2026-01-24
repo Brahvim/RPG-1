@@ -4,8 +4,8 @@
 #include <memory.h>
 #include <stdio.h>
 
-#include "UtilMacros.h"
 #include "Assets.h"
+#include "Macros.h"
 #include "Sml.h"
 #include "Gl.h"
 
@@ -101,14 +101,14 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	callocArray(rects, atlas->count);
 
 	// Find the highest width as well as the sum of heights:
-	// puts("\nIn the loop that finds the highest width as well as the sum of heights:");
+	// puti("\nIn the loop that finds the highest width as well as the sum of heights:");
 	for (size_t i = 0; i < atlas->count; ++i) {
 
 		int const t = p_textures[i];
 		int const w = g_textureRects[t].w;
 		int const h = g_textureRects[t].h;
 
-		// printf(
+		// printi(
 		// 	"`%s`, width `%d`, height `%d`.\n",
 		// 	g_texturePaths[t], w, h
 		// );
@@ -123,7 +123,7 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 
 	}
 
-	// puts("\nIn the loop that converts data in `Rect`-form to local `stbrp_rect`s:");
+	// puti("\nIn the loop that converts data in `Rect`-form to local `stbrp_rect`s:");
 	// Convert data in `Rect`-form to local `stbrp_rect`s:
 	for (size_t i = 0; i < atlas->count; ++i) {
 
@@ -131,7 +131,7 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 		int const w = g_textureRects[t].w;
 		int const h = g_textureRects[t].h;
 
-		// printf(
+		// printi(
 		// 	"`%s`, width `%d`, height `%d`.\n",
 		// 	g_texturePaths[t], w, h
 		// );
@@ -159,7 +159,7 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 
 	if (!packed) {
 
-		puts("Atlas packing failed!");
+		pute("Atlas packing failed!");
 		free(atlas->rects);
 		free(atlas);
 		free(rects);
@@ -185,7 +185,7 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 		NULL
 	));
 
-	puts("\n...In some atlas:");
+	puti("\n...In some atlas:");
 
 	// Blit packed textures into atlas:
 	for (size_t i = 0; i < atlas->count; ++i) {
@@ -199,7 +199,7 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 		int const h = rects[i].h;
 		int const glY = atlas->height - (y + h); // Feel free *not* to invert the placement of all sprites...!
 
-		// printf(
+		// printi(
 		// 	"Placed `%s`, width `%d`, height `%d` at position `(%d, %d)`.\n",
 		// 	g_texturePaths[texid], w, h, x, y
 		// );
@@ -320,10 +320,10 @@ void loadTextures(void) {
 
 		// int w, h, c;
 		// stbi_info(fpath, &w, &h, &c);
-		// printf("`stbi_info()`: `%s`, width `%d`, height `%d`, channels-count `%d`.\n", fpath, w, h, c);
+		// printi("`stbi_info()`: `%s`, width `%d`, height `%d`, channels-count `%d`.\n", fpath, w, h, c);
 
 		g_textureData[i] = stbi_load(fpath, &g_textureRects[i].w, &g_textureRects[i].h, NULL, STBI_rgb_alpha);
-		printf("Attempted loading `%s`, width `%d`, height `%d`...\n", g_texturePaths[i], g_textureRects[i].w, g_textureRects[i].h);
+		printi("Attempted loading `%s`, width `%d`, height `%d`...\n", g_texturePaths[i], g_textureRects[i].w, g_textureRects[i].h);
 
 	}
 
@@ -333,14 +333,14 @@ void loadTextures(void) {
 		void *ptr = g_textureData[i];
 		if (unlikely(!ptr)) {
 
-			fprintf(stderr, "Failed to load texture `%s`.\n", g_texturePaths[i]);
+			printe("Failed to load texture `%s`.\n", g_texturePaths[i]);
 			continue;
 
 		}
 
 	}
 
-	puts("Textures ready to go!");
+	puti("Textures ready to go!");
 }
 
 void loadShaders(void) {
@@ -378,15 +378,15 @@ void loadShaders(void) {
 
 		memset(logBuf, 0, logLen);
 		ERRGL(glGetShaderInfoLog(g_shaderGlIdsFrag[i], L, &logLen, logBuf));
-		if (logLen)	printf("Fragment shader `%d` log: %s.\n", i, logBuf);
+		if (logLen)	printi("Fragment shader `%d` log: %s.\n", i, logBuf);
 
 		memset(logBuf, 0, logLen);
 		ERRGL(glGetShaderInfoLog(g_shaderGlIdsVert[i], L, &logLen, logBuf));
-		if (logLen)	printf("Vertex shader `%d` log: %s.\n", i, logBuf);
+		if (logLen)	printi("Vertex shader `%d` log: %s.\n", i, logBuf);
 
 		memset(logBuf, 0, logLen);
 		ERRGL(glGetProgramInfoLog(g_shaderGlIds[i], L, &logLen, logBuf));
-		if (logLen)	printf("Program `%d` log: %s.\n", i, logBuf);
+		if (logLen)	printi("Program `%d` log: %s.\n", i, logBuf);
 
 #undef L
 	}
@@ -395,7 +395,7 @@ void loadShaders(void) {
 void loadCwd(void) {
 	if (likely(getcwd(g_cwd, sizeof(g_cwd)) != NULL)) {
 
-		printf("Current working directory: `%s`.\n", g_cwd);
+		printi("Current working directory: `%s`.\n", g_cwd);
 		g_cwdLen = strlen(g_cwd);
 
 	}

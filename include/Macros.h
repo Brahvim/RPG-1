@@ -1,4 +1,5 @@
 #pragma once
+#include "Log.h"
 #include "Exit.h"
 
 #define likely(p_condition) 	__builtin_expect((long) (p_condition), 1)
@@ -12,7 +13,7 @@
 #define mallocArrayStride(p_array, p_count, p_stride) {\
 	if (unlikely((((p_array) = malloc((p_count) * (p_stride))) == NULL))) {\
 		\
-		fprintf(stderr, "`malloc() for `%s` in function `%s` at `%s:%d` failed.\n", (#p_array), __FUNCTION__, __FILE__, __LINE__);\
+		printe("`malloc() for `%s` in function `%s` at `%s:%d` failed.\n", (#p_array), __FUNCTION__, __FILE__, __LINE__);\
 		gameExit(EXIT_REASON_MALLOC);\
 		\
 	}\
@@ -21,7 +22,7 @@
 #define callocArrayStride(p_array, p_count, p_stride) {\
 	if (unlikely((((p_array) = calloc((p_count), (p_stride))) == NULL))) {\
 		\
-		fprintf(stderr, "`calloc() for `%s` in function `%s` at `%s:%d` failed.\n", (#p_array), __FUNCTION__, __FILE__, __LINE__);\
+		printe("`calloc() for `%s` in function `%s` at `%s:%d` failed.\n", (#p_array), __FUNCTION__, __FILE__, __LINE__);\
 		gameExit(EXIT_REASON_CALLOC);\
 		\
 	}\
@@ -30,7 +31,7 @@
 #define reallocArrayStride(p_array, p_count, p_stride) {\
 	if (unlikely((((p_array) = realloc((p_array), (p_count) * (p_stride))) == NULL))) {\
 		\
-		fprintf(stderr, "`realloc() for `%s` in function `%s` at `%s:%d` failed.\n", (#p_array), __FUNCTION__, __FILE__, __LINE__);\
+		printe("`realloc() for `%s` in function `%s` at `%s:%d` failed.\n", (#p_array), __FUNCTION__, __FILE__, __LINE__);\
 		gameExit(EXIT_REASON_REALLOC);\
 		\
 	}\
