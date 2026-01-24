@@ -1,6 +1,6 @@
 #include "Gl.h"
 
-GLenum g_errorGl;
+GLenum g_glerr;
 
 char const* glGetErrorString(GLenum const p_error) {
     switch (p_error) {
