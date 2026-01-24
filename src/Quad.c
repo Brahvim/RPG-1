@@ -32,7 +32,7 @@ void quadInitSystem(void) {
 struct QuadCtx* quadCreate() {
 	struct QuadCtx *ctx;
 
-	CALLOC_STRUCT(ctx);
+	callocStruct(ctx);
 	ctx->quads = listCreateStruct(Quad);
 
 	quadInit(ctx);
@@ -123,4 +123,3 @@ struct QuadCtx* quadDelete(struct QuadCtx *p_ctx) {
 	free(p_ctx);
 	return NULL;
 }
-

@@ -5,10 +5,10 @@
 
 struct List {
 
-	char *data;
 	size_t size;
 	size_t stride;
 	size_t capacity;
+	unsigned char *data;
 
 };
 

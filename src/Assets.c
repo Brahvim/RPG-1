@@ -91,14 +91,14 @@ static int cmpStbrpRectId(void const *p_first, void const *p_second) {
 
 struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	struct Atlas *atlas;
-	CALLOC_STRUCT(atlas);
+	callocStruct(atlas);
 	atlas->count = p_count;
-	CALLOC_ARRAY(atlas->rects, atlas->count);
+	callocArray(atlas->rects, atlas->count);
 
 	int width = 0; 	// Widths' max.
 	int height = 0; // Heights' sum.
 	struct stbrp_rect *rects;
-	CALLOC_ARRAY(rects, atlas->count);
+	callocArray(rects, atlas->count);
 
 	// Find the highest width as well as the sum of heights:
 	// puts("\nIn the loop that finds the highest width as well as the sum of heights:");
@@ -148,10 +148,10 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	struct stbrp_node *nodes;
 	struct stbrp_context ctx;
 
-	CALLOC_ARRAY(nodes, width);
+	callocArray(nodes, width);
 
 	stbrp_init_target(&ctx, width, height, nodes, width);
-	// CALLOC_ARRAY(atlas->pixels, atlas->height * atlas->width);
+	// callocArray(atlas->pixels, atlas->height * atlas->width);
 	// qsort(rects, sizeof(stbrp_rect), atlas->count, cmpStbrpRectId); // `TextureName`-sort.
 
 	int const packed = stbrp_pack_rects(&ctx, rects, atlas->count);
@@ -232,7 +232,21 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	return atlas;
 }
 
+/*
+ * Shaders upto 2 GiB only. If they have more than that many **C `char`s**, we're done.
+ * We don't check for FS changes, don't split into a string array - don't respect that GL ES contract...
+ * ...But it works. If it doesn't, time to rewrite this exact function!
+*/
 GLint loadShaderSourceFromPath(GLchar **p_buffer, char const *p_path) {
+	// Code to help with FS changes, unused...!:
+	// size_t retries = 0;
+	// retry:
+	// if (retries > 5) {
+	// 
+	//	return -1;
+	// 
+	// }
+
 	FILE *file = fopen(p_path, "rb");
 
 	if (unlikely(!file)) {
@@ -242,7 +256,7 @@ GLint loadShaderSourceFromPath(GLchar **p_buffer, char const *p_path) {
 	}
 
 	fseek(file, 0, SEEK_END);
-	long const length = ftell(file);
+	long length = ftell(file);
 
 	if (unlikely(length < 0)) {
 
@@ -263,6 +277,15 @@ GLint loadShaderSourceFromPath(GLchar **p_buffer, char const *p_path) {
 	rewind(file);
 	fread(buffer, 1, length, file);
 	fclose(file);
+
+	// Code to help with FS changes, unused...!:
+	// if (unlikely(fread(buffer, 1, length, file) != (size_t) length)) {
+	//
+	// 	fclose(file);
+	// 	free(buffer);
+	// 	goto retry;
+	//
+	// }
 
 	buffer[length] = '\0';
 	*p_buffer = buffer;

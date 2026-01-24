@@ -56,15 +56,15 @@ struct Atlas {
 
 	// These first 4 are all 4 bytes:
 
-	int count;		// ...of *textures* in the atlas!
-	int width;		// ...of the atlas.
-	int height;		// ...of the atlas.
+	int count;			// ...of *textures* in the atlas!
+	int width;			// ...of the atlas.
+	int height;			// ...of the atlas.
 	GLuint glTextureId;	// ...of the atlas!
 
 	// These last 2 are all 8 bytes:
 
-	struct Rect *rects; // `x`, `y`, `w`, `h`. In order of `Atlas::textures`!
-	enum TextureName *textures; 		// In order of `Atlas::rects`, which textures does this atlas contain?
+	struct Rect *rects; 		// `x`, `y`, `w`, `h`. In order of `Atlas::textures`!
+	enum TextureName *textures; // In order of `Atlas::rects`, which textures does this atlas contain?
 
 };
 
