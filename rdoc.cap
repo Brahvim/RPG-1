@@ -22,7 +22,7 @@
             "softMemoryLimit": 0,
             "verifyBufferAccess": false
         },
-        "queuedFrameCap": 5,
+        "queuedFrameCap": 1,
         "workingDir": ""
     }
 }

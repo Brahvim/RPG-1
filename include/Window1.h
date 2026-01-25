@@ -1,20 +1,21 @@
 #pragma once
+#define GLFW_INCLUDE_NONE 1
 #include <GLFW/glfw3.h>
 
 extern int g_window1X;
 extern int g_window1Y;
 extern int g_window1W;
 extern int g_window1H;
-extern int g_window1Wfb;
-extern int g_window1Hfb;
+extern int g_window1Wfb; // "Framebuffer"!
+extern int g_window1Hfb; // "Framebuffer"!
 extern char g_window1Full;
 extern int g_window1XUnFull;
 extern int g_window1YUnFull;
 extern int g_window1WUnFull;
 extern int g_window1HUnFull;
 extern GLFWwindow *g_window1;
-extern int const g_window1WDef;
-extern int const g_window1HDef;
+extern int const g_window1WDef; // "Default".
+extern int const g_window1HDef; // "Default".
 
 void window1Create(void);
 void window1Delete(void);

@@ -65,7 +65,7 @@ void quadInit(struct QuadCtx *const p_ctx) {
 	ERRGL(glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(struct Quad), (void*) offsetof(struct Quad, uv)));
 	ERRGL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(struct Quad), (void*) offsetof(struct Quad, pos)));
 	ERRGL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct Quad), (void*) offsetof(struct Quad, scale)));
-	// There's no third attribute. It's `l_corner`! *That* gets injected-in from `g_quadModelVbo` by the OpenGL driver!
+	// Attribute `a3_corner`, isn't passed per-vertex. ...It's injected-in from `g_quadModelVbo` by the OpenGL driver!
 	ERRGL(glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(struct Quad), (void*) offsetof(struct Quad, angle)));
 
 	// ...And we define that "injection" here:
@@ -79,19 +79,19 @@ void quadInit(struct QuadCtx *const p_ctx) {
 
 void quadDebug(struct Quad const *const p_quad) {
 	printi(
-	"	Angle:	`%.2f`,\n",
-	p_quad->angle
+		"	Angle:	`%.2f`,\n",
+		p_quad->angle
 	);
 	printi(
-		"	Scale:	x: %.2f, y: %.2f,\n",
+		"	Scale:	x: `%.2ff`, y: `%.2ff`,\n",
 		p_quad->scale.x, p_quad->scale.y
 	);
 	printi(
-		"	Pos:	x: %.2f, y: %.2f, z: %.2f,\n",
+		"	Pos:	x: `%.2ff`, y: `%.2ff`, z: `%.2ff`,\n",
 		p_quad->pos.x, p_quad->pos.y
 	);
 	printi(
-		"	UVs:	x: %.2f, y: %.2f, z: %.2f, w: %.2f.\n",
+		"	UVs:	x: `%.2ff`, y: `%.2ff`, z: `%.2ff`, w: `%.2ff`.\n",
 		p_quad->uv.x, p_quad->uv.y, p_quad->uv.z, p_quad->uv.w
 	);
 }
@@ -111,6 +111,12 @@ void quadDraw(struct QuadCtx const *const p_ctx) {
 		p_ctx->quads->data,
 		GL_STREAM_DRAW
 	));
+
+	for (size_t i = 0; i < p_ctx->quads->size; i++) {
+
+		quadDebug(quadListRead(p_ctx->quads, i));
+
+	}
 
 	ERRGL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, p_ctx->quads->size));
 

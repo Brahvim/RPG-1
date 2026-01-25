@@ -179,13 +179,14 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	ERRGL(glTexImage2D(
 		GL_TEXTURE_2D,
 		0, GL_RGBA8,
-		atlas->width, atlas->height,
+		atlas->width,
+		atlas->height,
 		0, GL_RGBA,
 		GL_UNSIGNED_BYTE,
 		NULL
 	));
 
-	puti("\n...In some atlas:");
+	// puti("\n...In some atlas:");
 
 	// Blit packed textures into atlas:
 	for (size_t i = 0; i < atlas->count; ++i) {

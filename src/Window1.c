@@ -41,6 +41,18 @@ void window1CbckKey(GLFWwindow *p_window, int p_key, int p_scancode, int p_actio
 
 	}
 
+	if (unlikely(p_key == GLFW_KEY_F && p_action == GLFW_PRESS)) {
+
+		int const visible = GLFW_CURSOR_NORMAL == glfwGetInputMode(g_window1, GLFW_CURSOR);
+
+		glfwSetInputMode(
+			g_window1,
+			GLFW_CURSOR,
+			visible ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL
+		);
+
+	}
+
 	if (unlikely((p_key == GLFW_KEY_F11 || p_key == GLFW_KEY_ENTER && (p_mods & GLFW_MOD_ALT)) && p_action == GLFW_PRESS)) {
 
 		if (unlikely(g_window1Full)) { // When leaving FS mode.
