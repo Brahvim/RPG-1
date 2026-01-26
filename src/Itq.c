@@ -57,35 +57,42 @@ void itqCtxInit(struct ItqCtx *const p_ctx) {
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboVertPos));
 	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizearr(g_itqModel), g_itqModel, GL_STATIC_DRAW));
-	ERRGL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(struct SmlVec2), 0));
+	ERRGL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0));
+	ERRGL(glEnableVertexAttribArray(0));
+	ERRGL(glVertexAttribDivisor(0, 0));
 
 	// It's not important to fill the buffers RIGHT here.
 	// ...Just that they *are* bound right now; so I just... fill them here!
+	// Buuuuuuuuut driver shenanigans exist! Most likely shouldn't fill HERE...!
+	// It's probably best to fill them (i.e. call `glBuffer*Data()`) beforehand or something...!
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboVertTexcoords));
 	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizearr(g_itqTexcoords), g_itqTexcoords, GL_STATIC_DRAW));
-	ERRGL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(struct SmlVec2), 0));
+	ERRGL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0));
+	ERRGL(glEnableVertexAttribArray(1));
+	ERRGL(glVertexAttribDivisor(1, 0));
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst));
+	// ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(struct Itq), NULL, GL_STREAM_DRAW));
+	ERRGL(glBufferData(GL_ARRAY_BUFFER, listBytesSize(p_ctx->list), p_ctx->list->data, GL_STREAM_DRAW));
+
 	ERRGL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct Itq), (void*) offsetof(struct Itq, pos)));
-	ERRGL(glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(struct Itq), (void*) offsetof(struct Itq, scale)));
-	ERRGL(glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(struct Itq), (void*) offsetof(struct Itq, texRect)));
-
-	ERRGL(glEnableVertexAttribArray(0));
-	ERRGL(glEnableVertexAttribArray(1));
 	ERRGL(glEnableVertexAttribArray(2));
-	ERRGL(glEnableVertexAttribArray(3));
-	ERRGL(glEnableVertexAttribArray(4));
-
-	ERRGL(glVertexAttribDivisor(0, 0));
-	ERRGL(glVertexAttribDivisor(1, 0));
 	ERRGL(glVertexAttribDivisor(2, 1));
+
+	// ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst)); // Repeated. GOD KNOWS what the driver likes.
+	ERRGL(glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(struct Itq), (void*) offsetof(struct Itq, scale)));
+	ERRGL(glEnableVertexAttribArray(3));
 	ERRGL(glVertexAttribDivisor(3, 1));
+
+	// ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst)); // Repeated. GOD KNOWS what the driver likes.
+	ERRGL(glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(struct Itq), (void*) offsetof(struct Itq, texRect)));
+	ERRGL(glEnableVertexAttribArray(4));
 	ERRGL(glVertexAttribDivisor(4, 1));
 
 	// ERRGL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	// ERRGL(glBindVertexArray(0));
-	// "Clean up!", they said.
+	// *"Clean up!", they said.*
 }
 
 void itqDebug(struct Itq const *const p_quad) {
@@ -117,10 +124,18 @@ void itqCtxDraw(struct ItqCtx const *const p_ctx) {
 	ERRGL(glUniform1i(g_itqProgramUniformLocationAtlas, GL_TEXTURE0 - GL_TEXTURE0));
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst));
+	// "Orphan" previous buffer. Let it "be GCd" for a new one:
 	ERRGL(glBufferData(
 		GL_ARRAY_BUFFER,
 		listBytesSize(p_ctx->list),
-		p_ctx->list->data, GL_STREAM_DRAW
+		NULL,
+		GL_STREAM_DRAW
+	));
+	ERRGL(glBufferData(
+		GL_ARRAY_BUFFER,
+		listBytesSize(p_ctx->list),
+		p_ctx->list->data,
+		GL_STREAM_DRAW
 	));
 
 	ERRGL(glEnable(GL_BLEND));
