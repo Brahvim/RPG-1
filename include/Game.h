@@ -6,6 +6,7 @@
 
 void gameDraw();
 void gameSetup();
+void gameShutdown();
 double gameMillis();
 
 extern size_t g_gameFrameCount;

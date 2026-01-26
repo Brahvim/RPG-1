@@ -10,25 +10,25 @@
 			"type": "cppdbg",
 			"environment": [
 				{
-					"name": "gpu",
 					"value": "i",
+					"name": "gpu",
 				}
 			],
 			"setupCommands": [
 				{
-					"description": "Enable pretty-printing for gdb",
-					"text": "-enable-pretty-printing",
 					"ignoreFailures": true,
+					"text": "-enable-pretty-printing",
+					"description": "Enable pretty-printing for gdb",
 				},
 				{
-					"description": "Set Disassembly Flavor to Intel",
-					"text": "-gdb-set disassembly-flavor intel",
 					"ignoreFailures": true,
+					"text": "-gdb-set disassembly-flavor intel",
+					"description": "Set Disassembly Flavor to Intel",
 				},
 			],
 			"request": "launch",
 			"stopAtEntry": false,
-			"name": "Launch On iGPU",
+			"name": "iGPU",
 			"externalConsole": false,
 			"cwd": "${workspaceFolder}",
 			"program": "${workspaceFolder}/Rpg1",
@@ -65,10 +65,43 @@
 			],
 			"request": "launch",
 			"stopAtEntry": false,
-			"name": "Launch On dGPU",
+			"name": "dGPU",
 			"externalConsole": false,
 			"cwd": "${workspaceFolder}",
 			"program": "${workspaceFolder}/Rpg1",
+		},
+		{
+			"args": [ // Not passed to Vally :/
+				// "-s",
+				// "--leak-check=full",
+				// "--track-origins=yes",
+				// "--trace-children=yes",
+			],
+			"MIMode": "gdb",
+			"type": "cppdbg",
+			"environment": [
+				{
+					"name": "PATH",
+					"value": "$PATH:${command:cmake.launchTargetDirectory}",
+				},
+			],
+			"setupCommands": [
+				{
+					"ignoreFailures": true,
+					"text": "-enable-pretty-printing",
+					"description": "Enable pretty-printing for gdb",
+				},
+				{
+					"ignoreFailures": true,
+					"description": "Connect to valgrind",
+					"text": "${command:valgrind-task-integration.valgrindGdbArg}",
+				},
+			],
+			"name": "Valgrind!",
+			"request": "launch",
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}",
+			"program": "${command:cmake.launchTargetPath}",
 		},
 	],
 }

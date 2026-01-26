@@ -1,10 +1,13 @@
 #pragma once
 #include <stddef.h>
 
-#define listCreateType(p_type) 		listCreate(sizeof(p_type))
-#define listCreateStruct(p_struct) 	listCreateType(struct p_struct)
-#define listBytesSize(p_listPtr)		((p_listPtr)->stride * (p_listPtr)->size)
-#define listBytesCapacity(p_listPtr)	((p_listPtr)->stride * (p_listPtr)->capacity)
+#define listCreateType(p_type) 			listCreate(sizeof(p_type))
+#define listCreateStruct(p_struct) 		listCreateType(struct p_struct)
+
+#define listBytesSize(p_listPtr) 		((p_listPtr)->stride * (p_listPtr)->size)
+#define listBytesCapacity(p_listPtr) 	((p_listPtr)->stride * (p_listPtr)->capacity)
+
+#define listDebug(p_listVar) 			listDebugImpl(p_listVar, "`" STR(p_listVar) "`")
 
 struct List {
 
@@ -14,6 +17,8 @@ struct List {
 	unsigned char *data;
 
 };
+
+void listDebugImpl(struct List *list, char const *name);
 
 /**
  * Uses `calloc*()`-and-co. macros. `List::capacity` is `1` for non-zero mult.

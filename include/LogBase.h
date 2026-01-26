@@ -1,7 +1,7 @@
 #pragma once
 
 // [Tag] File.c:00 `function()`: TEXTEXTTEXTEXT!!!
-#define LOG_PREFIX "[%s] %s:%d: `%s()`: "
+#define LOG_PREFIX "[%s] %s:%d, `%s()`: "
 
 #define puti(p_line) \
 	printf(LOG_PREFIX "%s\n", "inf", __FILE_NAME__, __LINE__, __func__, p_line)

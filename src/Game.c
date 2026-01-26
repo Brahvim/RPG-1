@@ -19,10 +19,15 @@ double gameMillis() {
 	return glfwGetTime() - g_gameMillisSetup;
 }
 
+void gameShutdown() {
+	itqCtxDelete(g_gameQuadCtx);
+}
+
 void gameSetup() {
 	itqInitSystem();
 	cameraInitSystem();
 	g_gameQuadCtx = itqCtxCreate();
+	listDebug(g_gameQuadCtx->list);
 
 	struct Itq q = {
 
@@ -34,6 +39,7 @@ void gameSetup() {
 
 	itqTexture(&q, ATLAS_DEFAULT, TEXTURE_NONE);
 	listAppend(g_gameQuadCtx->list, 1, &q);
+	listDebug(g_gameQuadCtx->list);
 	itqDebug(&q);
 }
 

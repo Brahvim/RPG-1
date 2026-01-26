@@ -350,8 +350,12 @@ void loadShaders(void) {
 
 #define FERR(x) F(ERRGL(x))
 #define F(x) for (size_t i = 0; i < SHADER_TOTAL; i++) x
-	F(g_shaderSourceLengthsVert[i] = strlen(g_shaderSourcesVert[i]));
-	F(g_shaderSourceLengthsFrag[i] = strlen(g_shaderSourcesFrag[i]));
+	// F(g_shaderSourceLengthsVert[i] = strlen(g_shaderSourcesVert[i]));
+	// F(g_shaderSourceLengthsFrag[i] = strlen(g_shaderSourcesFrag[i]));
+
+	// `valgrind` WOULDN'T advance debugging with this running `strlen(NULL)`...!:
+	F(g_shaderSourceLengthsVert[i] = g_shaderSourcesVert[i] ? strlen(g_shaderSourcesVert[i]) : 0);
+	F(g_shaderSourceLengthsFrag[i] = g_shaderSourcesFrag[i] ? strlen(g_shaderSourcesFrag[i]) : 0);
 
 	FERR(g_shaderGlIds[i] = glCreateProgram());
 	FERR(g_shaderGlIdsVert[i] = glCreateShader(GL_VERTEX_SHADER));
@@ -401,7 +405,7 @@ void loadCwd(void) {
 	}
 	else {
 
-		perror("Failed to `getcwd()` the current working directory.\n");
+		pute("`getcwd()` failed.\n");
 		gameExit(EXIT_FAILURE);
 
 	}

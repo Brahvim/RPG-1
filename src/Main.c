@@ -78,6 +78,7 @@ int main(int const p_argCount, char const **p_argValues) {
 
 	}
 
+	gameShutdown();
 	window1Delete();
 	glfwTerminate();
 	gameExit(EXIT_REASON_SUCCESS);

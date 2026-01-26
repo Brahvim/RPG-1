@@ -5,6 +5,20 @@
 #include <memory.h>
 #include <stdlib.h>
 
+void listDebugImpl(struct List *p_list, char const *p_name) {
+	printi(
+		"List %s: "
+		"size: `%zu`, "
+		"capacity: `%zu`, "
+		"stride/elt-size: `%zu`. "
+		"\n",
+		p_name,
+		p_list->size,
+		p_list->capacity,
+		p_list->stride
+	);
+}
+
 struct List* listCreate(size_t const p_stride) {
 	struct List *list;
 	callocStruct(list);
