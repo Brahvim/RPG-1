@@ -234,11 +234,6 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	return atlas;
 }
 
-/*
- * Shaders upto 2 GiB only. If they have more than that many **C `char`s**, we're done.
- * We don't check for FS changes, don't split into a string array - don't respect that GL ES contract...
- * ...But it works. If it doesn't, time to rewrite this exact function!
-*/
 GLint loadShaderSourceFromPath(GLchar **p_buffer, char const *p_path) {
 	// Code to help with FS changes, unused...!:
 	// size_t retries = 0;
@@ -296,8 +291,11 @@ GLint loadShaderSourceFromPath(GLchar **p_buffer, char const *p_path) {
 }
 
 void loadMappedAtlases(void) {
-#define M(p_enum, p_var) g_atlases[ATLAS_DEFAULT] = atlasCreate(sizearr(p_var), &(*g_atlasTextures[p_enum]));
+#define M(p_enum, p_var) \
+g_atlases[ATLAS_DEFAULT] = atlasCreate(sizearr(p_var), g_atlasTextures[p_enum] = p_var)
+
 	M(ATLAS_DEFAULT, g_atlasTexturesDefault);
+
 #undef M
 }
 

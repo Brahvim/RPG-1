@@ -1,35 +1,40 @@
 #include "Itq.h"
 #include <stdlib.h>
 
+struct SmlVec2 g_itqModel[4] = {
+
+	{.x = -0.5f, .y = -0.5f},
+	{.x = +0.5f, .y = -0.5f},
+	{.x = +0.5f, .y = +0.5f},
+	{.x = -0.5f, .y = +0.5f},
+
+};
+struct SmlVec2 g_itqTexcoords[4] = {
+
+	{.x = 0, .y = 0},
+	{.x = 1, .y = 0},
+	{.x = 1, .y = 1},
+	{.x = 0, .y = 1},
+
+};
 // GLuint g_itqProgramUniformLocation = 0;
 GLuint g_itqProgramUniformLocationAtlas = 0;
 
 void itqInitSystem(void) {
 #define M(p_varName, p_idenStr) \
-	ERRGL(g_quadProgramUniformLocation ## p_varName \
-	= glGetUniformLocation(g_shaderGlIds[SHADER_ITQS], p_idenStr));
+	ERRGL(g_itqProgramUniformLocation ## p_varName \
+	= glGetUniformLocation(g_shaderGlIds[SHADER_ITQS], p_idenStr))
+
+	M(Atlas, "u_atlas");
+
 #undef M
-}
-
-struct Itq* itqCreate(struct ItqCtx *const p_ctx) {
-	struct Itq quad = { 0 };
-	struct SmlVec2 pos[4] = { 0 };
-	struct SmlVec2 texcoords[4] = { 0 };
-
-	listAppend(p_ctx->listInst, 1, &quad);
-	listAppend(p_ctx->listVertPos, 4, &pos);
-	listAppend(p_ctx->listVertTexcoords, 4, &texcoords);
-
-	return itqListRead(p_ctx->listInst, p_ctx->listInst->size - 1);
 }
 
 struct ItqCtx* itqCtxCreate() {
 	struct ItqCtx *ctx;
-
 	callocStruct(ctx);
-	ctx->listInst = listCreateStruct(Itq);
-	ctx->listVertPos = listCreateStruct(SmlVec2);
-	ctx->listVertTexcoords = listCreateStruct(SmlVec2);
+
+	ctx->list = listCreateStruct(Itq);
 
 	itqCtxInit(ctx);
 	return ctx;
@@ -37,19 +42,34 @@ struct ItqCtx* itqCtxCreate() {
 
 void itqCtxInit(struct ItqCtx *const p_ctx) {
 	ERRGL(glGenVertexArrays(1, &p_ctx->vao));
-
-	ERRGL(glGenBuffers(1, &p_ctx->vboInst));
-	ERRGL(glGenBuffers(1, &p_ctx->vboVertPos));
-	ERRGL(glGenBuffers(1, &p_ctx->vboVertTexcoords));
-
 	ERRGL(glBindVertexArray(p_ctx->vao));
 
-	ERRGL(glVertexAttribDivisor(0, 0));
-	ERRGL(glVertexAttribDivisor(1, 0));
+	{ // VBO allocs.
+#define N 3
+		GLuint bufs[N];
+		ERRGL(glGenBuffers(N, bufs));
 
-	ERRGL(glVertexAttribDivisor(2, 1));
-	ERRGL(glVertexAttribDivisor(3, 1));
-	ERRGL(glVertexAttribDivisor(4, 1));
+		p_ctx->vboInst = 			/**/ bufs[0];
+		p_ctx->vboVertPos = 		/**/ bufs[1];
+		p_ctx->vboVertTexcoords = 	/**/ bufs[2];
+#undef N
+	}
+
+	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboVertPos));
+	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizearr(g_itqModel), g_itqModel, GL_STATIC_DRAW));
+	ERRGL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(struct SmlVec2), 0));
+
+	// It's not important to fill the buffers RIGHT here.
+	// ...Just that they *are* bound right now; so I just... fill them here!
+
+	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboVertTexcoords));
+	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizearr(g_itqTexcoords), g_itqTexcoords, GL_STATIC_DRAW));
+	ERRGL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(struct SmlVec2), 0));
+
+	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst));
+	ERRGL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct Itq), (void*) offsetof(struct Itq, pos)));
+	ERRGL(glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(struct Itq), (void*) offsetof(struct Itq, scale)));
+	ERRGL(glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(struct Itq), (void*) offsetof(struct Itq, texRect)));
 
 	ERRGL(glEnableVertexAttribArray(0));
 	ERRGL(glEnableVertexAttribArray(1));
@@ -57,117 +77,93 @@ void itqCtxInit(struct ItqCtx *const p_ctx) {
 	ERRGL(glEnableVertexAttribArray(3));
 	ERRGL(glEnableVertexAttribArray(4));
 
-	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst));
-	ERRGL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct Itq), (void*) offsetof(struct Itq, pos)));
-	ERRGL(glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(struct Itq), (void*) offsetof(struct Itq, scale)));
-	ERRGL(glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(struct Itq), (void*) offsetof(struct Itq, texRect)));
+	ERRGL(glVertexAttribDivisor(0, 0));
+	ERRGL(glVertexAttribDivisor(1, 0));
+	ERRGL(glVertexAttribDivisor(2, 1));
+	ERRGL(glVertexAttribDivisor(3, 1));
+	ERRGL(glVertexAttribDivisor(4, 1));
 
-	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboVertPos));
-	ERRGL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(struct SmlVec2), (void*) 0));
+	// ERRGL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+	// ERRGL(glBindVertexArray(0));
+	// "Clean up!", they said.
+}
 
-	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboVertTexcoords));
-	ERRGL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(struct SmlVec2), (void*) 0));
+void itqDebug(struct Itq const *const p_quad) {
+	printi(
+		"	Pos:		x: `%.2ff`,  y: `%.2ff`,\n",
+		p_quad->pos.x, p_quad->pos.y
+	);
+	printi(
+		"	Scale:		x: `%.2ff`,  y: `%.2ff`,\n",
+		p_quad->scale.x, p_quad->scale.y
+	);
+	printi(
+		"	Texcoords:	x1: `%.2ff`, y2: `%.2ff`, w: `%.2ff`, h: `%.2ff`.\n",
+		p_quad->texRect.x, p_quad->texRect.y, p_quad->texRect.z, p_quad->texRect.w
+	);
+}
 
-	// "Cleanup":
-	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-	ERRGL(glBindVertexArray(0));
+struct Itq* itqCreate(struct ItqCtx *const p_ctx) {
+	struct Itq quad = { 0 };
+	listAppend(p_ctx->list, 1, &quad);
+	return itqListRead(p_ctx->list, p_ctx->list->size - 1);
 }
 
 void itqCtxDraw(struct ItqCtx const *const p_ctx) {
-	for (size_t i = 0; i < p_ctx->listInst->size; i++) {
-
-		itqDebug(p_ctx, i);
-
-	}
-
+	ERRGL(glActiveTexture(GL_TEXTURE0));
 	ERRGL(glBindVertexArray(p_ctx->vao));
 	ERRGL(glUseProgram(g_shaderGlIds[SHADER_ITQS]));
-
-	ERRGL(glActiveTexture(GL_TEXTURE0));
 	ERRGL(glBindTexture(GL_TEXTURE_2D, g_atlases[ATLAS_DEFAULT]->glTextureId));
 	ERRGL(glUniform1i(g_itqProgramUniformLocationAtlas, GL_TEXTURE0 - GL_TEXTURE0));
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst));
-	ERRGL(glBufferData(GL_ARRAY_BUFFER,
-		p_ctx->listInst->size * p_ctx->listInst->stride,
-		p_ctx->listInst->data, GL_STREAM_DRAW
+	ERRGL(glBufferData(
+		GL_ARRAY_BUFFER,
+		listBytesSize(p_ctx->list),
+		p_ctx->list->data, GL_STREAM_DRAW
 	));
 
-	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboVertPos));
-	ERRGL(glBufferData(GL_ARRAY_BUFFER,
-		p_ctx->listVertPos->size * p_ctx->listVertPos->stride,
-		p_ctx->listVertPos->data, GL_STREAM_DRAW
-	));
-
-	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboVertTexcoords));
-	ERRGL(glBufferData(GL_ARRAY_BUFFER,
-		p_ctx->listVertTexcoords->size * p_ctx->listVertTexcoords->stride,
-		p_ctx->listVertTexcoords->data, GL_STREAM_DRAW
-	));
-
-	ERRGL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, p_ctx->listInst->size));
+	ERRGL(glEnable(GL_BLEND));
+	ERRGL(glFrontFace(GL_CCW));
+	ERRGL(glDisable(GL_CULL_FACE));
+	ERRGL(glDisable(GL_DEPTH_TEST));
+	ERRGL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+	ERRGL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, p_ctx->list->size));
+	// printi("Quads list size in bytes: `%d`.\n", listBytesSize(p_ctx->list));
 }
 
 struct ItqCtx* itqCtxDelete(struct ItqCtx *p_ctx) {
-	listDelete(p_ctx->listVertTexcoords);
-	listDelete(p_ctx->listVertPos);
-	listDelete(p_ctx->listInst);
+	listDelete(p_ctx->list);
 	free(p_ctx);
 	return NULL;
 }
 
-void itqDebug(struct ItqCtx const *const p_ctx, size_t const p_id) {
-	struct Itq *p_quad = itqListRead(p_ctx->listInst, p_id);
-	struct SmlVec2 *p_quadVertPos = listRead(p_ctx->listVertPos, 4 * p_id);
-	struct SmlVec2 *p_quadVertTexcoords = listRead(p_ctx->listVertTexcoords, 4 * p_id);
+void itqTexture(struct Itq *const p_quad, enum AtlasName const p_atlas, enum TextureName p_texture) {
+	float const tx = g_textureRects[p_texture].x;
+	float const ty = g_textureRects[p_texture].y;
+	float const tw = g_textureRects[p_texture].w;
+	float const th = g_textureRects[p_texture].h;
+	float const ah = g_atlases[p_atlas]->height;
+	float const aw = g_atlases[p_atlas]->width;
 
-	printi(
-		"	Pos:				x: `%.2ff`,		y: `%.2ff`,\n",
-		p_quad->pos.x, p_quad->pos.y
-	);
-	printi(
-		"	Scale:				x: `%.2ff`,		y: `%.2ff`,\n",
-		p_quad->scale.x, p_quad->scale.y
-	);
-	printi(
-		"	Texcoords:			x1: `%.2ff`,	y2: `%.2ff`,	w: `%.2ff`,		h: `%.2ff`.\n",
-		p_quad->texRect.x, p_quad->texRect.y, p_quad->texRect.z, p_quad->texRect.w
-	);
+	// p_quad->texRect.x = tx / aw; 
+	// p_quad->texRect.y = ty / ah; 
+	// p_quad->texRect.z = tw / aw; 
+	// p_quad->texRect.w = th / ah;
+	// 
+	// Done!
+	//
+	// ...But wait!
+	// Textures in an atlas can BLEED after mipmapping!
+	// ...To fix that, we limit their exact bounds by half a pixel or so, as done below...!:
 
-	puti("---------");
-	puti("Vertices:");
-	puti("---------");
+	// Inversion:
+	float const ahi = 1.0f / ah;
+	float const awi = 1.0f / aw;
 
-	printi(
-		"\t\tVert1 Pos:			x: `%.2ff`,		y: `%.2ff`,\n",
-		p_quadVertPos[0].x, p_quadVertPos[0].y
-	);
-	printi(
-		"\t\tVert2 Pos:			x: `%.2ff`,		y: `%.2ff`,\n",
-		p_quadVertPos[0].x, p_quadVertPos[0].y
-	);
-	printi(
-		"\t\tVert3 Pos:			x: `%.2ff`,		y: `%.2ff`,\n",
-		p_quadVertPos[2].x, p_quadVertPos[2].y
-	);
-	printi(
-		"\t\tVert4 Pos:			x: `%.2ff`,		y: `%.2ff`,\n",
-		p_quadVertPos[3].x, p_quadVertPos[3].y
-	);
-	printi(
-		"\t\tVert1 Texcoords:	x1: `%.2ff`,	y2: `%.2ff`.\n",
-		p_quadVertTexcoords[0].x, p_quadVertTexcoords[0].y
-	);
-	printi(
-		"\t\tVert2 Texcoords:	x1: `%.2ff`,	y2: `%.2ff`.\n",
-		p_quadVertTexcoords[1].x, p_quadVertTexcoords[1].y
-	);
-	printi(
-		"\t\tVert3 Texcoords:	x1: `%.2ff`,	y2: `%.2ff`.\n",
-		p_quadVertTexcoords[2].x, p_quadVertTexcoords[2].y
-	);
-	printi(
-		"\t\tVert4 Texcoords:	x1: `%.2ff`,	y2: `%.2ff`.\n",
-		p_quadVertTexcoords[3].x, p_quadVertTexcoords[3].y
-	);
+	// Offsetting:
+	p_quad->texRect.x = (tx + 0.5f) * awi;
+	p_quad->texRect.y = (ty + 0.5f) * ahi;
+	p_quad->texRect.z = (tw - 1.0f) * awi;
+	p_quad->texRect.w = (th - 1.0f) * ahi;
 }

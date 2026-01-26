@@ -1,13 +1,14 @@
 #pragma once
+
 #include "Gl.h"
-#include "Quad.h"
+#include "Itq.h"
 #include <stddef.h>
 
-void gameDraw(void);
-void gameSetup(void);
-double gameMillis(void);
+void gameDraw();
+void gameSetup();
+double gameMillis();
 
 extern size_t g_gameFrameCount;
 extern double g_gameMillisDraw;
 extern double g_gameMillisSetup;
-extern struct QuadCtx *g_gameQuadCtx;
+extern struct ItqCtx *g_gameQuadCtx;

@@ -11,14 +11,14 @@
         "options": {
             "allowFullscreen": true,
             "allowVSync": true,
-            "apiValidation": true,
+            "apiValidation": false,
             "captureAllCmdLists": false,
             "captureCallstacks": true,
             "captureCallstacksOnlyDraws": false,
             "debugOutputMute": true,
             "delayForDebugger": 0,
             "hookIntoChildren": false,
-            "refAllResources": false,
+            "refAllResources": true,
             "softMemoryLimit": 0,
             "verifyBufferAccess": false
         },

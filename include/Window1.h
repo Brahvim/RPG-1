@@ -17,7 +17,7 @@ extern GLFWwindow *g_window1;
 extern int const g_window1WDef; // "Default".
 extern int const g_window1HDef; // "Default".
 
-void window1Create(void);
-void window1Delete(void);
-void window1UpdateVars(void);
+void window1Create();
+void window1Delete();
+void window1UpdateVars();
 void window1CbckKey(GLFWwindow *const window, int const key, int const scancode, int const action, int const mods);

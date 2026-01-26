@@ -1,8 +1,5 @@
 #pragma once
 
-#define LOG_STR_IMPL(x) #x
-#define LOG_STR(x) LOG_STR_IMPL(x)
-
 // [Tag] File.c:00 `function()`: TEXTEXTTEXTEXT!!!
 #define LOG_PREFIX "[%s] %s:%d: `%s()`: "
 

@@ -1,10 +1,10 @@
 #version 300 es
-precision highp float;
+precision mediump float;
 
 in vec2 v_uv;
-out vec4 f_color;
+out vec4 f_fragment;
 uniform sampler2D u_atlas;
 
 void main() {
-	f_color = texture(u_atlas, v_uv);
+	f_fragment = texture(u_atlas, v_uv);
 }

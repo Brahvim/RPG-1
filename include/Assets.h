@@ -8,7 +8,7 @@
 
 typedef unsigned char pixel_t;
 
-#pragma region Working dir!
+#pragma region Current dir!
 extern char g_cwd[FILENAME_MAX];
 extern size_t g_cwdLen;
 void loadCwd(void);
@@ -93,6 +93,12 @@ enum ShaderName {
 };
 
 void loadShaders(void);
+
+/*
+ * Shaders upto 2 GiB only! If they have more than that many **[AS]C[II] `char`s**, this won't put those in.
+ * We don't check for FS changes, don't split into a string array, don't respect that GLES contract...
+ * ...But it works. Whenever it stops being enough, we rewrite this function!
+ */
 GLint loadShaderSourceFromPath(GLchar **buffer, char const *path);
 
 extern GLuint g_shaderGlIds[SHADER_TOTAL];

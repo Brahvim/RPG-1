@@ -5,51 +5,46 @@
 #include "Assets.h"
 #include "Camera.h"
 #include <stdio.h>
-#include "Quad.h"
 #include "Game.h"
 #include "Exit.h"
 #include "Log.h"
+#include "Itq.h"
 
-size_t g_gameFrameCount;
-double g_gameMillisDraw;
+struct ItqCtx *g_gameQuadCtx;
 double g_gameMillisSetup;
-struct QuadCtx *g_gameQuadCtx;
+double g_gameMillisDraw;
+size_t g_gameFrameCount;
 
-double gameMillis(void) {
+double gameMillis() {
 	return glfwGetTime() - g_gameMillisSetup;
 }
 
-void gameSetup(void) {
-	quadInitSystem();
+void gameSetup() {
+	itqInitSystem();
 	cameraInitSystem();
-	g_gameQuadCtx = quadCreate();
+	g_gameQuadCtx = itqCtxCreate();
 
-	struct Quad q = {
+	struct Itq q = {
 
-		/**/.uv = {
-			.x = (float) g_textureRects[TEXTURE_NONE].x / (float) g_atlases[ATLAS_DEFAULT]->width,
-			.y = (float) g_textureRects[TEXTURE_NONE].y / (float) g_atlases[ATLAS_DEFAULT]->height,
-			.z = (float) g_textureRects[TEXTURE_NONE].w / (float) g_atlases[ATLAS_DEFAULT]->width,
-			.w = (float) g_textureRects[TEXTURE_NONE].h / (float) g_atlases[ATLAS_DEFAULT]->height,
-		},
-		// .pos = { .x = 0.25f, .y = 0.25f, .z = 0, },
-			.pos = {.x = 0.0f, .y = 0.0f, .z = 0.0f, },
-			.scale = {.x = 1, .y = 1 },
-			.angle = 0,
+		.texRect = { 0 },
+		.scale = {.x = 1, .y = 1 },
+		.pos = {.x = 0.25f, .y = 0.25f, },
 
 	};
 
-	listAppend(g_gameQuadCtx->quads, 1, &q);
+	itqTexture(&q, ATLAS_DEFAULT, TEXTURE_NONE);
+	listAppend(g_gameQuadCtx->list, 1, &q);
+	itqDebug(&q);
 }
 
-void gameDraw(void) {
+void gameDraw() {
 	g_camera2d.update();
+	cameraUploadUbo(&g_camera2d);
 
 	// ERRGL(glClearColor(1, 1, 1, 1));
 	ERRGL(glClearColor(0.8f, 0.6f, 1.0f, 0.1f));
 	ERRGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
 	ERRGL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-	cameraUploadUbo(&g_camera2d);
-	quadDraw(g_gameQuadCtx);
+	itqCtxDraw(g_gameQuadCtx);
 }

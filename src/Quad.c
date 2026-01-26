@@ -140,9 +140,6 @@ void quadDraw(struct QuadCtx const *const p_ctx) {
 	}
 
 	ERRGL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, p_ctx->quads->size));
-
-	// for (size_t i = 0; i < p_ctx->quads->size; i++)
-	// 	quadDebug(quadListRead(p_ctx->quads, i));
 }
 
 struct QuadCtx* quadDelete(struct QuadCtx *p_ctx) {
