@@ -2,11 +2,12 @@
 #include "Log.h"
 #include "Exit.h"
 
+#define asarr(p_type, p_body) 	((p_type[]) p_body)
+#define sizearr(p_array) 		(sizeof(p_array) / sizeof(p_array[0]))
 #define likely(p_condition) 	__builtin_expect((long) (p_condition), 1)
 #define unlikely(p_condition) 	__builtin_expect((long) (p_condition), 0)
 
 #pragma region Allocation.
-
 // #include <stdlib.h> // Nope! *They* must do the `#include`. They MUST know!
 // #include <stdio.h>
 
@@ -38,7 +39,6 @@
 }\
 
 #pragma region Derivatives.
-
 #define callocStruct(p_ptr) callocArrayStride(p_ptr, 1, sizeof(typeof(*p_ptr)))
 #define MALLOC_STRUCT(p_ptr) mallocArrayStride(p_ptr, 1, sizeof(typeof(*p_ptr)))
 #define REALLOC_STRUCT(p_ptr) reallocArrayStride(p_ptr, 1, sizeof(typeof(*p_ptr)))
@@ -54,7 +54,5 @@
 #define callocArrayType(p_array, p_count, p_type) callocArrayStride(p_array, p_count, sizeof(p_type))
 #define mallocArrayType(p_array, p_count, p_type) mallocArrayStride(p_array, p_count, sizeof(p_type))
 #define reallocArrayType(p_array, p_count, p_type) reallocArrayStride(p_array, p_count, sizeof(p_type))
-
 #pragma endregion
-
 #pragma endregion

@@ -3,30 +3,52 @@
 #include <stdlib.h>
 
 #pragma region Globals.
-GLuint g_quadModelVbo = 0;
-struct SmlVec2 g_quadOffsets[4] = {
+GLuint g_quadModelOffsetsTexture = 0;
+struct SmlVec3 g_quadModelOffsets[4] = {
 
-	{ -0.5f, -0.5f },
-	{ +0.5f, -0.5f },
-	{ -0.5f, +0.5f },
-	{ +0.5f, +0.5f },
+	{ -0.5f, -0.5f, 0.0f },
+	{ +0.5f, -0.5f, 0.0f },
+	{ -0.5f, +0.5f, 0.0f },
+	{ +0.5f, +0.5f, 0.0f },
 
 };
 GLuint g_quadProgramUniformLocationCam = 0;
 GLuint g_quadProgramUniformLocationAtlas = 0;
-GLuint g_quadProgramUniformLocationQuadOffsets = 0;
+GLuint g_quadProgramUniformLocationOffsets = 0;
+GLuint g_quadProgramUniformLocationOffsetsCount = 0;
 #pragma endregion
 
-void quadInitSystem(void) {
-	ERRGL(glGenBuffers(1, &g_quadModelVbo));
-	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, g_quadModelVbo));
-	// ERRGL(glBindBufferBase(GL_ARRAY_BUFFER, 0, g_quadModelVbo));
-	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(g_quadOffsets), g_quadOffsets, GL_STATIC_DRAW));
-	// ERRGL(glBindBuffer(GL_UNIFORM_BUFFER, 0)); // Do we *really* need to be cleaning up?
+void quadInitSystem() {
+	ERRGL(glActiveTexture(GL_TEXTURE1));
+	ERRGL(glGenTextures(1, &g_quadModelOffsetsTexture));
+	ERRGL(glBindTexture(GL_TEXTURE_2D, g_quadModelOffsetsTexture));
 
-	ERRGL(g_quadProgramUniformLocationCam = glGetUniformLocation(g_shaderGlIds[SHADER_QUADS], "u_cam"));
-	ERRGL(g_quadProgramUniformLocationAtlas = glGetUniformLocation(g_shaderGlIds[SHADER_QUADS], "u_atlas"));
-	ERRGL(g_quadProgramUniformLocationQuadOffsets = glGetUniformLocation(g_shaderGlIds[SHADER_QUADS], "u_quadOffsets"));
+	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+
+	ERRGL(glTexImage2D(
+		GL_TEXTURE_2D,
+		0, GL_RGB32F,
+		sizearr(g_quadModelOffsets), 1,
+		0, GL_RGBA,
+		GL_FLOAT,
+		g_quadModelOffsets
+	));
+
+	// ...Do we *really* need to be cleaning up?
+
+#define M(p_varName, p_idenStr) \
+	ERRGL(g_quadProgramUniformLocation ## p_varName \
+	= glGetUniformLocation(g_shaderGlIds[SHADER_QUADS], p_idenStr));
+
+	M(Cam, "u_cam");
+	M(Atlas, "u_atlas");
+	M(Offsets, "u_offsets");
+	M(OffsetsCount, "u_offsetsCount");
+
+#undef M
 }
 
 struct QuadCtx* quadCreate() {
@@ -53,25 +75,19 @@ void quadInit(struct QuadCtx *const p_ctx) {
 	ERRGL(glVertexAttribDivisor(0, 1));
 	ERRGL(glVertexAttribDivisor(1, 1));
 	ERRGL(glVertexAttribDivisor(2, 1));
-	ERRGL(glVertexAttribDivisor(3, 0));
-	ERRGL(glVertexAttribDivisor(4, 1));
+	ERRGL(glVertexAttribDivisor(3, 1));
+
+	// ERRGL(glGetVertexAttribiv(2, GL_VERTEX_ATTRIB_ARRAY_DIVISOR, &cpuSideMem)); // You can READ these BACK!
 
 	ERRGL(glEnableVertexAttribArray(0));
 	ERRGL(glEnableVertexAttribArray(1));
 	ERRGL(glEnableVertexAttribArray(2));
 	ERRGL(glEnableVertexAttribArray(3));
-	ERRGL(glEnableVertexAttribArray(4));
 
 	ERRGL(glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(struct Quad), (void*) offsetof(struct Quad, uv)));
 	ERRGL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(struct Quad), (void*) offsetof(struct Quad, pos)));
 	ERRGL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct Quad), (void*) offsetof(struct Quad, scale)));
-	// Attribute `a3_corner`, isn't passed per-vertex. ...It's injected-in from `g_quadModelVbo` by the OpenGL driver!
-	ERRGL(glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(struct Quad), (void*) offsetof(struct Quad, angle)));
-
-	// ...And we define that "injection" here:
-	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, g_quadModelVbo));
-	// printi("VBO %s\n", glIsBuffer(g_quadModelVbo) ? "valid." : "invalid!");
-	ERRGL(glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(struct SmlVec2), (void*) 0));
+	ERRGL(glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(struct Quad), (void*) offsetof(struct Quad, angle)));
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	ERRGL(glBindVertexArray(0));
@@ -97,9 +113,14 @@ void quadDebug(struct Quad const *const p_quad) {
 }
 
 void quadDraw(struct QuadCtx const *const p_ctx) {
+	ERRGL(glUniform1i(g_quadProgramUniformLocationOffsetsCount, 4));
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vbo));
 	ERRGL(glUseProgram(g_shaderGlIds[SHADER_QUADS]));
 	ERRGL(glBindVertexArray(p_ctx->vao));
+
+	ERRGL(glActiveTexture(GL_TEXTURE1));
+	ERRGL(glBindTexture(GL_TEXTURE_2D, g_quadModelOffsetsTexture));
+	ERRGL(glUniform1i(g_quadProgramUniformLocationOffsets, GL_TEXTURE1 - GL_TEXTURE0));
 
 	ERRGL(glActiveTexture(GL_TEXTURE0));
 	ERRGL(glBindTexture(GL_TEXTURE_2D, g_atlases[ATLAS_DEFAULT]->glTextureId));

@@ -23,15 +23,23 @@ void gameSetup(void) {
 	quadInitSystem();
 	cameraInitSystem();
 	g_gameQuadCtx = quadCreate();
-	listAppend(g_gameQuadCtx->quads, 1, &((struct Quad) {
 
-		/**/.uv = { .x = 0.75f, .y = 0.75f, .z = 0.75f, .w = 0.75f },
-			// .pos = { .x = 0.25f, .y = 0.25f, .z = 0, },
-			.pos = { .x = 0.0f, .y = 0.0f, .z = 0.0f, },
-			.scale = { .x = 1, .y = 1 },
+	struct Quad q = {
+
+		/**/.uv = {
+			.x = (float) g_textureRects[TEXTURE_NONE].x / (float) g_atlases[ATLAS_DEFAULT]->width,
+			.y = (float) g_textureRects[TEXTURE_NONE].y / (float) g_atlases[ATLAS_DEFAULT]->height,
+			.z = (float) g_textureRects[TEXTURE_NONE].w / (float) g_atlases[ATLAS_DEFAULT]->width,
+			.w = (float) g_textureRects[TEXTURE_NONE].h / (float) g_atlases[ATLAS_DEFAULT]->height,
+		},
+		// .pos = { .x = 0.25f, .y = 0.25f, .z = 0, },
+			.pos = {.x = 0.0f, .y = 0.0f, .z = 0.0f, },
+			.scale = {.x = 1, .y = 1 },
 			.angle = 0,
 
-	}));
+	};
+
+	listAppend(g_gameQuadCtx->quads, 1, &q);
 }
 
 void gameDraw(void) {

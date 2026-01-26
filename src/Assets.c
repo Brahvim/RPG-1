@@ -4,8 +4,8 @@
 #include <memory.h>
 #include <stdio.h>
 
-#include "Assets.h"
 #include "Macros.h"
+#include "Assets.h"
 #include "Sml.h"
 #include "Gl.h"
 
@@ -37,6 +37,7 @@ static inline void mapShaders(void) {
 	g_shaderPathsVert[p_shader] = p_vert; g_shaderPathsFrag[p_shader] = p_frag;\
 	g_shaderPathLengthsVert[p_shader] = sizeof(p_vert); g_shaderPathLengthsFrag[p_shader] = sizeof(p_frag)
 	M(SHADER_QUADS, "quad.vert", "quad.frag");
+	M(SHADER_ITQS, "itq.vert", "itq.frag");
 #undef M
 }
 #pragma endregion
@@ -295,7 +296,7 @@ GLint loadShaderSourceFromPath(GLchar **p_buffer, char const *p_path) {
 }
 
 void loadMappedAtlases(void) {
-#define M(p_enum, p_var) g_atlases[ATLAS_DEFAULT] = atlasCreate(sizeof(p_var) / sizeof(p_var[0]), &(*g_atlasTextures[p_enum]));
+#define M(p_enum, p_var) g_atlases[ATLAS_DEFAULT] = atlasCreate(sizearr(p_var), &(*g_atlasTextures[p_enum]));
 	M(ATLAS_DEFAULT, g_atlasTexturesDefault);
 #undef M
 }

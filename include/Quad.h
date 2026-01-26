@@ -23,15 +23,15 @@ struct QuadCtx {
 
 };
 
-void quadInitSystem(void);
+void quadInitSystem();
 struct QuadCtx* quadCreate();
 void quadInit(struct QuadCtx *const ctx);
 void quadDebug(struct Quad const *const quad);
 void quadDraw(struct QuadCtx const *const ctx);
 struct QuadCtx* quadDelete(struct QuadCtx *ctx);
 
-extern GLuint g_quadModelVbo;
-extern struct SmlVec2 g_quadOffsets[4];
+extern GLuint g_quadModelOffsetsTexture;
+extern struct SmlVec3 g_quadModelOffsets[4];
 extern GLuint g_quadProgramUniformLocationCam;
 extern GLuint g_quadProgramUniformLocationAtlas;
-extern GLuint g_quadProgramUniformLocationQuadOffsets;
+extern GLuint g_quadProgramUniformLocationOffsets;
