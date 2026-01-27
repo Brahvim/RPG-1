@@ -5,12 +5,12 @@
 #include "Assets.h"
 #include "Camera.h"
 #include <stdio.h>
+#include "Quad2.h"
 #include "Game.h"
 #include "Exit.h"
 #include "Log.h"
-#include "Itq.h"
 
-struct ItqCtx *g_gameQuadCtx;
+struct Quad2Ctx *g_gameQuad2Ctx;
 double g_gameMillisSetup;
 double g_gameMillisDraw;
 size_t g_gameFrameCount;
@@ -20,16 +20,16 @@ double gameMillis() {
 }
 
 void gameShutdown() {
-	itqCtxDelete(g_gameQuadCtx);
+	quad2CtxDelete(g_gameQuad2Ctx);
 }
 
 void gameSetup() {
-	itqInitSystem();
+	quad2InitSystem();
 	cameraInitSystem();
-	g_gameQuadCtx = itqCtxCreate();
-	listDebug(g_gameQuadCtx->list);
+	g_gameQuad2Ctx = quad2CtxCreate();
+	listDebug(g_gameQuad2Ctx->list);
 
-	struct Itq q = {
+	struct Quad2 q = {
 
 		.texRect = { 0 },
 		.scale = {.x = 1, .y = 1 },
@@ -37,10 +37,10 @@ void gameSetup() {
 
 	};
 
-	itqTexture(&q, ATLAS_DEFAULT, TEXTURE_NONE);
-	listAppend(g_gameQuadCtx->list, 1, &q);
-	listDebug(g_gameQuadCtx->list);
-	itqDebug(&q);
+	quad2Texture(&q, ATLAS_DEFAULT, TEXTURE_NONE);
+	listAppend(g_gameQuad2Ctx->list, 1, &q);
+	listDebug(g_gameQuad2Ctx->list);
+	quad2Debug(&q);
 }
 
 void gameDraw() {
@@ -52,5 +52,5 @@ void gameDraw() {
 	ERRGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
 	ERRGL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-	itqCtxDraw(g_gameQuadCtx);
+	quad2CtxDraw(g_gameQuad2Ctx);
 }

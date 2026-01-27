@@ -1,7 +1,7 @@
-#include "Itq.h"
+#include "Quad2.h"
 #include <stdlib.h>
 
-struct SmlVec2 g_itqModel[4] = {
+struct SmlVec2 g_quad2Model[4] = {
 
 	{.x = -0.5f, .y = -0.5f},
 	{.x = +0.5f, .y = -0.5f},
@@ -9,7 +9,7 @@ struct SmlVec2 g_itqModel[4] = {
 	{.x = -0.5f, .y = +0.5f},
 
 };
-struct SmlVec2 g_itqTexcoords[4] = {
+struct SmlVec2 g_quad2Texcoords[4] = {
 
 	{.x = 0, .y = 0},
 	{.x = 1, .y = 0},
@@ -18,11 +18,11 @@ struct SmlVec2 g_itqTexcoords[4] = {
 
 };
 // GLuint g_itqProgramUniformLocation = 0;
-GLuint g_itqProgramUniformLocationAtlas = 0;
+GLuint g_quad2ProgramUniformLocationAtlas = 0;
 
-void itqInitSystem(void) {
+void quad2InitSystem(void) {
 #define M(p_varName, p_idenStr) \
-	ERRGL(g_itqProgramUniformLocation ## p_varName \
+	ERRGL(g_quad2ProgramUniformLocation ## p_varName \
 	= glGetUniformLocation(g_shaderGlIds[SHADER_ITQS], p_idenStr))
 
 	M(Atlas, "u_atlas");
@@ -30,17 +30,17 @@ void itqInitSystem(void) {
 #undef M
 }
 
-struct ItqCtx* itqCtxCreate() {
-	struct ItqCtx *ctx;
+struct Quad2Ctx* quad2CtxCreate() {
+	struct Quad2Ctx *ctx;
 	callocStruct(ctx);
 
-	ctx->list = listCreateStruct(Itq);
+	ctx->list = listCreateStruct(Quad2);
 
-	itqCtxInit(ctx);
+	quad2CtxInit(ctx);
 	return ctx;
 }
 
-void itqCtxInit(struct ItqCtx *const p_ctx) {
+void quad2CtxInit(struct Quad2Ctx *const p_ctx) {
 	ERRGL(glGenVertexArrays(1, &p_ctx->vao));
 	ERRGL(glBindVertexArray(p_ctx->vao));
 
@@ -56,7 +56,7 @@ void itqCtxInit(struct ItqCtx *const p_ctx) {
 	}
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboVertPos));
-	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizearr(g_itqModel), g_itqModel, GL_STATIC_DRAW));
+	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizearr(g_quad2Model), g_quad2Model, GL_STATIC_DRAW));
 	ERRGL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0));
 	ERRGL(glEnableVertexAttribArray(0));
 	ERRGL(glVertexAttribDivisor(0, 0));
@@ -67,26 +67,26 @@ void itqCtxInit(struct ItqCtx *const p_ctx) {
 	// It's probably best to fill them (i.e. call `glBuffer*Data()`) beforehand or something...!
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboVertTexcoords));
-	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizearr(g_itqTexcoords), g_itqTexcoords, GL_STATIC_DRAW));
+	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizearr(g_quad2Texcoords), g_quad2Texcoords, GL_STATIC_DRAW));
 	ERRGL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0));
 	ERRGL(glEnableVertexAttribArray(1));
 	ERRGL(glVertexAttribDivisor(1, 0));
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst));
-	// ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(struct Itq), NULL, GL_STREAM_DRAW));
+	// ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(struct Quad2), NULL, GL_STREAM_DRAW));
 	ERRGL(glBufferData(GL_ARRAY_BUFFER, listBytesSize(p_ctx->list), p_ctx->list->data, GL_STREAM_DRAW));
 
-	ERRGL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct Itq), (void*) offsetof(struct Itq, pos)));
+	ERRGL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct Quad2), (void*) offsetof(struct Quad2, pos)));
 	ERRGL(glEnableVertexAttribArray(2));
 	ERRGL(glVertexAttribDivisor(2, 1));
 
 	// ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst)); // Repeated. GOD KNOWS what the driver likes.
-	ERRGL(glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(struct Itq), (void*) offsetof(struct Itq, scale)));
+	ERRGL(glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(struct Quad2), (void*) offsetof(struct Quad2, scale)));
 	ERRGL(glEnableVertexAttribArray(3));
 	ERRGL(glVertexAttribDivisor(3, 1));
 
 	// ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst)); // Repeated. GOD KNOWS what the driver likes.
-	ERRGL(glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(struct Itq), (void*) offsetof(struct Itq, texRect)));
+	ERRGL(glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(struct Quad2), (void*) offsetof(struct Quad2, texRect)));
 	ERRGL(glEnableVertexAttribArray(4));
 	ERRGL(glVertexAttribDivisor(4, 1));
 
@@ -95,7 +95,7 @@ void itqCtxInit(struct ItqCtx *const p_ctx) {
 	// *"Clean up!", they said.*
 }
 
-void itqDebug(struct Itq const *const p_quad) {
+void quad2Debug(struct Quad2 const *const p_quad) {
 	printi(
 		"	Pos:		x: `%.2ff`,  y: `%.2ff`,\n",
 		p_quad->pos.x, p_quad->pos.y
@@ -110,18 +110,18 @@ void itqDebug(struct Itq const *const p_quad) {
 	);
 }
 
-struct Itq* itqCreate(struct ItqCtx *const p_ctx) {
-	struct Itq quad = { 0 };
+struct Quad2* quad2Create(struct Quad2Ctx *const p_ctx) {
+	struct Quad2 quad = { 0 };
 	listAppend(p_ctx->list, 1, &quad);
-	return itqListRead(p_ctx->list, p_ctx->list->size - 1);
+	return quad2ListRead(p_ctx->list, p_ctx->list->size - 1);
 }
 
-void itqCtxDraw(struct ItqCtx const *const p_ctx) {
+void quad2CtxDraw(struct Quad2Ctx const *const p_ctx) {
 	ERRGL(glActiveTexture(GL_TEXTURE0));
 	ERRGL(glBindVertexArray(p_ctx->vao));
 	ERRGL(glUseProgram(g_shaderGlIds[SHADER_ITQS]));
 	ERRGL(glBindTexture(GL_TEXTURE_2D, g_atlases[ATLAS_DEFAULT]->glTextureId));
-	ERRGL(glUniform1i(g_itqProgramUniformLocationAtlas, GL_TEXTURE0 - GL_TEXTURE0));
+	ERRGL(glUniform1i(g_quad2ProgramUniformLocationAtlas, GL_TEXTURE0 - GL_TEXTURE0));
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst));
 	// "Orphan" previous buffer. Let it "be GCd" for a new one:
@@ -147,13 +147,13 @@ void itqCtxDraw(struct ItqCtx const *const p_ctx) {
 	// printi("Quads list size in bytes: `%d`.\n", listBytesSize(p_ctx->list));
 }
 
-struct ItqCtx* itqCtxDelete(struct ItqCtx *p_ctx) {
+struct Quad2Ctx* quad2CtxDelete(struct Quad2Ctx *p_ctx) {
 	listDelete(p_ctx->list);
 	free(p_ctx);
 	return NULL;
 }
 
-void itqTexture(struct Itq *const p_quad, enum AtlasName const p_atlas, enum TextureName p_texture) {
+void quad2Texture(struct Quad2 *const p_quad, enum AtlasName const p_atlas, enum TextureName p_texture) {
 	float const tx = g_textureRects[p_texture].x;
 	float const ty = g_textureRects[p_texture].y;
 	float const tw = g_textureRects[p_texture].w;
