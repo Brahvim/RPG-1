@@ -56,7 +56,7 @@ void quad2CtxInit(struct Quad2Ctx *const p_ctx) {
 	}
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboVertPos));
-	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizearr(s_quad2Model), s_quad2Model, GL_STATIC_DRAW));
+	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(s_quad2Model), s_quad2Model, GL_STATIC_DRAW));
 	ERRGL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0));
 	ERRGL(glEnableVertexAttribArray(0));
 	ERRGL(glVertexAttribDivisor(0, 0));
@@ -67,7 +67,7 @@ void quad2CtxInit(struct Quad2Ctx *const p_ctx) {
 	// It's probably best to fill them (i.e. call `glBuffer*Data()`) beforehand or something...!
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboVertTexcoords));
-	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizearr(s_quad2Texcoords), s_quad2Texcoords, GL_STATIC_DRAW));
+	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(s_quad2Texcoords), s_quad2Texcoords, GL_STATIC_DRAW));
 	ERRGL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0));
 	ERRGL(glEnableVertexAttribArray(1));
 	ERRGL(glVertexAttribDivisor(1, 0));
