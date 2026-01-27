@@ -2,6 +2,7 @@
 #include "Macros.h"
 #include "Window1.h"
 
+#pragma region Globals.
 int g_window1X = 0;
 int g_window1Y = 0;
 int g_window1W = 0;
@@ -16,18 +17,19 @@ int g_window1HUnFull = 0;
 GLFWwindow *g_window1 = NULL;
 int const g_window1WDef = 640;
 int const g_window1HDef = 480;
+#pragma endregion
 
 void window1Create(void) {
-	g_window1 = glfwCreateWindow(g_window1WDef, g_window1HDef, "Game", NULL, NULL);
+	g_window1 = glfwCreateWindow(g_window1WDef, g_window1HDef, "Role Playing Game", NULL, NULL);
 	glfwSetKeyCallback(g_window1, window1CbckKey);
-	window1UpdateVars();
+	window1Update();
 }
 
 void window1Delete(void) {
 	glfwDestroyWindow(g_window1);
 }
 
-void window1UpdateVars(void) {
+void window1Update(void) {
 	glfwGetWindowPos(g_window1, &g_window1X, &g_window1Y);
 	glfwGetWindowSize(g_window1, &g_window1W, &g_window1H);
 	glfwGetFramebufferSize(g_window1, &g_window1Wfb, &g_window1Hfb);

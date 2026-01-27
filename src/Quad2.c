@@ -1,3 +1,4 @@
+#include "Exit.h"
 #include "Quad2.h"
 #include <stdlib.h>
 
@@ -5,8 +6,8 @@ static struct SmlVec2 s_quad2Model[4] = {
 
 	{.x = -0.5f, .y = -0.5f},
 	{.x = +0.5f, .y = -0.5f},
-	{.x = +0.5f, .y = +0.5f},
 	{.x = -0.5f, .y = +0.5f},
+	{.x = +0.5f, .y = +0.5f},
 
 };
 static struct SmlVec2 s_quad2Texcoords[4] = {

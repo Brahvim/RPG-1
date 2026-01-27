@@ -1,10 +1,7 @@
+#define __USE_XOPEN
 #include <stb/stb_image.h>
 #include <glad/gles2.h>
-
-#define __USE_XOPEN
 #include <stdlib.h>
-#undef __USE_XOPEN
-
 #include <string.h>
 #include <stdio.h>
 
@@ -12,8 +9,10 @@
 #include "Macros.h"
 #include "Assets.h"
 #include "Game.h"
+#include "Exit.h"
 #include "Log.h"
 #include "Gl.h"
+#undef __USE_XOPEN
 
 static void cliFlagGpu(int const p_argCount, char const **p_argValues) {
 	char gpu = 'i';
@@ -46,7 +45,6 @@ print:
 }
 
 int main(int const p_argCount, char const **p_argValues) {
-	putchar('\n');
 	cliFlagGpu(p_argCount, p_argValues);
 
 	glfwInit();
@@ -55,31 +53,28 @@ int main(int const p_argCount, char const **p_argValues) {
 	glfwMakeContextCurrent(g_window1);
 	gladLoadGLES2(glfwGetProcAddress);
 
-	puti("OpenGL Vendor:");
-	puti(glGetString(GL_VENDOR));
-
 	loadCwd();
 	loadShaders();
 	loadTextures();
 	loadMappedAtlases();
-
+	puti("OpenGL Vendor:");
+	puti(glGetString(GL_VENDOR));
 	g_gameMillisSetup = glfwGetTime();
+
 	gameSetup();
 
 	while (likely(!glfwWindowShouldClose(g_window1))) {
 
 		glfwPollEvents();
-		++g_gameFrameCount;
-		window1UpdateVars();
-		g_gameMillisDraw = glfwGetTime();
 
+		g_gameMillisDraw = glfwGetTime();
+		++g_gameFrameCount;
+		window1Update();
 		gameDraw();
+
 		glfwSwapBuffers(g_window1);
 
 	}
 
-	gameShutdown();
-	window1Delete();
-	glfwTerminate();
 	gameExit(EXIT_REASON_SUCCESS);
 }

@@ -1,4 +1,5 @@
 #include "Log.h"
+#include "Exit.h"
 #include "List.h"
 #include <stdio.h>
 #include "Macros.h"

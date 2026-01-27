@@ -6,6 +6,7 @@
 
 #include "Macros.h"
 #include "Assets.h"
+#include "Exit.h"
 #include "Sml.h"
 #include "Gl.h"
 

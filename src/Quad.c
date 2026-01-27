@@ -1,4 +1,5 @@
 #include "Quad.h"
+#include "Exit.h"
 #include "Macros.h"
 #include <stdlib.h>
 

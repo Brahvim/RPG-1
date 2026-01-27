@@ -1,5 +1,4 @@
 #pragma once
-#include "Exit.h"
 
 #define STR(x) #x
 #define STR2(x) STR(x)
