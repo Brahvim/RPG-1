@@ -26,16 +26,11 @@ struct Quad2Ctx {
 
 };
 
-extern struct SmlVec2 g_quad2Model[4];
-extern struct SmlVec2 g_quad2Texcoords[4];
-// extern GLuint g_itqProgramUniformLocation;
-extern GLuint g_quad2ProgramUniformLocationAtlas;
-
 void quad2InitSystem();
 struct Quad2Ctx* quad2CtxCreate();
 void quad2CtxInit(struct Quad2Ctx *const ctx);
 void quad2Debug(struct Quad2 const *const quad);
-struct Quad2* quad2Create(struct Quad2Ctx *const ctx);
 void quad2CtxDraw(struct Quad2Ctx const *const ctx);
 struct Quad2Ctx* quad2CtxDelete(struct Quad2Ctx *ctx);
+struct Quad2* quad2Create(struct Quad2Ctx *const ctx);
 void quad2Texture(struct Quad2 *const quad, enum AtlasName const atlas, enum TextureName texture);

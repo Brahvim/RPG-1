@@ -26,6 +26,7 @@ void gameShutdown() {
 void gameSetup() {
 	quad2InitSystem();
 	cameraInitSystem();
+
 	g_gameQuad2Ctx = quad2CtxCreate();
 	listDebug(g_gameQuad2Ctx->list);
 

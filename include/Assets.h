@@ -86,7 +86,7 @@ struct Atlas* atlasCreate(size_t const textureCount, int const *const textures);
 enum ShaderName {
 
 	SHADER_QUADS,
-	SHADER_ITQS,
+	SHADER_QUAD2,
 
 	SHADER_TOTAL
 

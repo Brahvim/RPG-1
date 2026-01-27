@@ -15,7 +15,7 @@
 #include "Log.h"
 #include "Gl.h"
 
-void cliFlagGpu(int const p_argCount, char const **p_argValues) {
+static void cliFlagGpu(int const p_argCount, char const **p_argValues) {
 	char gpu = 'i';
 	if (p_argCount != 2) goto print;
 

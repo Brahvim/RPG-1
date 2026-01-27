@@ -37,7 +37,7 @@ static inline void mapShaders(void) {
 	g_shaderPathsVert[p_shader] = p_vert; g_shaderPathsFrag[p_shader] = p_frag;\
 	g_shaderPathLengthsVert[p_shader] = sizeof(p_vert); g_shaderPathLengthsFrag[p_shader] = sizeof(p_frag)
 	M(SHADER_QUADS, "quad.vert", "quad.frag");
-	M(SHADER_ITQS, "itq.vert", "itq.frag");
+	M(SHADER_QUAD2, "q2.vert", "q2.frag");
 #undef M
 }
 #pragma endregion
