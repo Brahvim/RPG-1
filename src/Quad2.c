@@ -56,40 +56,47 @@ void quad2CtxInit(struct Quad2Ctx *const p_ctx) {
 #undef N
 	}
 
+	GLuint attrib;
+
+	attrib = 0;
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboVertPos));
 	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(s_quad2Model), s_quad2Model, GL_STATIC_DRAW));
-	ERRGL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0));
-	ERRGL(glEnableVertexAttribArray(0));
-	ERRGL(glVertexAttribDivisor(0, 0));
+	ERRGL(glVertexAttribPointer(attrib, 2, GL_FLOAT, GL_FALSE, 0, 0));
+	ERRGL(glEnableVertexAttribArray(attrib));
+	ERRGL(glVertexAttribDivisor(attrib, 0));
 
 	// It's not important to fill the buffers RIGHT here.
 	// ...Just that they *are* bound right now; so I just... fill them here!
 	// Buuuuuuuuut driver shenanigans exist! Most likely shouldn't fill HERE...!
 	// It's probably best to fill them (i.e. call `glBuffer*Data()`) beforehand or something...!
 
+	attrib = 1;
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboVertTexcoords));
 	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(s_quad2Texcoords), s_quad2Texcoords, GL_STATIC_DRAW));
-	ERRGL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0));
-	ERRGL(glEnableVertexAttribArray(1));
-	ERRGL(glVertexAttribDivisor(1, 0));
+	ERRGL(glVertexAttribPointer(attrib, 2, GL_FLOAT, GL_FALSE, 0, 0));
+	ERRGL(glEnableVertexAttribArray(attrib));
+	ERRGL(glVertexAttribDivisor(attrib, 0));
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst));
 	// ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(struct Quad2), NULL, GL_STREAM_DRAW));
 	ERRGL(glBufferData(GL_ARRAY_BUFFER, listBytesSize(p_ctx->list), p_ctx->list->data, GL_STREAM_DRAW));
 
-	ERRGL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct Quad2), (void*) offsetof(struct Quad2, pos)));
-	ERRGL(glEnableVertexAttribArray(2));
-	ERRGL(glVertexAttribDivisor(2, 1));
+	attrib = 2;
+	ERRGL(glVertexAttribPointer(attrib, 2, GL_FLOAT, GL_FALSE, sizeof(struct Quad2), (void*) offsetof(struct Quad2, pos)));
+	ERRGL(glEnableVertexAttribArray(attrib));
+	ERRGL(glVertexAttribDivisor(attrib, 1));
 
+	attrib = 3;
 	// ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst)); // Repeated. GOD KNOWS what the driver likes.
-	ERRGL(glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(struct Quad2), (void*) offsetof(struct Quad2, scale)));
-	ERRGL(glEnableVertexAttribArray(3));
-	ERRGL(glVertexAttribDivisor(3, 1));
+	ERRGL(glVertexAttribPointer(attrib, 2, GL_FLOAT, GL_FALSE, sizeof(struct Quad2), (void*) offsetof(struct Quad2, scale)));
+	ERRGL(glEnableVertexAttribArray(attrib));
+	ERRGL(glVertexAttribDivisor(attrib, 1));
 
+	attrib = 4;
 	// ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst)); // Repeated. GOD KNOWS what the driver likes.
-	ERRGL(glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(struct Quad2), (void*) offsetof(struct Quad2, texRect)));
-	ERRGL(glEnableVertexAttribArray(4));
-	ERRGL(glVertexAttribDivisor(4, 1));
+	ERRGL(glVertexAttribPointer(attrib, 4, GL_FLOAT, GL_FALSE, sizeof(struct Quad2), (void*) offsetof(struct Quad2, texRect)));
+	ERRGL(glEnableVertexAttribArray(attrib));
+	ERRGL(glVertexAttribDivisor(attrib, 1));
 
 	// ERRGL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	// ERRGL(glBindVertexArray(0));
@@ -139,7 +146,6 @@ void quad2CtxDraw(struct Quad2Ctx const *const p_ctx) {
 	ERRGL(glDisable(GL_DEPTH_TEST));
 	ERRGL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 	ERRGL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, p_ctx->list->size));
-	// printi("Quads list size in bytes: `%d`.\n", listBytesSize(p_ctx->list));
 }
 
 struct Quad2* quad2Create(struct Quad2Ctx *const p_ctx) {
