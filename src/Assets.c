@@ -13,6 +13,7 @@
 
 #pragma region Maps.
 size_t g_atlasTextureCounts[ATLAS_TOTAL] = { 0 };
+size_t *g_atlasTextureIndices[ATLAS_TOTAL] = { 0 };
 enum TextureName *g_atlasTextureNames[ATLAS_TOTAL] = { 0 };
 
 static inline void mapTextures(void) {
@@ -198,8 +199,6 @@ struct Atlas* atlasCreate(enum AtlasName const p_atlas) {
 
 	}
 
-	free(rects);
-
 	atlas->width = 0;
 	for (size_t i = 0; i < atlas->count; ++i) {
 
@@ -286,6 +285,7 @@ struct Atlas* atlasCreate(enum AtlasName const p_atlas) {
 	// ERRGL(glGenerateMipmap(GL_TEXTURE_2D));
 	ERRGL(glBindTexture(GL_TEXTURE_2D, 0)); // Cleaning up? Us? HAH!
 
+	free(rects);
 	return atlas;
 }
 
@@ -345,15 +345,45 @@ GLint loadShaderSourceFromPath(GLchar **p_buffer, char const *p_path) {
 	return length;
 }
 
+static void atlasReverseMapNames(enum AtlasName const p_atlas, size_t *const p_indices) {
+	for (size_t i = 0; i < TEXTURE_TOTAL; i++) {
+
+		g_atlasTextureIndices[p_atlas] = p_indices;
+
+		for (size_t j = 0; j < g_atlasTextureCounts[p_atlas]; j++) {
+
+			if (i == g_atlasTextureNames[p_atlas][j]) {
+
+				g_atlasTextureIndices[p_atlas][i] = j;
+				break;
+
+			}
+
+		}
+
+	}
+}
+
 void loadMappedAtlases(void) {
 #define M(p_enum, ...) { \
-		static enum TextureName s_##p_enum[] = { __VA_ARGS__ }; \
-		g_atlasTextureCounts[p_enum] = sizearr(s_##p_enum); \
-		g_atlasTextureNames[p_enum] = s_##p_enum; \
+		static size_t indices[TEXTURE_TOTAL] = { -1 }; \
+		static enum TextureName texs[] = { __VA_ARGS__ }; \
+		g_atlasTextureCounts[p_enum] = sizearr(texs); \
+		memset(indices, -1, TEXTURE_TOTAL); \
+		g_atlasTextureNames[p_enum] = texs; \
 		g_atlases[p_enum] = atlasCreate(p_enum); \
+		atlasReverseMapNames(p_enum, indices); \
 	}
 
-	M(ATLAS_DEFAULT, TEXTURE_MISSING, TEXTURE_BLACK, TEXTURE_WHITE, TEXTURE_GRID);
+
+	M(ATLAS_DEFAULT,
+
+	TEXTURE_GRID,
+	TEXTURE_BLACK,
+	TEXTURE_WHITE,
+	TEXTURE_MISSING,
+
+	);
 
 #undef M
 }

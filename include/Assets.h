@@ -84,6 +84,7 @@ enum AtlasName {
 void loadMappedAtlases(void);
 extern struct Atlas *g_atlases[ATLAS_TOTAL];
 extern size_t g_atlasTextureCounts[ATLAS_TOTAL];
+extern size_t *g_atlasTextureIndices[ATLAS_TOTAL];
 struct Atlas* atlasCreate(enum AtlasName const atlas);
 extern enum TextureName *g_atlasTextureNames[ATLAS_TOTAL];
 #pragma endregion

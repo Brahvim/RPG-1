@@ -177,11 +177,12 @@ struct QuadCtx* quadCtxDelete(struct QuadCtx *p_ctx) {
 }
 
 void quadTexture(struct Quad *const p_quad, enum AtlasName const p_atlas, enum TextureName p_texture) {
+	size_t const rid = g_atlasTextureIndices[p_atlas][p_texture];
 	struct Atlas *atlas = g_atlases[p_atlas];
-	float const tx = atlas->rects[p_texture].x;
-	float const ty = atlas->rects[p_texture].y;
-	float const tw = atlas->rects[p_texture].w;
-	float const th = atlas->rects[p_texture].h;
+	float const tx = atlas->rects[rid].x;
+	float const ty = atlas->rects[rid].y;
+	float const tw = atlas->rects[rid].w;
+	float const th = atlas->rects[rid].h;
 	float const ah = atlas->height;
 	float const aw = atlas->width;
 
