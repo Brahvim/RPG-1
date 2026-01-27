@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Gl.h"
-#include "Quad2.h"
+#include "Quad.h"
 #include <stddef.h>
 
 void gameDraw();
@@ -12,4 +12,4 @@ double gameMillis();
 extern size_t g_gameFrameCount;
 extern double g_gameMillisDraw;
 extern double g_gameMillisSetup;
-extern struct Quad2Ctx *g_gameQuad2Ctx;
+extern struct QuadCtx *g_gameQuadCtx;

@@ -5,13 +5,13 @@
 #include "Assets.h"
 #include "Camera.h"
 #include <stdio.h>
-#include "Quad2.h"
 #include <math.h>
+#include "Quad.h"
 #include "Game.h"
 #include "Exit.h"
 #include "Log.h"
 
-struct Quad2Ctx *g_gameQuad2Ctx;
+struct QuadCtx *g_gameQuadCtx;
 double g_gameMillisSetup;
 double g_gameMillisDraw;
 size_t g_gameFrameCount;
@@ -64,34 +64,41 @@ double gameMillis() {
 }
 
 void gameShutdown() {
-	quad2CtxDelete(g_gameQuad2Ctx);
+	quadCtxDelete(g_gameQuadCtx);
 }
 
 void gameSetup() {
-	quad2InitSystem();
+	quadInitSystem();
 	cameraInitSystem();
-	g_gameQuad2Ctx = quad2CtxCreate();
+	g_gameQuadCtx = quadCtxCreate();
 
-	struct Quad2 q = {
+	struct Quad q = {
 
 		.pos = { 0 },
 		.texRect = { 0 },
-		.scale = {.x = 1, .y = 1 },
+		.scale = { 1, 1 },
+		.tintRgba = { 0, 0, 1, 0 },
 
 	};
 
-	quad2Texture(&q, ATLAS_DEFAULT, TEXTURE_TEST1);
-	listAppend(g_gameQuad2Ctx->list, 1, &q);
+	quadTexture(&q, ATLAS_DEFAULT, TEXTURE_WHITE);
+	listAppend(g_gameQuadCtx->list, 1, &q);
+
+	quadTexture(&q, ATLAS_DEFAULT, TEXTURE_WHITE);
+	q.scale = ((struct SmlVec2) { 0.1f, 0.1f });
+	q.pos = ((struct SmlVec2) { -0.5f, -0.5f });
+	listAppend(g_gameQuadCtx->list, 1, &q);
 }
 
 void gameDraw() {
 	g_camera2d.update();
 	cameraUploadUbo(&g_camera2d);
-	quad2ListRead(g_gameQuad2Ctx->list, 0)->pos.x = fabs(sin(g_gameMillisDraw)) - 0.5f;
+	quadListRead(g_gameQuadCtx->list, 0)->pos.x = fabs(sin(g_gameMillisDraw)) - 0.5f;
 
-	ERRGL(glClearColor(0.8f, 0.6f, 1.0f, 0.1f));
+	ERRGL(glClearColor(0, 0, 0, 0));
+	// ERRGL(glClearColor(0.8f, 0.6f, 1.0f, 0.1f));
 	ERRGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
 	ERRGL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-	quad2CtxDraw(g_gameQuad2Ctx);
+	quadCtxDraw(g_gameQuadCtx);
 }

@@ -15,15 +15,6 @@ void loadCwd(void);
 #pragma endregion
 
 #pragma region Textures.
-struct Rect {
-
-	int x;
-	int y;
-	int w;
-	int h;
-
-};
-
 enum Flip {
 
 	FLIP_NONE,
@@ -33,15 +24,26 @@ enum Flip {
 
 };
 
-enum TextureName {
+struct Rect {
 
-	TEXTURE_NONE,
-	TEXTURE_TEST0,
-	TEXTURE_TEST1,
-
-	TEXTURE_TOTAL
+	int x;
+	int y;
+	int w;
+	int h;
 
 };
+
+#define T(x) TEXTURE_ ## x
+enum TextureName {
+
+	T(MISSING),
+	T(WHITE),
+	T(GRID),
+
+	T(TOTAL)
+
+};
+#undef T
 
 void loadTextures(void);
 
@@ -68,13 +70,15 @@ struct Atlas {
 
 };
 
+#define A(x) ATLAS_ ## x
 enum AtlasName {
 
-	ATLAS_DEFAULT,
+	A(DEFAULT),
 
-	ATLAS_TOTAL
+	A(TOTAL)
 
 };
+#undef T
 
 void loadMappedAtlases(void);
 extern int *g_atlasTextures[ATLAS_TOTAL];
@@ -83,14 +87,15 @@ struct Atlas* atlasCreate(size_t const textureCount, int const *const textures);
 #pragma endregion
 
 #pragma region Shaders.
+#define S(x) SHADER_ ## x
 enum ShaderName {
 
-	SHADER_QUADS,
-	SHADER_QUAD2,
+	S(QUADS),
 
-	SHADER_TOTAL
+	S(TOTAL)
 
 };
+#undef S
 
 void loadShaders(void);
 

@@ -1,37 +1,36 @@
 #pragma once
+
 #include "Gl.h"
 #include "Sml.h"
 #include "List.h"
 #include "Assets.h"
 
-#define quadListRead(p_list, p_id) ((struct Quad*) listRead(p_list, p_id))
-
 struct Quad {
 
-	float angle;
-	struct SmlQuat uv;
-	struct SmlVec3 pos;
+	struct SmlVec2 pos;
 	struct SmlVec2 scale;
+	struct SmlQuat texRect;
+	struct SmlQuat tintRgba;
 
 };
 
 struct QuadCtx {
 
 	GLuint vao;
-	GLuint vbo;
-	struct List *quads;
+	GLuint vboInst;
+	GLuint vboVertPos;
+	GLuint vboVertTexcoords;
+
+	struct List *list;
 
 };
 
 void quadInitSystem();
-struct QuadCtx* quadCreate();
-void quadInit(struct QuadCtx *const ctx);
+struct QuadCtx* quadCtxCreate();
+void quadCtxInit(struct QuadCtx *const ctx);
 void quadDebug(struct Quad const *const quad);
-void quadDraw(struct QuadCtx const *const ctx);
-struct QuadCtx* quadDelete(struct QuadCtx *ctx);
-
-extern GLuint g_quadModelOffsetsTexture;
-extern struct SmlVec3 g_quadModelOffsets[4];
-extern GLuint g_quadProgramUniformLocationCam;
-extern GLuint g_quadProgramUniformLocationAtlas;
-extern GLuint g_quadProgramUniformLocationOffsets;
+void quadCtxDraw(struct QuadCtx const *const ctx);
+struct QuadCtx* quadCtxDelete(struct QuadCtx *ctx);
+struct Quad* quadCreate(struct QuadCtx *const ctx);
+#define quadListRead(p_list, p_id) ((struct Quad*) listRead(p_list, p_id))
+void quadTexture(struct Quad *const quad, enum AtlasName const atlas, enum TextureName texture);
