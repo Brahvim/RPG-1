@@ -177,12 +177,13 @@ struct QuadCtx* quadCtxDelete(struct QuadCtx *p_ctx) {
 }
 
 void quadTexture(struct Quad *const p_quad, enum AtlasName const p_atlas, enum TextureName p_texture) {
-	float const tx = g_textureRects[p_texture].x;
-	float const ty = g_textureRects[p_texture].y;
-	float const tw = g_textureRects[p_texture].w;
-	float const th = g_textureRects[p_texture].h;
-	float const ah = g_atlases[p_atlas]->height;
-	float const aw = g_atlases[p_atlas]->width;
+	struct Atlas *atlas = g_atlases[p_atlas];
+	float const tx = atlas->rects[p_texture].x;
+	float const ty = atlas->rects[p_texture].y;
+	float const tw = atlas->rects[p_texture].w;
+	float const th = atlas->rects[p_texture].h;
+	float const ah = atlas->height;
+	float const aw = atlas->width;
 
 	// p_quad->texRect.x = tx / aw; // Texture AABB `x`,
 	// p_quad->texRect.y = ty / ah; // Texture AABB `y`,
@@ -192,7 +193,7 @@ void quadTexture(struct Quad *const p_quad, enum AtlasName const p_atlas, enum T
 	// Done!
 	//
 	// ...But wait!
-	// Textures in an atlas can BLEED after mipmapping!
+	// Textures in an atlas can BLEED into each other after mipmapping!
 	// ...To fix that, we limit their exact bounds by half a pixel or so, as done below...!:
 
 	// Inversion:

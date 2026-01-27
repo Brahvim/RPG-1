@@ -15,15 +15,6 @@ void loadCwd(void);
 #pragma endregion
 
 #pragma region Textures.
-enum Flip {
-
-	FLIP_NONE,
-	FLIP_VERTICAL,
-	FLIP_HORIZONTAL,
-	FLIP_ON_BOTH_AXES
-
-};
-
 struct Rect {
 
 	int x;
@@ -33,11 +24,21 @@ struct Rect {
 
 };
 
+enum TextureFlip { // A frag-shader branch IS the fastest method!
+
+	FLIP_NONE,
+	FLIP_VERTICAL,
+	FLIP_HORIZONTAL,
+	FLIP_ON_BOTH_AXES
+
+};
+
 #define T(x) TEXTURE_ ## x
 enum TextureName {
 
 	T(MISSING),
 	T(WHITE),
+	T(BLACK),
 	T(GRID),
 
 	T(TOTAL)
@@ -48,9 +49,9 @@ enum TextureName {
 void loadTextures(void);
 
 extern pixel_t *g_textureData[TEXTURE_TOTAL];
-extern struct Rect g_textureRects[TEXTURE_TOTAL];
 extern char const *g_texturePaths[TEXTURE_TOTAL];
 extern size_t g_texturePathLengths[TEXTURE_TOTAL];
+extern struct SmlVec2 g_textureDims[TEXTURE_TOTAL];
 #pragma endregion
 
 #pragma region Atlases.
@@ -78,12 +79,13 @@ enum AtlasName {
 	A(TOTAL)
 
 };
-#undef T
+#undef A
 
 void loadMappedAtlases(void);
-extern int *g_atlasTextures[ATLAS_TOTAL];
 extern struct Atlas *g_atlases[ATLAS_TOTAL];
-struct Atlas* atlasCreate(size_t const textureCount, int const *const textures);
+extern size_t g_atlasTextureCounts[ATLAS_TOTAL];
+struct Atlas* atlasCreate(enum AtlasName const atlas);
+extern enum TextureName *g_atlasTextureNames[ATLAS_TOTAL];
 #pragma endregion
 
 #pragma region Shaders.

@@ -11,23 +11,13 @@
 #include "Gl.h"
 
 #pragma region Maps.
-int g_atlasTexturesDefault[] = {
-
-	TEXTURE_MISSING,
-	TEXTURE_WHITE,
-	TEXTURE_GRID,
-
-};
-
-int *g_atlasTextures[ATLAS_TOTAL] = {
-
-	g_atlasTexturesDefault,
-
-};
+size_t g_atlasTextureCounts[ATLAS_TOTAL] = { 0 };
+enum TextureName *g_atlasTextureNames[ATLAS_TOTAL] = { 0 };
 
 static inline void mapTextures(void) {
 #define M(p_texture, p_path) g_texturePaths[p_texture] = p_path; g_texturePathLengths[p_texture] = sizeof(p_path)
 	M(TEXTURE_MISSING, "missing.png");
+	M(TEXTURE_BLACK, "black.png");
 	M(TEXTURE_WHITE, "white.png");
 	M(TEXTURE_GRID, "grid.png");
 #undef M
@@ -50,8 +40,8 @@ struct Atlas *g_atlases[ATLAS_TOTAL];
 
 pixel_t *g_textureData[TEXTURE_TOTAL];
 char const *g_texturePaths[TEXTURE_TOTAL];
-struct Rect g_textureRects[TEXTURE_TOTAL];
 size_t g_texturePathLengths[TEXTURE_TOTAL];
+struct SmlVec2 g_textureDims[TEXTURE_TOTAL];
 
 GLuint g_shaderGlIds[SHADER_TOTAL];
 char *g_shaderPathsVert[SHADER_TOTAL];
@@ -78,7 +68,7 @@ static void loadShaderArrays(char *p_paths[SHADER_TOTAL], size_t p_pathLengths[S
 		strncat(fpath, g_cwd, sizeof(char) * g_cwdLen);
 		strncat(fpath, fdir, sizeof(char) * sizeof(fdir));
 		strncat(fpath, fname, sizeof(char) * p_pathLengths[i]);
-		loadShaderSourceFromPath(&p_sources[i], fpath);
+		/*		*/ loadShaderSourceFromPath(&p_sources[i], fpath);
 
 	}
 }
@@ -90,10 +80,10 @@ static int cmpStbrpRectId(void const *p_first, void const *p_second) {
 }
 #pragma endregion
 
-struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
+struct Atlas* atlasCreate(enum AtlasName const p_atlas) {
 	struct Atlas *atlas;
 	callocStruct(atlas);
-	atlas->count = p_count;
+	atlas->count = g_atlasTextureCounts[p_atlas];
 	callocArray(atlas->rects, atlas->count);
 
 	int width = 0; 	// Widths' max.
@@ -105,9 +95,9 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	// puti("\nIn the loop that finds the highest width as well as the sum of heights:");
 	for (size_t i = 0; i < atlas->count; ++i) {
 
-		int const t = p_textures[i];
-		int const w = g_textureRects[t].w;
-		int const h = g_textureRects[t].h;
+		int const t = g_atlasTextureNames[p_atlas][i];
+		int const w = g_textureDims[t].x;
+		int const h = g_textureDims[t].y;
 
 		// printi(
 		// 	"`%s`, width `%d`, height `%d`.\n",
@@ -128,9 +118,9 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	// Convert data in `Rect`-form to local `stbrp_rect`s:
 	for (size_t i = 0; i < atlas->count; ++i) {
 
-		int const t = p_textures[i];
-		int const w = g_textureRects[t].w;
-		int const h = g_textureRects[t].h;
+		int const t = i; // p_textures[i];
+		int const w = g_textureDims[t].x;
+		int const h = g_textureDims[t].y;
 
 		// printi(
 		// 	"`%s`, width `%d`, height `%d`.\n",
@@ -148,7 +138,6 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 
 	struct stbrp_node *nodes;
 	struct stbrp_context ctx;
-
 	callocArray(nodes, width);
 
 	stbrp_init_target(&ctx, width, height, nodes, width);
@@ -200,8 +189,8 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 	// Blit packed textures into atlas:
 	for (size_t i = 0; i < atlas->count; ++i) {
 
-		int const texid = rects[i].id;
-		pixel_t const *const texpix = g_textureData[texid];
+		int const t = rects[i].id;
+		pixel_t const *const texpix = g_textureData[g_atlasTextureNames[p_atlas][t]];
 
 		int const x = rects[i].x;
 		int const y = rects[i].y;
@@ -211,7 +200,7 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 
 		// printi(
 		// 	"Placed `%s`, width `%d`, height `%d` at position `(%d, %d)`.\n",
-		// 	g_texturePaths[texid], w, h, x, y
+		// 	g_texturePaths[t], w, h, x, y
 		// );
 
 		ERRGL(glTexSubImage2D(
@@ -230,6 +219,11 @@ struct Atlas* atlasCreate(size_t const p_count, int const *const p_textures) {
 
 		struct stbrp_rect const *const rs = rects + i;
 		struct Rect *ra = atlas->rects + rs->id;
+
+		printi(
+			"Tex placement: `[ %d, %d, %d, %d ]`.\n",
+			rs->x, rs->y, rs->w, rs->h
+		);
 
 		ra->x = rs->x;
 		ra->y = rs->y;
@@ -299,10 +293,15 @@ GLint loadShaderSourceFromPath(GLchar **p_buffer, char const *p_path) {
 }
 
 void loadMappedAtlases(void) {
-#define M(p_enum, p_var) \
-g_atlases[ATLAS_DEFAULT] = atlasCreate(sizearr(p_var), g_atlasTextures[p_enum] = p_var)
+#define M(p_enum, ...) { \
+		static enum TextureName s_##p_enum[] = { __VA_ARGS__ }; \
+		g_atlasTextureCounts[p_enum] = sizearr(s_##p_enum); \
+		g_atlasTextureNames[p_enum] = s_##p_enum; \
+		g_atlases[p_enum] = atlasCreate(p_enum); \
+	}
 
-	M(ATLAS_DEFAULT, g_atlasTexturesDefault);
+	// M(ATLAS_DEFAULT, TEXTURE_MISSING, TEXTURE_BLACK, TEXTURE_WHITE, TEXTURE_GRID);
+	M(ATLAS_DEFAULT, TEXTURE_MISSING, TEXTURE_BLACK, TEXTURE_GRID);
 
 #undef M
 }
@@ -330,8 +329,13 @@ void loadTextures(void) {
 		// stbi_info(fpath, &w, &h, &c);
 		// printi("`stbi_info()`: `%s`, width `%d`, height `%d`, channels-count `%d`.\n", fpath, w, h, c);
 
-		g_textureData[i] = stbi_load(fpath, &g_textureRects[i].w, &g_textureRects[i].h, NULL, STBI_rgb_alpha);
-		printi("Attempted loading `%s`, width `%d`, height `%d`...\n", g_texturePaths[i], g_textureRects[i].w, g_textureRects[i].h);
+		int w; int h;
+		g_textureData[i] = stbi_load(fpath, &w, &h, NULL, STBI_rgb_alpha);
+		g_textureDims[i].x = (float) w; g_textureDims[i].y = (float) h;
+		printi(
+			"Attempted loading `%s`, width `%d`, height `%d`...\n",
+			g_texturePaths[i], w, h
+		);
 
 	}
 

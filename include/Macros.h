@@ -2,7 +2,8 @@
 
 #define STR(x) #x
 #define STR2(x) STR(x)
-#define CAT(x, y) x ## y
+#define CAT(x, y) x##y
+#define CALL(f, x) f(x)
 #define CAT2(x, y) CAT(x, y)
 
 #define asarr(p_type, p_body) 	((p_type[]) p_body)
