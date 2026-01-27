@@ -37,8 +37,8 @@ enum TextureFlip { // A frag-shader branch IS the fastest method!
 enum TextureName {
 
 	T(MISSING),
-	T(WHITE),
 	T(BLACK),
+	T(WHITE),
 	T(GRID),
 
 	T(TOTAL)

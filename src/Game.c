@@ -84,7 +84,8 @@ void gameSetup() {
 	quadTexture(&q, ATLAS_DEFAULT, TEXTURE_GRID);
 	listAppend(g_gameQuadCtx->list, 1, &q);
 
-	quadTexture(&q, ATLAS_DEFAULT, TEXTURE_WHITE);
+	q.tintRgba = ((struct SmlQuat) { 0, 0, 1, 0 });
+	quadTexture(&q, ATLAS_DEFAULT, TEXTURE_BLACK);
 	q.scale = ((struct SmlVec2) { 0.1f, 0.1f });
 	q.pos = ((struct SmlVec2) { -0.5f, -0.5f });
 	listAppend(g_gameQuadCtx->list, 1, &q);
@@ -96,7 +97,7 @@ void gameDraw() {
 	quadListRead(g_gameQuadCtx->list, 0)->pos.x = fabs(sin(g_gameMillisDraw)) - 0.5f;
 
 	// ERRGL(glClearColor(0, 0, 0, 0));
-	ERRGL(glClearColor(0.8f, 0.6f, 1.0f, 0.1f));
+	ERRGL(glClearColor(0.8f, 0.6f, 1.0f, 1.0f));
 	ERRGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
 	ERRGL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 

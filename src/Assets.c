@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <memory.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "Macros.h"
 #include "Assets.h"
@@ -114,11 +115,14 @@ struct Atlas* atlasCreate(enum AtlasName const p_atlas) {
 
 	}
 
+	atlas->width = width;
+	atlas->height = height;
+
 	// puti("\nIn the loop that converts data in `Rect`-form to local `stbrp_rect`s:");
 	// Convert data in `Rect`-form to local `stbrp_rect`s:
 	for (size_t i = 0; i < atlas->count; ++i) {
 
-		int const t = i; // p_textures[i];
+		int const t = g_atlasTextureNames[p_atlas][i];
 		int const w = g_textureDims[t].x;
 		int const h = g_textureDims[t].y;
 
@@ -127,14 +131,11 @@ struct Atlas* atlasCreate(enum AtlasName const p_atlas) {
 		// 	g_texturePaths[t], w, h
 		// );
 
-		rects[i].id = t;
+		rects[i].id = i;
 		rects[i].w = w;
 		rects[i].h = h;
 
 	}
-
-	atlas->width = width;
-	atlas->height = height;
 
 	struct stbrp_node *nodes;
 	struct stbrp_context ctx;
@@ -154,6 +155,77 @@ struct Atlas* atlasCreate(enum AtlasName const p_atlas) {
 		free(atlas);
 		free(rects);
 		return NULL;
+
+	}
+
+	// Since we stored actual `TextureName`s into our `stbrp_rect`s,
+	// ...we must now convert back:
+	//
+	// enum TextureName *namesIndices;
+	// callocArray(namesIndices, atlas->count);
+	// for (size_t i = 0; i < atlas->count; i++) {
+	//
+	// 	struct stbrp_rect const *const r = rects + i;
+	//
+	// 	for (size_t j = 0; j < atlas->count; j++) {
+	//
+	// 		if (g_atlasTextureNames[p_atlas][j] == r->id) {
+	//
+	// 			namesIndices[i] = j;
+	//
+	// 		}
+	//
+	// 	}
+	//
+	// }
+
+	// Change back to the `struct Rect` format:
+	for (size_t i = 0; i < atlas->count; ++i) {
+
+		struct stbrp_rect const *const rs = rects + i;
+		struct Rect *ra = atlas->rects + rs->id;
+
+		printi(
+			"Tex `%s` placement: `[ %d, %d, %d, %d ]`.\n",
+			g_texturePaths[g_atlasTextureNames[p_atlas][rs->id]],
+			rs->x, rs->y, rs->w, rs->h
+		);
+
+		ra->x = rs->x;
+		ra->y = rs->y;
+		ra->w = rs->w;
+		ra->h = rs->h;
+
+	}
+
+	free(rects);
+
+	atlas->width = 0;
+	for (size_t i = 0; i < atlas->count; ++i) {
+
+		struct Rect *r = atlas->rects + i;
+
+		// atlas->width = fmax(atlas->width, r->x + r->w);
+		int const right = r->x + r->w;
+		if (right > atlas->width) {
+
+			atlas->width = right;
+
+		}
+
+	}
+
+	atlas->height = 0;
+	for (size_t i = 0; i < atlas->count; ++i) {
+
+		struct Rect *r = atlas->rects + i;
+		// atlas->height = fmax(atlas->height, r->y + r->h);
+		int const top = r->y + r->h;
+		if (top > atlas->height) {
+
+			atlas->height = top;
+
+		}
 
 	}
 
@@ -189,14 +261,14 @@ struct Atlas* atlasCreate(enum AtlasName const p_atlas) {
 	// Blit packed textures into atlas:
 	for (size_t i = 0; i < atlas->count; ++i) {
 
-		int const t = rects[i].id;
-		pixel_t const *const texpix = g_textureData[g_atlasTextureNames[p_atlas][t]];
+		pixel_t const *const texpix = g_textureData[g_atlasTextureNames[p_atlas][i]];
 
-		int const x = rects[i].x;
-		int const y = rects[i].y;
-		int const w = rects[i].w;
-		int const h = rects[i].h;
-		int const glY = atlas->height - (y + h); // Feel free *not* to invert the placement of all sprites...!
+		int const x = atlas->rects[i].x;
+		int const y = atlas->rects[i].y;
+		int const w = atlas->rects[i].w;
+		int const h = atlas->rects[i].h;
+		// int const glY = atlas->height - (y + h); // Feel free *not* to invert the placement of all sprites...!
+		int const glY = y;
 
 		// printi(
 		// 	"Placed `%s`, width `%d`, height `%d` at position `(%d, %d)`.\n",
@@ -214,25 +286,6 @@ struct Atlas* atlasCreate(enum AtlasName const p_atlas) {
 	// ERRGL(glGenerateMipmap(GL_TEXTURE_2D));
 	ERRGL(glBindTexture(GL_TEXTURE_2D, 0)); // Cleaning up? Us? HAH!
 
-	// Change back to the `struct Rect` format:
-	for (size_t i = 0; i < atlas->count; ++i) {
-
-		struct stbrp_rect const *const rs = rects + i;
-		struct Rect *ra = atlas->rects + rs->id;
-
-		printi(
-			"Tex placement: `[ %d, %d, %d, %d ]`.\n",
-			rs->x, rs->y, rs->w, rs->h
-		);
-
-		ra->x = rs->x;
-		ra->y = rs->y;
-		ra->w = rs->w;
-		ra->h = rs->h;
-
-	}
-
-	free(rects);
 	return atlas;
 }
 
@@ -241,9 +294,9 @@ GLint loadShaderSourceFromPath(GLchar **p_buffer, char const *p_path) {
 	// size_t retries = 0;
 	// retry:
 	// if (retries > 5) {
-	// 
+	//
 	//	return -1;
-	// 
+	//
 	// }
 
 	FILE *file = fopen(p_path, "rb");
@@ -300,8 +353,7 @@ void loadMappedAtlases(void) {
 		g_atlases[p_enum] = atlasCreate(p_enum); \
 	}
 
-	// M(ATLAS_DEFAULT, TEXTURE_MISSING, TEXTURE_BLACK, TEXTURE_WHITE, TEXTURE_GRID);
-	M(ATLAS_DEFAULT, TEXTURE_MISSING, TEXTURE_BLACK, TEXTURE_GRID);
+	M(ATLAS_DEFAULT, TEXTURE_MISSING, TEXTURE_BLACK, TEXTURE_WHITE, TEXTURE_GRID);
 
 #undef M
 }

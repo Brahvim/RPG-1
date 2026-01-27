@@ -187,8 +187,8 @@ void quadTexture(struct Quad *const p_quad, enum AtlasName const p_atlas, enum T
 
 	// p_quad->texRect.x = tx / aw; // Texture AABB `x`,
 	// p_quad->texRect.y = ty / ah; // Texture AABB `y`,
-	// p_quad->texRect.z = tw / aw; // Texture AABB `w`,
-	// p_quad->texRect.w = th / ah; // Texture AABB `h`.
+	// p_quad->texRect.z = (tx + tw) / aw; // Texture AABB `w`,
+	// p_quad->texRect.w = (ty + th) / ah; // Texture AABB `h`.
 	//
 	// Done!
 	//
@@ -203,6 +203,6 @@ void quadTexture(struct Quad *const p_quad, enum AtlasName const p_atlas, enum T
 	// Offsetting:
 	p_quad->texRect.x = (tx + 0.5f) * awi; // Texture AABB `x`,
 	p_quad->texRect.y = (ty + 0.5f) * ahi; // Texture AABB `y`,
-	p_quad->texRect.z = (tw - 1.0f) * awi; // Texture AABB `w`,
-	p_quad->texRect.w = (th - 1.0f) * ahi; // Texture AABB `h`.
+	p_quad->texRect.z = (tx + tw - 1.0f) * awi; // Texture AABB `w`,
+	p_quad->texRect.w = (ty + th - 1.0f) * ahi; // Texture AABB `h`.
 }
