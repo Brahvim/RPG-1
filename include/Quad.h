@@ -7,8 +7,8 @@
 
 struct Quad {
 
-	struct SmlVec2 pos;
-	struct SmlVec2 scale;
+	struct SmlVec3 pos;
+	struct SmlVec3 scale;
 	struct SmlQuat texRect;
 	struct SmlQuat tintRgba;
 
@@ -31,6 +31,6 @@ void quadCtxInit(struct QuadCtx *const ctx);
 void quadDebug(struct Quad const *const quad);
 void quadCtxDraw(struct QuadCtx const *const ctx);
 struct QuadCtx* quadCtxDelete(struct QuadCtx *ctx);
-struct Quad* quadCreate(struct QuadCtx *const ctx);
+size_t quadCreate(struct QuadCtx *const ctx, size_t const count);
 #define quadListRead(p_list, p_id) ((struct Quad*) listRead(p_list, p_id))
 void quadTexture(struct Quad *const quad, enum AtlasName const atlas, enum TextureName texture);

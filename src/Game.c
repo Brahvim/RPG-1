@@ -77,23 +77,25 @@ void gameSetup() {
 		.pos = { 0 },
 		.texRect = { 0 },
 		.scale = { 1, 1 },
+		// TODO: Quad rotation?
 		// .tintRgba = { 0, 0, 1, 0 },
 
 	};
 
+	// TODO: `quadAdd()` for all of this!
 	quadTexture(&q, ATLAS_DEFAULT, TEXTURE_GRID);
 	listAppend(g_gameQuadCtx->list, 1, &q);
 
 	q.tintRgba = ((struct SmlQuat) { 0, 0, 1, 0 });
 	quadTexture(&q, ATLAS_DEFAULT, TEXTURE_BLACK);
-	q.scale = ((struct SmlVec2) { 0.1f, 0.1f });
-	q.pos = ((struct SmlVec2) { -0.5f, -0.5f });
+	q.scale = ((struct SmlVec3) { 0.1f, 0.1f, 0.0f });
+	q.pos = ((struct SmlVec3) { -0.5f, -0.5f, 0.0f });
 	listAppend(g_gameQuadCtx->list, 1, &q);
 }
 
 void gameDraw() {
 	g_camera2d.update();
-	cameraUploadUbo(&g_camera2d);
+	cameraUploadUbo(&g_camera2d); // TODO: Projection matrix too! Multiply on CPU-side only!
 	quadListRead(g_gameQuadCtx->list, 0)->pos.x = fabs(sin(g_gameMillisDraw)) - 0.5f;
 
 	// ERRGL(glClearColor(0, 0, 0, 0));
@@ -101,5 +103,6 @@ void gameDraw() {
 	ERRGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
 	ERRGL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-	quadCtxDraw(g_gameQuadCtx);
+	quadCtxDraw(g_gameQuadCtx); // TODO: Limit how many are drawn!
+	// TODO: Perhaps also `quadCtxDrawRest()` to draw all remaining!
 }

@@ -2,20 +2,20 @@
 #include "Quad.h"
 #include <stdlib.h>
 
-static struct SmlVec2 s_quadModel[4] = {
+static struct SmlVec3 s_quadModel[4] = {
 
-	{.x = -0.5f, .y = -0.5f},
-	{.x = +0.5f, .y = -0.5f},
-	{.x = -0.5f, .y = +0.5f},
-	{.x = +0.5f, .y = +0.5f},
+	{ -0.5, -0.5, 0 },
+	{ +0.5, -0.5, 0 },
+	{ -0.5, +0.5, 0 },
+	{ +0.5, +0.5, 0 },
 
 };
 static struct SmlVec2 s_quadTexcoords[4] = {
 
-	{.x = 0, .y = 0},
-	{.x = 1, .y = 0},
-	{.x = 0, .y = 1},
-	{.x = 1, .y = 1},
+	{ 0, 0 },
+	{ 1, 0 },
+	{ 0, 1 },
+	{ 1, 1 },
 
 };
 // static GLuint s_quadProgramUniformLocation = 0;
@@ -60,7 +60,7 @@ void quadCtxInit(struct QuadCtx *const p_ctx) {
 #pragma region
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboVertPos));
 	ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(s_quadModel), s_quadModel, GL_STATIC_DRAW));
-	ERRGL(glVertexAttribPointer(attrib, 2, GL_FLOAT, GL_FALSE, 0, 0));
+	ERRGL(glVertexAttribPointer(attrib, 3, GL_FLOAT, GL_FALSE, 0, 0));
 	ERRGL(glEnableVertexAttribArray(attrib));
 	ERRGL(glVertexAttribDivisor(attrib, 0));
 
@@ -85,7 +85,7 @@ void quadCtxInit(struct QuadCtx *const p_ctx) {
 
 	attrib = 2; // `a2_iPos`.
 #pragma region
-	ERRGL(glVertexAttribPointer(attrib, 2, GL_FLOAT, GL_FALSE, sizeof(struct Quad), (void*) offsetof(struct Quad, pos)));
+	ERRGL(glVertexAttribPointer(attrib, 3, GL_FLOAT, GL_FALSE, sizeof(struct Quad), (void*) offsetof(struct Quad, pos)));
 	ERRGL(glEnableVertexAttribArray(attrib));
 	ERRGL(glVertexAttribDivisor(attrib, 1));
 #pragma endregion
@@ -101,7 +101,7 @@ void quadCtxInit(struct QuadCtx *const p_ctx) {
 	attrib = 4; // `a4_iScale`.
 #pragma region
 	// ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst)); // Repeated. GOD KNOWS what the driver likes.
-	ERRGL(glVertexAttribPointer(attrib, 2, GL_FLOAT, GL_FALSE, sizeof(struct Quad), (void*) offsetof(struct Quad, scale)));
+	ERRGL(glVertexAttribPointer(attrib, 3, GL_FLOAT, GL_FALSE, sizeof(struct Quad), (void*) offsetof(struct Quad, scale)));
 	ERRGL(glEnableVertexAttribArray(attrib));
 	ERRGL(glVertexAttribDivisor(attrib, 1));
 #pragma endregion
@@ -164,10 +164,11 @@ void quadCtxDraw(struct QuadCtx const *const p_ctx) {
 	ERRGL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, p_ctx->list->size));
 }
 
-struct Quad* quadCreate(struct QuadCtx *const p_ctx) {
-	struct Quad quad = { 0 };
-	listAppend(p_ctx->list, 1, &quad);
-	return quadListRead(p_ctx->list, p_ctx->list->size - 1);
+size_t quadCreate(struct QuadCtx *const p_ctx, size_t const p_count) {
+	listExpand(p_ctx->list, p_count);
+	size_t const ret = p_ctx->list->size;
+	p_ctx->list->size += p_count;
+	return ret;
 }
 
 struct QuadCtx* quadCtxDelete(struct QuadCtx *p_ctx) {
