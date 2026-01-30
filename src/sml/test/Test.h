@@ -2,6 +2,7 @@
 
 #include "Sml.h"
 #include "Log.h"
+#include <math.h>
 #include <stdio.h>
 #include "Macros.h"
 #include <stdlib.h>
@@ -30,16 +31,15 @@ testRunTests(sizearr(p_array), p_array)
 #define testCreateArray(...)	\
 ((struct Test const []) { __VA_ARGS__ })
 
-#define testCheck(p_condition)	\
-if (unlikely(!(p_condition))) {	\
+#define testCheck(p_prefix, p_condition)	\
+if (unlikely(!(p_prefix (p_condition)))) {	\
 	\
 	printe("Failure!\n", STR2(p_condition));	\
-	return false;	\
 	\
 }
 
-#define testCheckFloat(p_result, p_answer)	\
-testCheck(smlFloatCompareFltEpsilon(p_result, p_answer))
+#define testCheckFloat(p_prefix, p_result, p_answer)	\
+testCheck(p_prefix, smlFloatCompareFltEpsilon(p_result, p_answer))
 
-#define testCheckFloatEpsilon(p_result, p_answer, p_epsilon)	\
-testCheck(smlFloatCompare(p_result, p_answer, p_epsilon))
+#define testCheckFloatEpsilon(p_prefix, p_result, p_answer, p_epsilon)	\
+testCheck(p_prefix, smlFloatCompare(p_result, p_answer, p_epsilon))
