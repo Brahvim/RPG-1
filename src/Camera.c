@@ -20,7 +20,7 @@ struct SmlMat44 g_camera2dTransf = { // IDEN!
 };
 
 void camera2dUpdate(void) {
-	// smlMat44Identity(&g_camera2dTransf);
+	smlMat44Identity(&g_camera2dTransf);
 	g_camera2dTransf.r14 = -g_camera2dPos.x;
 	g_camera2dTransf.r24 = -g_camera2dPos.y;
 	smlMat33RotateZ(&g_camera2dTransf.mat33, -g_camera2dRot);
