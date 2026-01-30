@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.31.6)
+project(Rpg1)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS true)
 include_directories("./include")

@@ -2,9 +2,15 @@
 
 #define STR(x) #x
 #define STR2(x) STR(x)
+
 #define CAT(x, y) x##y
-#define CALL(f, x) f(x)
 #define CAT2(x, y) CAT(x, y)
+
+#define CALL(f, x) f(x)
+#define CALL2(f, x) CALL(f, x)
+
+#define IDENTITY(x) x
+#define IDENTITY2(x) IDENTITY(x)
 
 #define asarr(p_type, p_body) 	((p_type[]) p_body)
 #define sizearr(p_array) 		(sizeof(p_array) / sizeof(p_array[0]))

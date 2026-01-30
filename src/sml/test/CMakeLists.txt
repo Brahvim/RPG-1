@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.15)
+project(SmlTest)
 
 macro(Test p_binary p_file)
-  add_executable(${p_binary} ${p_file})
+  add_executable(${p_binary} ${p_file} test.c)
   target_link_libraries(${p_binary} PRIVATE Sml)
 endmacro()
 
-file(GLOB SRC_SML_TEST "./test/**.c")
-
+include_directories(".")
 test(SmlTestVec2 "vec2.c")
 test(SmlTestVec3 "vec3.c")
 test(SmlTestQuat "quat.c")
