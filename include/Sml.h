@@ -359,16 +359,14 @@ struct SmlVec3* smlVec2Cross(struct SmlVec2 const *const first, struct SmlVec2 c
 #define smlVec3Ptr(...) (&smlVec3Val(__VA_ARGS__))
 #define smlVec3Val(...) ((struct SmlVec3) { __VA_ARGS__ })
 
-float smlVec3Direction2d(struct SmlVec3* vector);
 float smlVec3Magnitude(struct SmlVec3 const *vector);
 struct SmlVec3* smlVec3One(struct SmlVec3 *const vector);
 struct SmlVec3* smlVec3Zero(struct SmlVec3 *const vector);
 float smlVec3MagnitudeSquared(struct SmlVec3 const *vector);
-struct SmlVec3* smlVec3FromAngle2d(struct SmlVec3 *const vector, float const angle);
 float smlVec3Dot(struct SmlVec3 const *const first, struct SmlVec3 const *const second);
 struct SmlVec3* smlVec3Normalize(struct SmlVec3 const *vector, struct SmlVec3 *const destination);
-struct SmlVec3* smlVec3NormalizeUnchecked(struct SmlVec3 const *vector, struct SmlVec3 *const destination);
 struct SmlVec3* smlVec3Set(struct SmlVec3 *const vector, float const x, float const y, float const z);
+struct SmlVec3* smlVec3NormalizeUnchecked(struct SmlVec3 const *vector, struct SmlVec3 *const destination);
 struct SmlVec3* smlVec3Scale(struct SmlVec3 *const vector, float const scalar, struct SmlVec3 *const destination);
 struct SmlVec3* smlVec3FromAngle3d(float const x, float const y, float const z, struct SmlVec3 *const destination);
 struct SmlVec3* smlVec3ScaleUnchecked(struct SmlVec3 *const vector, float scalar, struct SmlVec3 *const destination);

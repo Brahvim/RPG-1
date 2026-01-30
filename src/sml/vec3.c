@@ -2,10 +2,6 @@
 #include <math.h>
 #include "Macros.h"
 
-inline float smlVec3Direction2d(struct SmlVec3* p_vector) {
-	return atan2f(p_vector->y, p_vector->x);
-}
-
 inline float smlVec3Magnitude(struct SmlVec3 const *p_vector) {
 	return __builtin_sqrtf(smlVec3MagnitudeSquared(p_vector));
 }
@@ -28,13 +24,6 @@ inline float smlVec3MagnitudeSquared(struct SmlVec3 const *p_vector) {
 #define S(x) x * x
 	return S(p_vector->x) + S(p_vector->y) + S(p_vector->z);
 #undef S
-}
-
-inline struct SmlVec3* smlVec3FromAngle2d(struct SmlVec3 *const p_vector, float const p_angle) {
-	p_vector->x = cosf(p_angle);
-	p_vector->y = sinf(p_angle);
-	p_vector->z = 0;
-	return p_vector;
 }
 
 inline float smlVec3Dot(struct SmlVec3 const *const p_first, struct SmlVec3 const *const p_second) {
@@ -68,6 +57,15 @@ inline struct SmlVec3* smlVec3NormalizeUnchecked(struct SmlVec3 const *p_vector,
 	return p_destination;
 }
 
+inline struct SmlVec3* smlVec3FromAngle3d(float const x, float const y, float const z, struct SmlVec3 *const p_destination) {
+	float const cosPitch = cosf(y);
+
+	p_destination->x = cosf(x) * cosPitch;
+	p_destination->y = sinf(y);
+	p_destination->z = sinf(x) * cosPitch;
+	return p_destination;
+}
+
 inline struct SmlVec3* smlVec3Scale(struct SmlVec3 *const p_vector, float const p_scalar, struct SmlVec3 *const p_destination) {
 	smlVec3Normalize(p_vector, p_destination);
 	return smlVec3Mult(p_vector, p_scalar, p_destination);
@@ -78,20 +76,18 @@ inline struct SmlVec3* smlVec3ScaleUnchecked(struct SmlVec3 *const p_vector, flo
 	return smlVec3Mult(p_vector, p_scalar, p_destination);
 }
 
-inline struct SmlVec3* smlVec3FromAngle3d(float const x, float const y, float const z, struct SmlVec3 *const p_destination) {
-	float const cosPitch = cosf(y);
-
-	p_destination->x = cosf(x) * cosPitch;
-	p_destination->y = sinf(y);
-	p_destination->z = sinf(x) * cosPitch;
-	return p_destination;
-}
-
 inline struct SmlVec3* smlVec3Mult(struct SmlVec3 const *const p_vector, float const p_scalar, struct SmlVec3 *const p_destination) {
 	p_destination->x = p_scalar * p_vector->x;
 	p_destination->y = p_scalar * p_vector->y;
 	p_destination->z = p_scalar * p_vector->z;
 	return p_destination;
+}
+
+inline struct SmlVec3* smlVec3FromAngle2d(struct SmlVec3 *const p_vector, struct SmlVec3 const *const p_plane, float const p_angle) {
+	p_vector->x = cosf(p_angle);
+	p_vector->y = sinf(p_angle);
+	p_vector->z = 0;
+	return p_vector;
 }
 
 inline struct SmlVec3* smlVec3Add(struct SmlVec3 const *const p_first, struct SmlVec3 const *const p_second, struct SmlVec3 *const p_destination) {

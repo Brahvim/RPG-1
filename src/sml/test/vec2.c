@@ -80,7 +80,7 @@ testfn normalize() {
 	struct SmlVec2 out;
 	bool passing = true;
 
-	/* What is zeroes, stay zeroed (Checked™!): */
+	/* What is zeroed, stay zeroed (Checked™!): */
 	smlVec2Normalize(smlVec2Ptr(0, 0), &out);
 	testCheckFloat(passing |=, out.x, 0.0f);
 	testCheckFloat(passing |=, out.y, 0.0f);
@@ -93,15 +93,6 @@ testfn normalize() {
 	smlVec2Normalize(smlVec2Ptr(3, 4), &out);
 	testCheckFloatEpsilon(passing |=, smlVec2Magnitude(&out), 1.0f, 1e-6f);
 
-	return passing;
-}
-
-testfn magnitude() {
-	bool passing = true;
-	testCheckFloat(passing |=, smlVec2Magnitude(smlVec2Ptr(-3, -4)), 5.0f);
-	testCheckFloat(passing |=, smlVec2Magnitude(smlVec2Ptr(3, 4)), 5.0f);
-	testCheckFloat(passing |=, smlVec2Magnitude(smlVec2Ptr(1, 0)), 1.0f);
-	testCheckFloat(passing |=, smlVec2Magnitude(smlVec2Ptr(0, 0)), 0.0f);
 	return passing;
 }
 
@@ -181,7 +172,6 @@ int main(int const p_count, char *p_values[]) {
 		testCreateTest(magAndMagSquared),
 		testCreateTest(setZeroOne),
 		testCreateTest(fromAngle),
-		testCreateTest(magnitude),
 		testCreateTest(normalize),
 		testCreateTest(cross),
 		testCreateTest(scale),
