@@ -12,10 +12,6 @@
 #include "Gl.h"
 
 #pragma region Maps.
-size_t g_atlasTextureCounts[ATLAS_TOTAL] = { 0 };
-size_t *g_atlasTextureIndices[ATLAS_TOTAL] = { 0 };
-enum TextureName *g_atlasTextureNames[ATLAS_TOTAL] = { 0 };
-
 static inline void mapTextures(void) {
 #define M(p_texture, p_path) g_texturePaths[p_texture] = p_path; g_texturePathLengths[p_texture] = sizeof(p_path)
 	M(TEXTURE_MISSING, "missing.png");
@@ -38,8 +34,6 @@ static inline void mapShaders(void) {
 size_t g_cwdLen = 0;
 char g_cwd[FILENAME_MAX];
 
-struct Atlas *g_atlases[ATLAS_TOTAL];
-
 pixel_t *g_textureData[TEXTURE_TOTAL];
 char const *g_texturePaths[TEXTURE_TOTAL];
 size_t g_texturePathLengths[TEXTURE_TOTAL];
@@ -56,11 +50,16 @@ size_t g_shaderPathLengthsVert[SHADER_TOTAL];
 size_t g_shaderPathLengthsFrag[SHADER_TOTAL];
 GLint g_shaderSourceLengthsVert[SHADER_TOTAL];
 GLint g_shaderSourceLengthsFrag[SHADER_TOTAL];
+
+struct Atlas g_atlases[ATLAS_TOTAL];
+size_t g_atlasTextureCounts[ATLAS_TOTAL] = { 0 };
+long long *g_atlasTextureIndices[ATLAS_TOTAL] = { 0 };
+enum TextureName *g_atlasTextureNames[ATLAS_TOTAL] = { 0 };
 #pragma endregion
 
 #pragma region Static.
 static void loadShaderArrays(char *p_paths[SHADER_TOTAL], size_t p_pathLengths[SHADER_TOTAL], GLchar *p_sources[SHADER_TOTAL]) {
-	for (enum ShaderName i = 0; i < SHADER_TOTAL; i++) {
+	for (enum ShaderName i = 0; i < SHADER_TOTAL; ++i) {
 
 		char fpath[FILENAME_MAX];
 		char fdir[] = "/shaders/";
@@ -83,8 +82,7 @@ static int cmpStbrpRectId(void const *p_first, void const *p_second) {
 #pragma endregion
 
 struct Atlas* atlasCreate(enum AtlasName const p_atlas) {
-	struct Atlas *atlas;
-	callocStruct(atlas);
+	struct Atlas *atlas = g_atlases + p_atlas;
 	atlas->count = g_atlasTextureCounts[p_atlas];
 	callocArray(atlas->rects, atlas->count);
 
@@ -153,7 +151,6 @@ struct Atlas* atlasCreate(enum AtlasName const p_atlas) {
 
 		pute("Atlas packing failed!");
 		free(atlas->rects);
-		free(atlas);
 		free(rects);
 		return NULL;
 
@@ -164,7 +161,7 @@ struct Atlas* atlasCreate(enum AtlasName const p_atlas) {
 	//
 	// enum TextureName *namesIndices;
 	// callocArray(namesIndices, atlas->count);
-	// for (size_t i = 0; i < atlas->count; i++) {
+	// for (size_t i = 0; i < atlas->count; ++i) {
 	//
 	// 	struct stbrp_rect const *const r = rects + i;
 	//
@@ -345,8 +342,8 @@ GLint loadShaderSourceFromPath(GLchar **p_buffer, char const *p_path) {
 	return length;
 }
 
-static void atlasReverseMapNames(enum AtlasName const p_atlas, size_t *const p_indices) {
-	for (size_t i = 0; i < TEXTURE_TOTAL; i++) {
+static void atlasReverseMapNames(enum AtlasName const p_atlas, long long *const p_indices) {
+	for (size_t i = 0; i < TEXTURE_TOTAL; ++i) {
 
 		g_atlasTextureIndices[p_atlas] = p_indices;
 
@@ -366,15 +363,14 @@ static void atlasReverseMapNames(enum AtlasName const p_atlas, size_t *const p_i
 
 void loadMappedAtlases(void) {
 #define M(p_enum, ...) { \
-		static size_t indices[TEXTURE_TOTAL] = { -1 }; \
-		static enum TextureName texs[] = { __VA_ARGS__ }; \
-		g_atlasTextureCounts[p_enum] = sizearr(texs); \
-		memset(indices, -1, TEXTURE_TOTAL); \
-		g_atlasTextureNames[p_enum] = texs; \
-		g_atlases[p_enum] = atlasCreate(p_enum); \
+		static enum TextureName names[] = { __VA_ARGS__ }; \
+		static long long indices[TEXTURE_TOTAL] = { 0 }; \
+		g_atlasTextureCounts[p_enum] = sizearr(names); \
+		memset(indices, -1, sizeof(indices)); \
+		g_atlasTextureNames[p_enum] = names; \
 		atlasReverseMapNames(p_enum, indices); \
+		atlasCreate(p_enum); \
 	}
-
 
 	M(ATLAS_DEFAULT,
 
@@ -443,7 +439,7 @@ void loadShaders(void) {
 	loadShaderArrays(g_shaderPathsFrag, g_shaderPathLengthsFrag, g_shaderSourcesFrag);
 
 #define FERR(x) F(ERRGL(x))
-#define F(x) for (size_t i = 0; i < SHADER_TOTAL; i++) x
+#define F(x) for (size_t i = 0; i < SHADER_TOTAL; ++i) x
 	// F(g_shaderSourceLengthsVert[i] = strlen(g_shaderSourcesVert[i]));
 	// F(g_shaderSourceLengthsFrag[i] = strlen(g_shaderSourcesFrag[i]));
 
@@ -468,7 +464,7 @@ void loadShaders(void) {
 #undef F
 #undef FERR
 
-	for (size_t i = 0; i < SHADER_TOTAL; i++) {
+	for (size_t i = 0; i < SHADER_TOTAL; ++i) {
 #define L 16384
 
 		GLchar logBuf[L];

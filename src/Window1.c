@@ -15,8 +15,6 @@ int g_window1YUnFull = 0;
 int g_window1WUnFull = 0;
 int g_window1HUnFull = 0;
 GLFWwindow *g_window1 = NULL;
-int const g_window1WDef = 640;
-int const g_window1HDef = 480;
 #pragma endregion
 
 void window1Create(void) {

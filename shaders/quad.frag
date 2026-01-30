@@ -7,6 +7,5 @@ out vec4 f_fragment;
 uniform sampler2D u_atlas;
 
 void main() {
-    f_fragment = texture(u_atlas, v_uv);
-    f_fragment += v_tint;
+    f_fragment = texture(u_atlas, v_uv) + v_tint;
 }

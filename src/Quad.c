@@ -1,5 +1,6 @@
 #include "Exit.h"
 #include "Quad.h"
+#include "Camera.h"
 #include <stdlib.h>
 
 static struct SmlVec3 s_quadModel[4] = {
@@ -20,13 +21,15 @@ static struct SmlVec2 s_quadTexcoords[4] = {
 };
 // static GLuint s_quadProgramUniformLocation = 0;
 static GLuint s_quadProgramUniformLocationAtlas = 0;
+static GLuint s_quadProgramUniformLocationCamera = 0;
 
-void quadInitSystem(void) {
+void quadSystemInit(void) {
 #define M(p_varName, p_idenStr) \
 	ERRGL(s_quadProgramUniformLocation ## p_varName \
 	= glGetUniformLocation(g_shaderGlIds[SHADER_QUADS], p_idenStr))
 
 	M(Atlas, "u_atlas");
+	M(Camera, "u_camera");
 
 #undef M
 }
@@ -39,6 +42,10 @@ struct QuadCtx* quadCtxCreate() {
 
 	quadCtxInit(ctx);
 	return ctx;
+}
+
+void quadInit(struct Quad *const p_quad) {
+	// p_quad->pos = ;
 }
 
 void quadCtxInit(struct QuadCtx *const p_ctx) {
@@ -79,7 +86,6 @@ void quadCtxInit(struct QuadCtx *const p_ctx) {
 	ERRGL(glVertexAttribDivisor(attrib, 0));
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst));
-	// ERRGL(glBufferData(GL_ARRAY_BUFFER, sizeof(struct Quad), NULL, GL_STREAM_DRAW));
 	ERRGL(glBufferData(GL_ARRAY_BUFFER, listBytesSize(p_ctx->list), p_ctx->list->data, GL_STREAM_DRAW));
 #pragma endregion
 
@@ -106,7 +112,14 @@ void quadCtxInit(struct QuadCtx *const p_ctx) {
 	ERRGL(glVertexAttribDivisor(attrib, 1));
 #pragma endregion
 
-	attrib = 5; // `a5_iTexcoords`.
+	attrib = 5; // `a5_iRotation`.
+#pragma region
+	ERRGL(glVertexAttribPointer(attrib, 3, GL_FLOAT, GL_FALSE, sizeof(struct Quad), (void*) offsetof(struct Quad, rotate)));
+	ERRGL(glEnableVertexAttribArray(attrib));
+	ERRGL(glVertexAttribDivisor(attrib, 1));
+#pragma endregion
+
+	attrib = 6; // `a6_iTexcoords`.
 #pragma region
 	// ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst)); // Repeated. GOD KNOWS what the driver likes.
 	ERRGL(glVertexAttribPointer(attrib, 4, GL_FLOAT, GL_FALSE, sizeof(struct Quad), (void*) offsetof(struct Quad, texRect)));
@@ -138,8 +151,9 @@ void quadCtxDraw(struct QuadCtx const *const p_ctx) {
 	ERRGL(glActiveTexture(GL_TEXTURE0));
 	ERRGL(glBindVertexArray(p_ctx->vao));
 	ERRGL(glUseProgram(g_shaderGlIds[SHADER_QUADS]));
-	ERRGL(glBindTexture(GL_TEXTURE_2D, g_atlases[ATLAS_DEFAULT]->glTextureId));
+	ERRGL(glBindTexture(GL_TEXTURE_2D, g_atlases[ATLAS_DEFAULT].glTextureId));
 	ERRGL(glUniform1i(s_quadProgramUniformLocationAtlas, GL_TEXTURE0 - GL_TEXTURE0));
+	ERRGL(glUniformMatrix4fv(s_quadProgramUniformLocationCamera, 1, GL_FALSE, (GLfloat const*) &g_camera2dTransf));
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst));
 	// "Orphan" previous buffer. Let it "be GCd" for a new one:
@@ -164,22 +178,27 @@ void quadCtxDraw(struct QuadCtx const *const p_ctx) {
 	ERRGL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, p_ctx->list->size));
 }
 
-size_t quadCreate(struct QuadCtx *const p_ctx, size_t const p_count) {
-	listExpand(p_ctx->list, p_count);
-	size_t const ret = p_ctx->list->size;
-	p_ctx->list->size += p_count;
-	return ret;
-}
-
 struct QuadCtx* quadCtxDelete(struct QuadCtx *p_ctx) {
-	listDelete(p_ctx->list);
+	ERRGL(glDeleteBuffers(3, ((GLuint[]) {
+		/**/p_ctx->vboVertTexcoords,
+			p_ctx->vboVertPos,
+			p_ctx->vboInst,
+	})));
+	p_ctx->list = listDelete(p_ctx->list);
 	free(p_ctx);
 	return NULL;
 }
 
+size_t quadCreate(struct QuadCtx *const p_ctx, size_t const p_count) {
+	size_t const ret = p_ctx->list->size;
+	listExpand(p_ctx->list, p_count);
+	p_ctx->list->size += p_count;
+	return ret;
+}
+
 void quadTexture(struct Quad *const p_quad, enum AtlasName const p_atlas, enum TextureName p_texture) {
 	size_t const rid = g_atlasTextureIndices[p_atlas][p_texture];
-	struct Atlas *atlas = g_atlases[p_atlas];
+	struct Atlas *atlas = g_atlases + p_atlas;
 	float const tx = atlas->rects[rid].x;
 	float const ty = atlas->rects[rid].y;
 	float const tw = atlas->rects[rid].w;

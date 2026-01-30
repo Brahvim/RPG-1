@@ -57,9 +57,8 @@ int main(int const p_argCount, char const **p_argValues) {
 	loadShaders();
 	loadTextures();
 	loadMappedAtlases();
-	puti("OpenGL Vendor:");
-	puti(glGetString(GL_VENDOR));
 	g_gameMillisSetup = glfwGetTime();
+	printi("OpenGL Vendor: \"%s\".\n", glGetString(GL_VENDOR));
 
 	gameSetup();
 

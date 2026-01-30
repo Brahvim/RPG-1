@@ -134,7 +134,7 @@ void quadDraw(struct QuadCtx const *const p_ctx) {
 		GL_STREAM_DRAW
 	));
 
-	for (size_t i = 0; i < p_ctx->quads->size; i++) {
+	for (size_t i = 0; i < p_ctx->quads->size; ++i) {
 
 		quadDebug(quadListRead(p_ctx->quads, i));
 

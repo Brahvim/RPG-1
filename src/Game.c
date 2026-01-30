@@ -1,4 +1,5 @@
 #include <stb/stb_rect_pack.h>
+#include <stb/stb_image.h>
 #include "Window1.h"
 #include <string.h>
 #include <stdlib.h>
@@ -17,6 +18,26 @@ double g_gameMillisDraw;
 size_t g_gameFrameCount;
 
 void gameExit(enum ExitReason const p_reason) {
+	for (size_t i = 0; i < TEXTURE_TOTAL; ++i) {
+
+		free(g_textureData[i]);
+
+	}
+
+	for (size_t i = 0; i < SHADER_TOTAL; ++i) {
+
+		free(g_shaderSourcesFrag[i]);
+		free(g_shaderSourcesVert[i]);
+
+	}
+
+	for (size_t i = 0; i < ATLAS_TOTAL; ++i) {
+
+		free(g_atlases[i].rects);
+		free(g_atlases[i].textures);
+
+	}
+
 	switch (p_reason) {
 
 		default: return;
@@ -68,37 +89,30 @@ void gameShutdown() {
 }
 
 void gameSetup() {
-	quadInitSystem();
-	cameraInitSystem();
-	g_gameQuadCtx = quadCtxCreate();
+	quadSystemInit();
+	struct QuadCtx *qc = g_gameQuadCtx = quadCtxCreate();
 
-	struct Quad q = {
+	listExpand(qc->list, 2);
+	quadCtxAppend(qc, quadDef());
+	quadTexture(quadListTail(qc->list), ATLAS_DEFAULT, TEXTURE_GRID);
 
-		.pos = { 0 },
-		.texRect = { 0 },
-		.scale = { 1, 1 },
-		// TODO: Quad rotation?
-		// .tintRgba = { 0, 0, 1, 0 },
-
-	};
-
-	// TODO: `quadAdd()` for all of this!
-	quadTexture(&q, ATLAS_DEFAULT, TEXTURE_GRID);
-	listAppend(g_gameQuadCtx->list, 1, &q);
-
-	q.tintRgba = ((struct SmlQuat) { 0, 0, 1, 0 });
-	quadTexture(&q, ATLAS_DEFAULT, TEXTURE_BLACK);
-	q.scale = ((struct SmlVec3) { 0.1f, 0.1f, 0.0f });
-	q.pos = ((struct SmlVec3) { -0.5f, -0.5f, 0.0f });
-	listAppend(g_gameQuadCtx->list, 1, &q);
+	quadCtxAppend(
+		qc,
+		quadVal(
+			.scale = smlVec3Val(0.1f, 0.1f),
+			.tintRgba = smlQuatVal(1, 0, 0, 0),
+			.pos = smlVec3Val(-0.5f, -0.5f, 0.0f)
+		)
+	);
+	// quadTexture(quadListTail(qc->list), ATLAS_DEFAULT, TEXTURE_MISSING);
 }
 
 void gameDraw() {
-	g_camera2d.update();
-	cameraUploadUbo(&g_camera2d); // TODO: Projection matrix too! Multiply on CPU-side only!
+	camera2dUpdate();
+	quadListRead(g_gameQuadCtx->list, 1)->rotate.z = g_gameMillisDraw;
+	// quadListRead(g_gameQuadCtx->list, 0)->pos.z = fabs(sin(g_gameMillisDraw)) * 2;
 	quadListRead(g_gameQuadCtx->list, 0)->pos.x = fabs(sin(g_gameMillisDraw)) - 0.5f;
 
-	// ERRGL(glClearColor(0, 0, 0, 0));
 	ERRGL(glClearColor(0.8f, 0.6f, 1.0f, 1.0f));
 	ERRGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
 	ERRGL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));

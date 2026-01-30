@@ -15,8 +15,8 @@ extern int g_window1YUnFull;
 extern int g_window1WUnFull;
 extern int g_window1HUnFull;
 extern GLFWwindow *g_window1;
-extern int const g_window1WDef; // "Default".
-extern int const g_window1HDef; // "Default".
+#define g_window1WDef /* 640 */ 500 // "Default".
+#define g_window1HDef /* 480 */ 500 // "Default".
 #pragma endregion
 
 void window1Create();
