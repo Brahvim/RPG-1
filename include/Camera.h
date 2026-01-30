@@ -1,10 +1,45 @@
 #pragma once
 #include "Sml.h"
 
+extern struct SmlMat44 g_cameraCurrentTransf;
+
+struct SmlMat44* cameraMakeLookAt(
+	struct SmlVec3 const *const target,
+	struct SmlVec3 const *const pos,
+	struct SmlVec3 const *const up,
+	struct SmlMat44 *const out
+);
+
+struct SmlMat44* cameraMakeOrtho(
+	float const far,
+	float const near,
+	float const top,
+	float const bottom,
+	float const left,
+	float const right,
+	struct SmlMat44 *const out
+);
+
+struct SmlMat44* cameraMakePersp(
+	float const fov,
+	float const far,
+	float const near,
+	float const aspect,
+	struct SmlMat44 *const out
+);
+
+struct SmlMat44* cameraMake2d(
+	struct SmlVec2 const *const position,
+	struct SmlMat44 *const out,
+	float const rotation,
+	float const zoom
+);
+
 #pragma region // 2D Cam.
 
-void camera2dUpdate(void);
+void camera2dUpdate();
 extern float g_camera2dRot;
+extern float g_camera2dZoom;
 extern struct SmlVec2 g_camera2dPos;
 extern struct SmlMat44 g_camera2dTransf;
 

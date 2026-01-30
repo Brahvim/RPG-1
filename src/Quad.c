@@ -153,7 +153,7 @@ void quadCtxDraw(struct QuadCtx const *const p_ctx) {
 	ERRGL(glUseProgram(g_shaderGlIds[SHADER_QUADS]));
 	ERRGL(glBindTexture(GL_TEXTURE_2D, g_atlases[ATLAS_DEFAULT].glTextureId));
 	ERRGL(glUniform1i(s_quadProgramUniformLocationAtlas, GL_TEXTURE0 - GL_TEXTURE0));
-	ERRGL(glUniformMatrix4fv(s_quadProgramUniformLocationCamera, 1, GL_FALSE, (GLfloat const*) &g_camera2dTransf));
+	ERRGL(glUniformMatrix4fv(s_quadProgramUniformLocationCamera, 1, GL_TRUE, (GLfloat const*) &g_cameraCurrentTransf));
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst));
 	// "Orphan" previous buffer. Let it "be GCd" for a new one:

@@ -25,22 +25,7 @@ inline float smlMat44Determinant(struct SmlMat44 const *const p_matrix) {
 inline struct SmlMat44* smlMat44AdjugateSame(struct SmlMat44 *const p_matrix) {
 	struct SmlMat44 cof;
 	smlMat44Cofactors(p_matrix, &cof);
-	smlMat44SwapMajorityToNew(&cof, p_matrix);
-	return p_matrix;
-}
-
-inline struct SmlMat44* smlMat44SwapMajority(struct SmlMat44 *const p_matrix) {
-	float temp;
-
-	temp = p_matrix->r12;  p_matrix->r12 = p_matrix->r21;  p_matrix->r21 = temp;
-	temp = p_matrix->r13;  p_matrix->r13 = p_matrix->r31;  p_matrix->r31 = temp;
-	temp = p_matrix->r14;  p_matrix->r14 = p_matrix->r41;   p_matrix->r41 = temp;
-
-	temp = p_matrix->r23;  p_matrix->r23 = p_matrix->r32;  p_matrix->r32 = temp;
-	temp = p_matrix->r24;  p_matrix->r24 = p_matrix->r42;  p_matrix->r42 = temp;
-
-	temp = p_matrix->r34;  p_matrix->r34 = p_matrix->r43;  p_matrix->r43 = temp;
-
+	smlMat44Transpose(&cof, p_matrix);
 	return p_matrix;
 }
 
@@ -63,6 +48,36 @@ inline struct SmlMat44* smlMat44Identity(struct SmlMat44 *const p_destination) {
 	p_destination->r44 = 1;
 
 	return p_destination;
+}
+
+inline struct SmlMat44* smlMat44TransposeSame(struct SmlMat44 *const p_matrix) {
+	float temp;
+
+	temp = p_matrix->r12;  p_matrix->r12 = p_matrix->r21;  p_matrix->r21 = temp;
+	temp = p_matrix->r13;  p_matrix->r13 = p_matrix->r31;  p_matrix->r31 = temp;
+	temp = p_matrix->r14;  p_matrix->r14 = p_matrix->r41;   p_matrix->r41 = temp;
+
+	temp = p_matrix->r23;  p_matrix->r23 = p_matrix->r32;  p_matrix->r32 = temp;
+	temp = p_matrix->r24;  p_matrix->r24 = p_matrix->r42;  p_matrix->r42 = temp;
+
+	temp = p_matrix->r34;  p_matrix->r34 = p_matrix->r43;  p_matrix->r43 = temp;
+
+	return p_matrix;
+}
+
+inline struct SmlMat44* smlMat44TranslateX(struct SmlMat44 *const p_matrix, float const p_value) {
+	p_matrix->r14 += p_value;
+	return p_matrix;
+}
+
+inline struct SmlMat44* smlMat44TranslateY(struct SmlMat44 *const p_matrix, float const p_value) {
+	p_matrix->r24 += p_value;
+	return p_matrix;
+}
+
+inline struct SmlMat44* smlMat44TranslateZ(struct SmlMat44 *const p_matrix, float const p_value) {
+	p_matrix->r34 += p_value;
+	return p_matrix;
 }
 
 inline struct SmlMat44* smlMat44Scale(struct SmlMat44 *const p_matrix, struct SmlVec3 *const p_scale) {
@@ -98,9 +113,44 @@ inline float smlMat44Invert(struct SmlMat44 const *const p_matrix, struct SmlMat
 	return det;
 }
 
+inline struct SmlMat44* smlMat44RotateQuat(struct SmlMat44 *const p_matrix, struct SmlQuat *const p_quat) {
+	float const x = p_quat->x;
+	float const y = p_quat->y;
+	float const z = p_quat->z;
+	float const w = p_quat->w;
+
+	float const xx = x * x;
+	float const xy = x * y;
+	float const wx = w * x;
+
+	float const yy = y * y;
+	float const xz = x * z;
+	float const wy = w * y;
+
+	float const zz = z * z;
+	float const yz = y * z;
+	float const wz = w * z;
+
+	struct SmlMat44 r = *p_matrix; // Copy.
+
+	// Upper-left `SmlMat33` is used for rotation:
+	r.r11 = 1.0f - 2.0f * (yy + zz); r.r12 = 2.0f /*  */ * (xy - wz); r.r13 = 2.0f /*  */ * (xz + wy);
+	r.r21 = 2.0f /*  */ * (xy + wz); r.r22 = 1.0f - 2.0f * (xx + zz); r.r23 = 2.0f /*  */ * (yz - wx);
+	r.r31 = 2.0f /*  */ * (xz - wy); r.r32 = 2.0f /*  */ * (yz + wx); r.r33 = 1.0f - 2.0f * (xx + yy);
+
+	*p_matrix = r;
+	return p_matrix;
+}
+
 inline struct SmlMat44* smlMat44Adjugate(struct SmlMat44 *const p_matrix, struct SmlMat44 *const p_destination) {
 	smlMat44Cofactors(p_matrix, p_destination);
-	smlMat44SwapMajority(p_destination);
+	smlMat44TransposeSame(p_destination);
+	return p_destination;
+}
+
+inline struct SmlMat44* smlMat44Transpose(struct SmlMat44 *const p_matrix, struct SmlMat44 *const p_destination) {
+	smlMat44Copy(p_matrix, p_destination);
+	smlMat44TransposeSame(p_destination);
 	return p_destination;
 }
 
@@ -188,10 +238,17 @@ inline struct SmlMat44* smlMat44Cofactors(struct SmlMat44 const* const p_matrix,
 	return p_destination;
 }
 
-inline struct SmlMat44* smlMat44SwapMajorityToNew(struct SmlMat44 *const p_matrix, struct SmlMat44 *const p_destination) {
-	smlMat44Copy(p_matrix, p_destination);
-	smlMat44SwapMajority(p_destination);
-	return p_destination;
+inline struct SmlMat44* smlMat44TranslateVec2(struct SmlMat44 *const p_matrix, struct SmlVec2 const *const p_translation) {
+	smlMat44TranslateX(p_matrix, p_translation->x);
+	smlMat44TranslateY(p_matrix, p_translation->y);
+	return p_matrix;
+}
+
+inline struct SmlMat44* smlMat44TranslateVec3(struct SmlMat44 *const p_matrix, struct SmlVec3 const *const p_translation) {
+	smlMat44TranslateX(p_matrix, p_translation->x);
+	smlMat44TranslateY(p_matrix, p_translation->y);
+	smlMat44TranslateZ(p_matrix, p_translation->z);
+	return p_matrix;
 }
 
 inline struct SmlMat44* smlMat44AddScalar(struct SmlMat44 const *const p_matrix, float const p_scalar, struct SmlMat44 *const p_destination) {
@@ -400,12 +457,29 @@ inline struct SmlMat44* smlMat44MultMembers(struct SmlMat44 const *const p_first
 	return p_destination;
 }
 
-inline struct SmlMat44* smlMat44InvertGivenInvertedDeterminant(struct SmlMat44 const *const p_matrix, struct SmlMat44 *const p_destination, float p_invertedDeterminant) {
-	struct SmlMat44 cof;
-	smlMat44SwapMajorityToNew(smlMat44Cofactors(p_matrix, &cof), p_destination);
+inline struct SmlMat44* smlMat44InvertGivenInvertedDeterminant(struct SmlMat44 const *const p_matrix, struct SmlMat44 *const p_destination, float const p_invertedDeterminant) {
+	struct SmlMat44 cofs;
+	smlMat44Transpose(
+		smlMat44Cofactors(p_matrix, &cofs),
+		p_destination
+	);
 
-	for (int i = 0; i < 16; ++i)
-		p_destination->one[i] *= p_invertedDeterminant;
+	p_destination->one[0] *= p_invertedDeterminant;
+	p_destination->one[1] *= p_invertedDeterminant;
+	p_destination->one[2] *= p_invertedDeterminant;
+	p_destination->one[3] *= p_invertedDeterminant;
+	p_destination->one[4] *= p_invertedDeterminant;
+	p_destination->one[5] *= p_invertedDeterminant;
+	p_destination->one[6] *= p_invertedDeterminant;
+	p_destination->one[7] *= p_invertedDeterminant;
+	p_destination->one[8] *= p_invertedDeterminant;
+	p_destination->one[9] *= p_invertedDeterminant;
+	p_destination->one[10] *= p_invertedDeterminant;
+	p_destination->one[11] *= p_invertedDeterminant;
+	p_destination->one[12] *= p_invertedDeterminant;
+	p_destination->one[13] *= p_invertedDeterminant;
+	p_destination->one[14] *= p_invertedDeterminant;
+	p_destination->one[15] *= p_invertedDeterminant;
 
 	return p_destination;
 }

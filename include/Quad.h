@@ -34,8 +34,8 @@ void quadDebug(struct Quad const *const quad);
 void quadCtxDraw(struct QuadCtx const *const ctx);
 struct QuadCtx* quadCtxDelete(struct QuadCtx *ctx);
 
+#define quadPtr(...) (&quadVal(__VA_ARGS__))
 #define quadVal(...) ((struct Quad) { __VA_ARGS__ })
-#define quadPtr(...) ((struct Quad*) { __VA_ARGS__ })
 #define quadDef() ((struct Quad) { .scale = { 1, 1 } })
 #define quadCtxNew(p_ctx) quadCtxAppend(p_ctx, quadDef())
 size_t quadCreate(struct QuadCtx *const ctx, size_t const count);

@@ -1,7 +1,6 @@
 #version 300 es
 precision mediump float;
 
-// `inout`
 out vec2 v_uv;
 out vec4 v_tint;
 

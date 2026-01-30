@@ -80,6 +80,19 @@ testfn identity() {
 	return passing;
 }
 
+testfn transpose() {
+	bool passing = true;
+	struct SmlMat22 m = smlMat22Val(1, 2, 3, 4);
+
+	smlMat22TransposeSame(smlMat22Ptr(1, 2, 3, 4));
+	testCheckFloat(passing |=, m.r11, 4.0f);
+	testCheckFloat(passing |=, m.r12, 3.0f);
+	testCheckFloat(passing |=, m.r21, 2.0f);
+	testCheckFloat(passing |=, m.r22, 1.0f);
+
+	return passing;
+}
+
 testfn addScalar() {
 	bool passing = true;
 	struct SmlMat22 out;
@@ -190,19 +203,6 @@ testfn determinant() {
 	return passing;
 }
 
-testfn swapMajority() {
-	bool passing = true;
-	struct SmlMat22 m = smlMat22Val(1, 2, 3, 4);
-
-	smlMat22SwapMajority(smlMat22Ptr(1, 2, 3, 4));
-	testCheckFloat(passing |=, m.r11, 4.0f);
-	testCheckFloat(passing |=, m.r12, 3.0f);
-	testCheckFloat(passing |=, m.r21, 2.0f);
-	testCheckFloat(passing |=, m.r22, 1.0f);
-
-	return passing;
-}
-
 testfn adjugateSame() {
 	bool passing = true;
 	struct SmlMat22 m = smlMat22Val(1, 2, 3, 4);
@@ -232,12 +232,12 @@ testfn invertUnchecked() {
 	return passing;
 }
 
-testfn swapMajorityToNew() {
+testfn transposeToNew() {
 	bool passing = true;
 	struct SmlMat22 out;
 	struct SmlMat22 m = smlMat22Val(1, 2, 3, 4);
 
-	smlMat22SwapMajorityToNew(&m, &out);
+	smlMat22Transpose(&m, &out);
 	testCheckFloat(passing |=, out.r11, 4.0f);
 	testCheckFloat(passing |=, out.r12, 3.0f);
 	testCheckFloat(passing |=, out.r21, 2.0f);
@@ -267,10 +267,10 @@ int main(int const p_count, char *p_values[]) {
 	return testRunTestsArray(testCreateArray(
 
 		testCreateTest(invertGivenInvertedDeterminant),
-		testCreateTest(swapMajorityToNew),
+		testCreateTest(transposeToNew),
 		testCreateTest(invertUnchecked),
 		testCreateTest(adjugateSame),
-		testCreateTest(swapMajority),
+		testCreateTest(transpose),
 		testCreateTest(determinant),
 		testCreateTest(multMembers),
 		testCreateTest(divMembers),

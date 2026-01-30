@@ -22,8 +22,8 @@
 // 75%
 #define SML_PI_THREE_FOURTHS 2.35619449019234
 
-#define SML_DEGREES(radians) SML_180_OVER_PI * (radians)
-#define SML_RADIANS(degrees) SML_PI_OVER_180 * (degrees)
+#define SML_DEGREES(p_radians) SML_180_OVER_PI * (p_radians)
+#define SML_RADIANS(p_degrees) SML_PI_OVER_180 * (p_degrees)
 #pragma endregion
 
 #pragma region Structures.
@@ -251,14 +251,14 @@ char smlFloatCompare(float const first, float const second, float epsilon);
 
 float smlMat22Determinant(struct SmlMat22 const *const matrix);
 struct SmlMat22* smlMat22AdjugateSame(struct SmlMat22 *const matrix);
-struct SmlMat22* smlMat22SwapMajority(struct SmlMat22 *const matrix);
 struct SmlMat22* smlMat22Identity(struct SmlMat22 *const destination);
+struct SmlMat22* smlMat22TransposeSame(struct SmlMat22 *const matrix);
 float smlMat22Invert(struct SmlMat22 const *const matrix, struct SmlMat22 *const destination);
 struct SmlMat22* smlMat22Adjugate(struct SmlMat22 *const matrix, struct SmlMat22 *const destination);
+struct SmlMat22* smlMat22Transpose(struct SmlMat22 *const matrix, struct SmlMat22 *const destination);
 float smlMat22InvertUnchecked(struct SmlMat22 const *const matrix, struct SmlMat22 *const destination);
-struct SmlMat22* smlMat22Copy(struct SmlMat22 const *const p_matrix, struct SmlMat22 *const p_destination);
+struct SmlMat22* smlMat22Copy(struct SmlMat22 const *const matrix, struct SmlMat22 *const destination);
 struct SmlMat22* smlMat22Cofactors(struct SmlMat22 const* const matrix, struct SmlMat22 *const destination);
-struct SmlMat22* smlMat22SwapMajorityToNew(struct SmlMat22 *const matrix, struct SmlMat22 *const destination);
 struct SmlMat22* smlMat22AddScalar(struct SmlMat22 const *const matrix, float const scalar, struct SmlMat22 *const destination);
 struct SmlMat22* smlMat22DivScalar(struct SmlMat22 const *const matrix, float const scalar, struct SmlMat22 *const destination);
 struct SmlMat22* smlMat22SubScalar(struct SmlMat22 const *const matrix, float const scalar, struct SmlMat22 *const destination);
@@ -269,7 +269,7 @@ struct SmlMat22* smlMat22Mult(struct SmlMat22 const *const first, struct SmlMat2
 struct SmlVec2* smlMat22MultVec2(struct SmlMat22 const *const matrix, struct SmlVec2 const *const vector2, struct SmlVec2 *const destination);
 struct SmlMat22* smlMat22DivMembers(struct SmlMat22 const *const first, struct SmlMat22 const *const second, struct SmlMat22 *const destination);
 struct SmlMat22* smlMat22MultMembers(struct SmlMat22 const *const first, struct SmlMat22 const *const second, struct SmlMat22 *const destination);
-struct SmlMat22* smlMat22InvertGivenInvertedDeterminant(struct SmlMat22 const *const matrix, struct SmlMat22 *const destination, float invertedDeterminant);
+struct SmlMat22* smlMat22InvertGivenInvertedDeterminant(struct SmlMat22 const *const matrix, struct SmlMat22 *const destination, float const invertedDeterminant);
 #pragma endregion
 
 #pragma region 3 * 3 Matrices.
@@ -278,9 +278,9 @@ struct SmlMat22* smlMat22InvertGivenInvertedDeterminant(struct SmlMat22 const *c
 
 float smlMat33Determinant(struct SmlMat33 const *const matrix);
 struct SmlMat33* smlMat33AdjugateSame(struct SmlMat33 *const matrix);
-struct SmlMat33* smlMat33SwapMajority(struct SmlMat33 *const matrix);
-struct SmlMat33* smlMat33ShearXY(struct SmlMat33 *const matrix, float const shear);
 struct SmlMat33* smlMat33Identity(struct SmlMat33 *const destination);
+struct SmlMat33* smlMat33TransposeSame(struct SmlMat33 *const matrix);
+struct SmlMat33* smlMat33ShearXY(struct SmlMat33 *const matrix, float const shear);
 struct SmlMat33* smlMat33ShearXZ(struct SmlMat33 *const matrix, float const shear);
 struct SmlMat33* smlMat33ShearYZ(struct SmlMat33 *const matrix, float const shear);
 struct SmlMat33* smlMat33RotateX(struct SmlMat33 *const matrix, float const angle);
@@ -288,10 +288,10 @@ struct SmlMat33* smlMat33RotateY(struct SmlMat33 *const matrix, float const angl
 struct SmlMat33* smlMat33RotateZ(struct SmlMat33 *const matrix, float const angle);
 float smlMat33Invert(struct SmlMat33 const *const matrix, struct SmlMat33 *const destination);
 struct SmlMat33* smlMat33Adjugate(struct SmlMat33 *const matrix, struct SmlMat33 *const destination);
+struct SmlMat33* smlMat33Transpose(struct SmlMat33 *const matrix, struct SmlMat33 *const destination);
 float smlMat33InvertUnchecked(struct SmlMat33 const *const matrix, struct SmlMat33 *const destination);
-struct SmlMat33* smlMat33Copy(struct SmlMat33 const *const p_matrix, struct SmlMat33 *const p_destination);
+struct SmlMat33* smlMat33Copy(struct SmlMat33 const *const matrix, struct SmlMat33 *const destination);
 struct SmlMat33* smlMat33Cofactors(struct SmlMat33 const* const matrix, struct SmlMat33 *const destination);
-struct SmlMat33* smlMat33SwapMajorityToNew(struct SmlMat33 *const matrix, struct SmlMat33 *const destination);
 struct SmlMat33* smlMat33AddScalar(struct SmlMat33 const *const matrix, float const scalar, struct SmlMat33 *const destination);
 struct SmlMat33* smlMat33DivScalar(struct SmlMat33 const *const matrix, float const scalar, struct SmlMat33 *const destination);
 struct SmlMat33* smlMat33SubScalar(struct SmlMat33 const *const matrix, float const scalar, struct SmlMat33 *const destination);
@@ -302,7 +302,7 @@ struct SmlMat33* smlMat33Mult(struct SmlMat33 const *const first, struct SmlMat3
 struct SmlVec3* smlMat33MultVec3(struct SmlMat33 const *const matrix, struct SmlVec3 const *const vector3, struct SmlVec3 *const destination);
 struct SmlMat33* smlMat33DivMembers(struct SmlMat33 const *const first, struct SmlMat33 const *const second, struct SmlMat33 *const destination);
 struct SmlMat33* smlMat33MultMembers(struct SmlMat33 const *const first, struct SmlMat33 const *const second, struct SmlMat33 *const destination);
-struct SmlMat33* smlMat33InvertGivenInvertedDeterminant(struct SmlMat33 const *const matrix, struct SmlMat33 *const destination, float invertedDeterminant);
+struct SmlMat33* smlMat33InvertGivenInvertedDeterminant(struct SmlMat33 const *const matrix, struct SmlMat33 *const destination, float const invertedDeterminant);
 #pragma endregion
 
 #pragma region 4 * 4 Matrices.
@@ -311,15 +311,20 @@ struct SmlMat33* smlMat33InvertGivenInvertedDeterminant(struct SmlMat33 const *c
 
 float smlMat44Determinant(struct SmlMat44 const *const matrix);
 struct SmlMat44* smlMat44AdjugateSame(struct SmlMat44 *const matrix);
-struct SmlMat44* smlMat44SwapMajority(struct SmlMat44 *const matrix);
 struct SmlMat44* smlMat44Identity(struct SmlMat44 *const destination);
+struct SmlMat44* smlMat44TransposeSame(struct SmlMat44 *const matrix);
+struct SmlMat44* smlMat44TranslateX(struct SmlMat44 *const matrix, float const x);
+struct SmlMat44* smlMat44TranslateY(struct SmlMat44 *const matrix, float const y);
+struct SmlMat44* smlMat44TranslateZ(struct SmlMat44 *const matrix, float const z);
 float smlMat44Invert(struct SmlMat44 const *const matrix, struct SmlMat44 *const destination);
-struct SmlMat44* smlMat44RotateQuat(struct SmlMat44 const *const matrix, struct SmlQuat *const quat);
+struct SmlMat44* smlMat44RotateQuat(struct SmlMat44 *const matrix, struct SmlQuat *const quat);
 struct SmlMat44* smlMat44Adjugate(struct SmlMat44 *const matrix, struct SmlMat44 *const destination);
+struct SmlMat44* smlMat44Transpose(struct SmlMat44 *const matrix, struct SmlMat44 *const destination);
 float smlMat44InvertUnchecked(struct SmlMat44 const *const matrix, struct SmlMat44 *const destination);
-struct SmlMat44* smlMat44Copy(struct SmlMat44 const *const p_matrix, struct SmlMat44 *const p_destination);
+struct SmlMat44* smlMat44Copy(struct SmlMat44 const *const matrix, struct SmlMat44 *const destination);
 struct SmlMat44* smlMat44Cofactors(struct SmlMat44 const* const matrix, struct SmlMat44 *const destination);
-struct SmlMat44* smlMat44SwapMajorityToNew(struct SmlMat44 *const matrix, struct SmlMat44 *const destination);
+struct SmlMat44* smlMat44TranslateVec2(struct SmlMat44 *const matrix, struct SmlVec2 const *const translation);
+struct SmlMat44* smlMat44TranslateVec3(struct SmlMat44 *const matrix, struct SmlVec3 const *const translation);
 struct SmlMat44* smlMat44AddScalar(struct SmlMat44 const *const matrix, float const scalar, struct SmlMat44 *const destination);
 struct SmlMat44* smlMat44DivScalar(struct SmlMat44 const *const matrix, float const scalar, struct SmlMat44 *const destination);
 struct SmlMat44* smlMat44SubScalar(struct SmlMat44 const *const matrix, float const scalar, struct SmlMat44 *const destination);
@@ -330,7 +335,7 @@ struct SmlMat44* smlMat44Mult(struct SmlMat44 const *const first, struct SmlMat4
 struct SmlQuat* smlMat44MultQuat(struct SmlMat44 const *const matrix, struct SmlQuat const *const quat, struct SmlQuat *const destination);
 struct SmlMat44* smlMat44DivMembers(struct SmlMat44 const *const first, struct SmlMat44 const *const second, struct SmlMat44 *const destination);
 struct SmlMat44* smlMat44MultMembers(struct SmlMat44 const *const first, struct SmlMat44 const *const second, struct SmlMat44 *const destination);
-struct SmlMat44* smlMat44InvertGivenInvertedDeterminant(struct SmlMat44 const *const matrix, struct SmlMat44 *const destination, float invertedDeterminant);
+struct SmlMat44* smlMat44InvertGivenInvertedDeterminant(struct SmlMat44 const *const matrix, struct SmlMat44 *const destination, float const invertedDeterminant);
 #pragma endregion
 
 #pragma region Two-dimensional vectors.
