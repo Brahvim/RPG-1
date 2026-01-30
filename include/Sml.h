@@ -246,8 +246,8 @@ char smlFloatCompare(float const first, float const second, float epsilon);
 #pragma endregion
 
 #pragma region 2 * 2 Matrices.
+#define smlMat22Ptr(...) (&smlMat22Val(__VA_ARGS__))
 #define smlMat22Val(...) ((struct SmlMat22) { __VA_ARGS__ })
-#define smlMat22Ptr(...) ((struct SmlMat22*) { __VA_ARGS__ })
 
 float smlMat22Determinant(struct SmlMat22 const *const matrix);
 struct SmlMat22* smlMat22AdjugateSame(struct SmlMat22 *const matrix);
@@ -273,14 +273,14 @@ struct SmlMat22* smlMat22InvertGivenInvertedDeterminant(struct SmlMat22 const *c
 #pragma endregion
 
 #pragma region 3 * 3 Matrices.
+#define smlMat33Ptr(...) (&smlMat33Val(__VA_ARGS__))
 #define smlMat33Val(...) ((struct SmlMat33) { __VA_ARGS__ })
-#define smlMat33Ptr(...) ((struct SmlMat33*) { __VA_ARGS__ })
 
 float smlMat33Determinant(struct SmlMat33 const *const matrix);
 struct SmlMat33* smlMat33AdjugateSame(struct SmlMat33 *const matrix);
 struct SmlMat33* smlMat33SwapMajority(struct SmlMat33 *const matrix);
-struct SmlMat33* smlMat33Identity(struct SmlMat33 *const destination);
 struct SmlMat33* smlMat33ShearXY(struct SmlMat33 *const matrix, float const shear);
+struct SmlMat33* smlMat33Identity(struct SmlMat33 *const destination);
 struct SmlMat33* smlMat33ShearXZ(struct SmlMat33 *const matrix, float const shear);
 struct SmlMat33* smlMat33ShearYZ(struct SmlMat33 *const matrix, float const shear);
 struct SmlMat33* smlMat33RotateX(struct SmlMat33 *const matrix, float const angle);
@@ -306,8 +306,8 @@ struct SmlMat33* smlMat33InvertGivenInvertedDeterminant(struct SmlMat33 const *c
 #pragma endregion
 
 #pragma region 4 * 4 Matrices.
+#define smlMat44Ptr(...) (&smlMat44Val(__VA_ARGS__))
 #define smlMat44Val(...) ((struct SmlMat44) { __VA_ARGS__ })
-#define smlMat44Ptr(...) ((struct SmlMat44*) { __VA_ARGS__ })
 
 float smlMat44Determinant(struct SmlMat44 const *const matrix);
 struct SmlMat44* smlMat44AdjugateSame(struct SmlMat44 *const matrix);
@@ -334,13 +334,13 @@ struct SmlMat44* smlMat44InvertGivenInvertedDeterminant(struct SmlMat44 const *c
 #pragma endregion
 
 #pragma region Two-dimensional vectors.
+#define smlVec2Ptr(...) (&smlVec2Val(__VA_ARGS__))
 #define smlVec2Val(...) ((struct SmlVec2) { __VA_ARGS__ })
-#define smlVec2Ptr(...) ((struct SmlVec2*) { __VA_ARGS__ })
 
 float smlVec2Direction(struct SmlVec2 const *vector);
 float smlVec2Magnitude(struct SmlVec2 const *vector);
-struct SmlVec2* smlVec2One(struct SmlVec2 *const vector);
 struct SmlVec2* smlVec2Zero(struct SmlVec2 *const vector);
+struct SmlVec2* smlVec2One(struct SmlVec2 *const vector);
 float smlVec2MagnitudeSquared(struct SmlVec2 const *vector);
 struct SmlVec2* smlVec2Set(struct SmlVec2 *const vector, float x, float y);
 struct SmlVec2* smlVec2FromAngle(float const angle, struct SmlVec2 *vector);
@@ -356,8 +356,8 @@ struct SmlVec3* smlVec2Cross(struct SmlVec2 const *const first, struct SmlVec2 c
 #pragma endregion
 
 #pragma region Three-dimensional vectors.
+#define smlVec3Ptr(...) (&smlVec3Val(__VA_ARGS__))
 #define smlVec3Val(...) ((struct SmlVec3) { __VA_ARGS__ })
-#define smlVec3Ptr(...) ((struct SmlVec3*) { __VA_ARGS__ })
 
 float smlVec3Direction2d(struct SmlVec3* vector);
 float smlVec3Magnitude(struct SmlVec3 const *vector);
@@ -367,8 +367,8 @@ float smlVec3MagnitudeSquared(struct SmlVec3 const *vector);
 struct SmlVec3* smlVec3FromAngle2d(struct SmlVec3 *const vector, float const angle);
 float smlVec3Dot(struct SmlVec3 const *const first, struct SmlVec3 const *const second);
 struct SmlVec3* smlVec3Normalize(struct SmlVec3 const *vector, struct SmlVec3 *const destination);
-struct SmlVec3* smlVec3Set(struct SmlVec3 *const vector, float const x, float const y, float const z);
 struct SmlVec3* smlVec3NormalizeUnchecked(struct SmlVec3 const *vector, struct SmlVec3 *const destination);
+struct SmlVec3* smlVec3Set(struct SmlVec3 *const vector, float const x, float const y, float const z);
 struct SmlVec3* smlVec3Scale(struct SmlVec3 *const vector, float const scalar, struct SmlVec3 *const destination);
 struct SmlVec3* smlVec3FromAngle3d(float const x, float const y, float const z, struct SmlVec3 *const destination);
 struct SmlVec3* smlVec3ScaleUnchecked(struct SmlVec3 *const vector, float scalar, struct SmlVec3 *const destination);
@@ -379,8 +379,8 @@ struct SmlVec3* smlVec3Cross(struct SmlVec3 const *const first, struct SmlVec3 c
 #pragma endregion
 
 #pragma region Quaternions (four-dimensional vectors!).
+#define smlQuatPtr(...) (&smlQuatVal(__VA_ARGS__))
 #define smlQuatVal(...) ((struct SmlQuat) { __VA_ARGS__ })
-#define smlQuatPtr(...) ((struct SmlQuat*) { __VA_ARGS__ })
 
 float smlQuatMagnitude(struct SmlQuat const *const quaternion);
 struct SmlQuat* smlQuatIdentity(struct SmlQuat *const destination);
@@ -389,11 +389,11 @@ float smlQuatDot(struct SmlQuat const *const first, struct SmlQuat const *const 
 struct SmlQuat* smlQuatInvert(struct SmlQuat const *const quaternion, struct SmlQuat *const destination);
 struct SmlVec3* smlQuatToEuler(struct SmlQuat const *const quaternion, struct SmlVec3 * const destination);
 struct SmlMat33* smlQuatToMatrix33(struct SmlQuat const *const source, struct SmlMat33 *const destination); // Rotation only!
-struct SmlMat44* smlQuatToMatrix44(struct SmlQuat const *const source, struct SmlMat44 *const destination); // Complete transforms only!
 struct SmlQuat* smlQuatConjugate(struct SmlQuat const *const quaternion, struct SmlQuat *const destination);
+struct SmlMat44* smlQuatToMatrix44(struct SmlQuat const *const source, struct SmlMat44 *const destination); // Complete transforms only!
 struct SmlQuat* smlQuatNormalize(struct SmlQuat const *const quaternion, struct SmlQuat *const destination);
-struct SmlQuat* smlQuatNormalizeUnchecked(struct SmlQuat const *const quaternion, struct SmlQuat *const destination);
 struct SmlQuat* smlQuatSet(struct SmlQuat *const quaternion, float const x, float const y, float const z, float const w);
+struct SmlQuat* smlQuatNormalizeUnchecked(struct SmlQuat const *const quaternion, struct SmlQuat *const destination);
 struct SmlQuat* smlQuatScale(struct SmlQuat const *const quaternion, float const scalar, struct SmlQuat *const destination);
 struct SmlQuat* smlQuatMultScalar(struct SmlQuat const *const first, float const scalar, struct SmlQuat *const destination);
 struct SmlQuat* smlQuatFromAxisAngle(struct SmlVec3 const *const axisVector, float const angle, struct SmlQuat *const destination);

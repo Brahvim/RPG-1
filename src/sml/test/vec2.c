@@ -1,25 +1,27 @@
-#include "Sml.h"
-#include "Log.h"
-#include <stdio.h>
-#include "Macros.h"
-#include <stdlib.h>
-#include <memory.h>
+#include "Test.h"
+
+testfn magnitude() {
+	testCheckFloat(smlVec2Magnitude(smlVec2Ptr(-3, -4)), 5.0f);
+	testCheckFloat(smlVec2Magnitude(smlVec2Ptr(3, 4)), 5.0f);
+	testCheckFloat(smlVec2Magnitude(smlVec2Ptr(1, 0)), 1.0f);
+	testCheckFloat(smlVec2Magnitude(smlVec2Ptr(0, 0)), 0.0f);
+	return true;
+}
+
+testfn axes() {
+	testCheckFloatEpsilon(smlVec2Direction(smlVec2Ptr(-0, -1)), -SML_PI * 0.5f, 1e-6f);
+	testCheckFloatEpsilon(smlVec2Direction(smlVec2Ptr(-0, +1)), +SML_PI * 0.5f, 1e-6f);
+	testCheckFloatEpsilon(smlVec2Direction(smlVec2Ptr(-1, -0)), -SML_PI, 1e-6f);
+	testCheckFloatEpsilon(smlVec2Direction(smlVec2Ptr(-1, -0)), +SML_PI, 1e-6f);
+	testCheckFloatEpsilon(smlVec2Direction(smlVec2Ptr(+1, -0)), 0.0f, 1e-6f);
+	return true;
+}
 
 int main(int const p_count, char *p_values[]) {
-	float arr[] = { 1, 2, 3, 4, };
-	struct SmlMat22 mat = smlMat22(arr);
+	return testRunTestsArray(testCreateArray(
 
-	puti("Row order:");
-	printi("%f, %f.\n", mat.r11, mat.r12);
-	printi("%f, %f.\n", mat.r21, mat.r22);
+		testCreateTest(magnitude),
+		testCreateTest(axes)
 
-	puti("Column order:");
-	printi("%f, %f.\n", mat.c11, mat.c12);
-	printi("%f, %f.\n", mat.c21, mat.c22);
-
-	struct SmlVec3 vec1 = smlVec3(arr);
-	struct SmlVec3 vec2 = smlVec3(arr);
-	smlVec3Add(&vec1, &vec2, &vec1);
-
-	return EXIT_SUCCESS;
+	));
 }

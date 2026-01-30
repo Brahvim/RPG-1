@@ -21,11 +21,12 @@ int testRunTests(int const p_count, struct Test const *const p_tests) {
 		if (result) {
 
 			++passed;
+			printi("Test `%d`, `%s()`, successfully passed...\n", i, p_tests[i].name);
 
 		}
 		else {
 
-			printe("Test `%d`, `%s`, failed.\n", i, p_tests[i].name);
+			printe("Test `%d`, `%s()`, *failed!*\n", i, p_tests[i].name);
 
 		}
 
@@ -39,7 +40,7 @@ int testRunTests(int const p_count, struct Test const *const p_tests) {
 
 	return
 		passed == p_count
-		? passed
-		: -passed
+		? 0
+		: passed
 		;
 }
