@@ -36,12 +36,10 @@ int testRunTests(int const p_count, struct Test const *const p_tests) {
 	}
 
 	puti("Test Results :)!!!");
+	int const failures = p_count - passed;
 	printi("`%d` tests passed.\n", passed);
-	printi("`%d` tests failed.\n", p_count - passed);
+	printi("`%d` tests failed.\n", failures);
 
-	return
-		passed == p_count
-		? 0
-		: passed
-		;
+	return failures ? passed : 0;
+	// return failures ? failures : 0;
 }

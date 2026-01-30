@@ -344,11 +344,11 @@ inline struct SmlMat44* smlMat44Mult(struct SmlMat44 const *const p_first, struc
 	return p_destination;
 }
 
-inline struct SmlQuat* smlMat44MultVec4(struct SmlMat44 const *const p_matrix, struct SmlQuat const *const p_vector4, struct SmlQuat *const p_destination) {
-	float const x = p_vector4->x;
-	float const y = p_vector4->y;
-	float const z = p_vector4->z;
-	float const w = p_vector4->w;
+inline struct SmlQuat* smlMat44MultQuat(struct SmlMat44 const *const p_matrix, struct SmlQuat const *const p_quat, struct SmlQuat *const p_destination) {
+	float const x = p_quat->x;
+	float const y = p_quat->y;
+	float const z = p_quat->z;
+	float const w = p_quat->w;
 
 	p_destination->x = p_matrix->r11 * x + p_matrix->r12 * y + p_matrix->r13 * z + p_matrix->r14 * w;
 	p_destination->y = p_matrix->r21 * x + p_matrix->r22 * y + p_matrix->r23 * z + p_matrix->r24 * w;

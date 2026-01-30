@@ -201,6 +201,23 @@ inline struct SmlQuat* smlQuatNormalizeUnchecked(struct SmlQuat const *const p_q
 	return p_destination;
 }
 
+inline struct SmlQuat* smlQuatFromAngle3d(float const p_x, float const p_y, float const p_z, struct SmlQuat *const p_destination) {
+	float const cx = cosf(p_x * 0.5f);
+	float const sx = sinf(p_x * 0.5f);
+	float const cy = cosf(p_y * 0.5f);
+	float const sy = sinf(p_y * 0.5f);
+	float const cz = cosf(p_z * 0.5f);
+	float const sz = sinf(p_z * 0.5f);
+
+	// `x`-`y`-`z` rotation:
+	p_destination->w = cx * cy * cz + sx * sy * sz;
+	p_destination->x = sx * cy * cz - cx * sy * sz;
+	p_destination->y = cx * sy * cz + sx * cy * sz;
+	p_destination->z = cx * cy * sz - sx * sy * cz;
+
+	return p_destination;
+}
+
 inline struct SmlQuat* smlQuatScale(struct SmlQuat const *const p_quaternion, float const p_scalar, struct SmlQuat *const p_destination) {
 	smlQuatNormalize(p_quaternion, p_destination);
 	return smlQuatMultScalar(p_quaternion, p_scalar, p_destination);
@@ -306,7 +323,6 @@ inline struct SmlVec2* smlQuatRotateVector2d(struct SmlQuat const *const p_quate
 	// Quaternion multiplication, `p_quaternion * quatVec2d * conj`:
 	smlQuatMult(p_quaternion, &quatVec2d, &quatVec2d); // DO NOT change the order! This is #1.
 	smlQuatMult(&quatVec2d, &conj, &quatVec2d); // DO NOT change the order! This is #2.
-	// Using `SmlQuat`
 
 	p_destination->x = quatVec2d.x;
 	p_destination->y = quatVec2d.y;
