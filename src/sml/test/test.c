@@ -12,10 +12,10 @@ puti("--------------------------------------------------------------------------
 
 int testRunTests(int const p_count, struct Test const *const p_tests) {
 	int passed = 0;
-	dashl();
 
 	for (int i = 0; i < p_count; i++) {
 
+		dashl();
 		bool const result = p_tests[i].function();
 
 		if (result) {
@@ -26,11 +26,12 @@ int testRunTests(int const p_count, struct Test const *const p_tests) {
 		}
 		else {
 
-			printe("Test `%d`, `%s()`, *failed!*\n", i, p_tests[i].name);
+			// printe("Test `%d`, `%s()`, *failed!*\n", i, p_tests[i].name);
 
 		}
 
 		dashl();
+		newln();
 
 	}
 

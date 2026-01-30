@@ -3,8 +3,8 @@
 // [Tag] File.c:00 `function()`: TEXTEXTTEXTEXT!!!
 #define LOG_PREFIX "[%s] %s:%d, `%s()`: "
 
-#define newln()	\
-	printf(LOG_PREFIX "\n", "...", __FILE_NAME__, __LINE__, __func__)
+#define newln()	putchar('\n')
+	// printf(LOG_PREFIX "\n", "...", __FILE_NAME__, __LINE__, __func__)
 
 #define puti(p_line) \
 	printf(LOG_PREFIX "%s\n", "inf", __FILE_NAME__, __LINE__, __func__, p_line)
