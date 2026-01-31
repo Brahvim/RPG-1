@@ -119,7 +119,6 @@ void gameDraw() {
 	g_camera2dPos.y = ((cosf(g_gameMillisDraw))) * 15;
 	g_camera2dRot = fabs(((g_gameMillisDraw)));
 
-	// camera2dUpdateOrtho();
 	camera2dUpdatePersp();
 	camera2dApply();
 
