@@ -73,13 +73,13 @@ struct SmlMat44* cameraMakeOrtho(
 	float const diffTopBottom = p_top - p_bottom;
 	float const diffFarNear = p_far - p_near;
 
-	p_out->r11 = +2.0f / diffRightLeft;
-	p_out->r22 = +2.0f / diffTopBottom;
-	p_out->r33 = -2.0f / diffFarNear;
-
 	p_out->r14 = -(p_right + p_left) / diffRightLeft;
 	p_out->r24 = -(p_top + p_bottom) / diffTopBottom;
 	p_out->r34 = -(p_far + p_near) / diffFarNear;
+
+	p_out->r11 = +2.0f / diffRightLeft;
+	p_out->r22 = +2.0f / diffTopBottom;
+	p_out->r33 = -2.0f / diffFarNear;
 
 	return p_out;
 }
@@ -113,76 +113,62 @@ struct SmlMat44* cameraMakePersp(
 }
 
 struct SmlMat44* cameraMake2d(
-	struct SmlVec2 const *const p_pos,
+	struct SmlVec3 const *const p_pos,
 	struct SmlMat44 *const p_out,
-	float const p_rotation,
-	float const p_zoom
+	float const p_rotation
 ) {
 	smlMat44Identity(p_out);
-
-	// Inverse translation:
-	p_out->r14 = -p_pos->x;
-	p_out->r24 = -p_pos->y;
 
 	// Inverse rotation (`z` axis!):
 	float const c = cosf(-p_rotation);
 	float const s = sinf(-p_rotation);
 
-	p_out->r11 = +c * p_zoom;
-	p_out->r12 = -s * p_zoom;
-	p_out->r21 = +s * p_zoom;
-	p_out->r22 = +c * p_zoom;
-	// smlMat33RotateZ(&p_out->mat33, -p_rotation);
+	p_out->r11 = +c;
+	p_out->r12 = -s;
+	p_out->r21 = +s;
+	p_out->r22 = +c;
 
-	// Inverse zoom:
-	// p_out->r11 *= p_zoom;
-	// p_out->r22 *= p_zoom;
+	// Inverse translation:
+	p_out->r14 = -p_pos->x;
+	p_out->r24 = -p_pos->y;
+	p_out->r34 = -p_pos->z;
 
 	return p_out;
 }
 
 #pragma region // 2D Cam.
 struct SmlMat44 g_camera2dTransf = { 0 };
-struct SmlVec2 g_camera2dPos = { 0 };
-float g_camera2dZoom = 1.0f;
+struct SmlVec3 g_camera2dPos = { 0 };
 float g_camera2dRot = 0;
 
 void camera2dUpdate() {
 	// TODO: Like the current cam, make a "current window"!
 	float const cx = g_window1Wfb * 0.5f;
 	float const cy = g_window1Hfb * 0.5f;
-	struct SmlMat44 ortho, view;
+	float const w = g_window1Wfb;
+	float const h = g_window1Hfb;
 
-	cameraMakeOrtho(
-		-1, +1,
-		+cy, -cy,
-		-cx, +cx,
-		&ortho
+	smlMat44Mult(
+
+		cameraMakeOrtho(
+			+1, -1,
+			+cy, -cy,
+			-cx, +cx,
+			smlMat44Ptr()
+		),
+
+		cameraMake2d(
+			&g_camera2dPos,
+			smlMat44Ptr(),
+			g_camera2dRot
+		),
+
+		&g_camera2dTransf
+
 	);
+}
 
-	cameraMake2d(
-		&g_camera2dPos,
-		&view,
-		g_camera2dRot,
-		g_camera2dZoom
-	);
-
-	smlMat44Mult(&ortho, &view, &g_camera2dTransf);
-
-	// smlMat44Mult(
-	// 	cameraMakeOrtho(
-	// 		+1, -1,
-	// 		+cy, -cy,
-	// 		-cx, +cx,
-	// 		smlMat44Ptr()
-	// 	),
-	// 	cameraMake2d(
-	// 		&g_camera2dPos,
-	// 		smlMat44Ptr(),
-	// 		g_camera2dRot,
-	// 		g_camera2dZoom
-	// 	),
-	// 	&g_camera2dTransf
-	// );
+void camera2dApply() {
+	g_cameraCurrentTransf = g_camera2dTransf;
 }
 #pragma endregion

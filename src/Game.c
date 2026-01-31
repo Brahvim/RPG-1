@@ -95,56 +95,44 @@ void gameSetup() {
 	struct QuadCtx *qc = g_gameQuadCtx = quadCtxCreate();
 
 	listExpand(qc->list, 2);
-	quadCtxAppend(qc, quadDef());
+	quadCtxAppend(
+		qc,
+		quadVal(
+			.scale = smlVec3Val(1.25f, 1),
+			.tintRgba = smlQuatVal(0, 0, 0, 1)
+		)
+	);
 	quadTexture(quadListTail(qc->list), ATLAS_DEFAULT, TEXTURE_GRID);
 
 	quadCtxAppend(
 		qc,
 		quadVal(
-			.scale = smlVec3Val(0.1f, 0.1f),
-			.tintRgba = smlQuatVal(1, 0, 0, 0),
-			.pos = smlVec3Val(-0.5f, -0.5f, 0.0f)
+			.scale = smlVec3Val(1, 1),
+			.tintRgba = smlQuatVal(1, 0, 0, 0.25f)
 		)
 	);
 	// quadTexture(quadListTail(qc->list), ATLAS_DEFAULT, TEXTURE_MISSING);
 }
 
 void gameDraw() {
-	// camera2dUpdate();
+	// g_camera2dPos.x = ((sinf(g_gameMillisDraw))) * 250;
+	// g_camera2dPos.y = ((cosf(g_gameMillisDraw))) * 250;
+	// g_camera2dPos.z = fabs(sinf(g_gameMillisDraw));
+	g_camera2dRot = g_gameMillisDraw;
+	camera2dUpdate();
+	camera2dApply();
 
-	float const cx = g_window1Wfb * 0.5f;
-	float const cy = g_window1Hfb * 0.5f;
-	cameraMakeOrtho(
-		+1, -1,
-		+cy, -cy,
-		-cx, +cx,
-		&g_cameraCurrentTransf
-	);
-
-	g_cameraCurrentTransf.r33 = 1.0f;
-	g_cameraCurrentTransf.r34 = 0.0f;
-	
-	cameraMake2d(
-		&g_camera2dPos,
-		&g_cameraCurrentTransf,
-		g_camera2dRot,
-		g_camera2dZoom
-	);
-	
-	// g_cameraCurrentTransf = g_camera2dTransf;
-	g_camera2dPos.y = fabs(sinf(g_gameMillisDraw));
-	g_camera2dPos.x = fabs(sinf(g_gameMillisDraw));
-	// g_camera2dPos.y += fabs(sinf(g_gameMillisDraw));
-	// g_camera2dRot = fabs(sinf(0.001f * g_gameMillisDraw)) * 250;
-	
-	ERRGL(glClearColor(0.8f, 0.6f, 1.0f, 1.0f));
+	ERRGL(glDisable(GL_DEPTH_TEST));
+	ERRGL(glClearColor(0.8f, 0.6f, 1.0f, 0.1f));
 	ERRGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
 	ERRGL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-	
+
+	smlVec3ScaleSame(&quadListRead(g_gameQuadCtx->list, 1)->scale, 500);
+	smlVec3ScaleSame(&quadListRead(g_gameQuadCtx->list, 0)->scale, 1500);
+
 	quadListRead(g_gameQuadCtx->list, 1)->rotate.z = g_gameMillisDraw * 2;
 	quadListRead(g_gameQuadCtx->list, 0)->pos.x = fabs(sin(g_gameMillisDraw)) - 0.5f;
-	
+
 	quadCtxDraw(g_gameQuadCtx); // TODO: Limit how many are drawn!
 	// TODO: Perhaps also `quadCtxDrawRest()` to draw all remaining!
 }
-	

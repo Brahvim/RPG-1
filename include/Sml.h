@@ -342,10 +342,16 @@ struct SmlMat44* smlMat44InvertGivenInvertedDeterminant(struct SmlMat44 const *c
 #define smlVec2Ptr(...) (&smlVec2Val(__VA_ARGS__))
 #define smlVec2Val(...) ((struct SmlVec2) { __VA_ARGS__ })
 
+#define smlVec2MultSame(vector, scalar) smlVec2Mult(vector, scalar, vector)
+#define smlVec2ScaleSame(vector, scalar) smlVec2Scale(vector, scalar, vector)
+#define smlVec2NormalizeSame(vector, scalar) smlVec2Normalize(vector, scalar, vector)
+#define smlVec2ScaleUncheckedSame(vector, scalar) smlVec2ScaleUnchecked(vector, scalar, vector)
+#define smlVec2NormalizeUncheckedSame(vector, scalar) smlVec2NormalizeUnchecked(vector, scalar, vector)
+
 float smlVec2Direction(struct SmlVec2 const *vector);
 float smlVec2Magnitude(struct SmlVec2 const *vector);
-struct SmlVec2* smlVec2Zero(struct SmlVec2 *const vector);
 struct SmlVec2* smlVec2One(struct SmlVec2 *const vector);
+struct SmlVec2* smlVec2Zero(struct SmlVec2 *const vector);
 float smlVec2MagnitudeSquared(struct SmlVec2 const *vector);
 struct SmlVec2* smlVec2Set(struct SmlVec2 *const vector, float x, float y);
 struct SmlVec2* smlVec2FromAngle(float const angle, struct SmlVec2 *vector);
@@ -363,6 +369,12 @@ struct SmlVec3* smlVec2Cross(struct SmlVec2 const *const first, struct SmlVec2 c
 #pragma region Three-dimensional vectors.
 #define smlVec3Ptr(...) (&smlVec3Val(__VA_ARGS__))
 #define smlVec3Val(...) ((struct SmlVec3) { __VA_ARGS__ })
+
+#define smlVec3MultSame(vector, scalar) smlVec3Mult(vector, scalar, vector)
+#define smlVec3ScaleSame(vector, scalar) smlVec3Scale(vector, scalar, vector)
+#define smlVec3NormalizeSame(vector, scalar) smlVec3Normalize(vector, scalar, vector)
+#define smlVec3ScaleUncheckedSame(vector, scalar) smlVec3ScaleUnchecked(vector, scalar, vector)
+#define smlVec3NormalizeUncheckedSame(vector, scalar) smlVec3NormalizeUnchecked(vector, scalar, vector)
 
 float smlVec3Magnitude(struct SmlVec3 const *vector);
 struct SmlVec3* smlVec3One(struct SmlVec3 *const vector);

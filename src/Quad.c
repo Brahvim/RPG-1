@@ -172,6 +172,7 @@ void quadCtxDraw(struct QuadCtx const *const p_ctx) {
 
 	ERRGL(glEnable(GL_BLEND));
 	ERRGL(glFrontFace(GL_CCW));
+	ERRGL(glClearDepthf(1.0f));
 	ERRGL(glDisable(GL_CULL_FACE));
 	ERRGL(glDisable(GL_DEPTH_TEST));
 	ERRGL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));

@@ -29,18 +29,17 @@ struct SmlMat44* cameraMakePersp(
 );
 
 struct SmlMat44* cameraMake2d(
-	struct SmlVec2 const *const position,
+	struct SmlVec3 const *const position,
 	struct SmlMat44 *const out,
-	float const rotation,
-	float const zoom
+	float const rotation
 );
 
 #pragma region // 2D Cam.
 
+void camera2dApply();
 void camera2dUpdate();
 extern float g_camera2dRot;
-extern float g_camera2dZoom;
-extern struct SmlVec2 g_camera2dPos;
+extern struct SmlVec3 g_camera2dPos;
 extern struct SmlMat44 g_camera2dTransf;
 
 #pragma endregion 
