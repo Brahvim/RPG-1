@@ -1,10 +1,12 @@
 #version 300 es
 precision mediump float;
 
-out vec2 v_uv;
-out vec4 v_tint;
-
 uniform mat4 u_camera;
+
+out vec4 v_tint;
+out vec2 v_uv;
+
+// Attributes.
 
 // Vertex attributes.
 layout(location = 0) in vec3 a0_vPos;

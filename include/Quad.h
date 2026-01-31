@@ -28,11 +28,11 @@ struct QuadCtx {
 
 void quadSystemInit();
 struct QuadCtx* quadCtxCreate();
-void quadInit(struct Quad *const quad);
-void quadCtxInit(struct QuadCtx *const ctx);
-void quadDebug(struct Quad const *const quad);
-void quadCtxDraw(struct QuadCtx const *const ctx);
+struct Quad* quadInit(struct Quad *const quad);
 struct QuadCtx* quadCtxDelete(struct QuadCtx *ctx);
+struct QuadCtx* quadCtxInit(struct QuadCtx *const ctx);
+struct Quad const *const quadDebug(struct Quad const *const quad);
+struct QuadCtx const *const quadCtxDraw(struct QuadCtx const *const ctx);
 
 #define quadPtr(...) (&quadVal(__VA_ARGS__))
 #define quadVal(...) ((struct Quad) { __VA_ARGS__ })

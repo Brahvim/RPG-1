@@ -44,14 +44,26 @@ struct QuadCtx* quadCtxCreate() {
 	return ctx;
 }
 
-void quadInit(struct Quad *const p_quad) {
+struct Quad* quadInit(struct Quad *const p_quad) {
 	p_quad->tintRgba = smlQuatVal(0, 0, 0, 1);
 	p_quad->scale = smlVec3Val(1, 1);
 	p_quad->texRect = smlQuatVal();
 	p_quad->pos = smlVec3Val();
+	return p_quad;
 }
 
-void quadCtxInit(struct QuadCtx *const p_ctx) {
+struct QuadCtx* quadCtxDelete(struct QuadCtx *p_ctx) {
+	ERRGL(glDeleteBuffers(3, ((GLuint[]) {
+		/**/p_ctx->vboVertTexcoords,
+			p_ctx->vboVertPos,
+			p_ctx->vboInst,
+	})));
+	p_ctx->list = listDelete(p_ctx->list);
+	free(p_ctx);
+	return NULL;
+}
+
+struct QuadCtx* quadCtxInit(struct QuadCtx *const p_ctx) {
 	ERRGL(glGenVertexArrays(1, &p_ctx->vao));
 	ERRGL(glBindVertexArray(p_ctx->vao));
 	{ // VBO allocs.
@@ -133,9 +145,10 @@ void quadCtxInit(struct QuadCtx *const p_ctx) {
 	// ERRGL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	// ERRGL(glBindVertexArray(0));
 	// *"Clean up!", they said.*
+	return p_ctx;
 }
 
-void quadDebug(struct Quad const *const p_quad) {
+struct Quad const* const quadDebug(struct Quad const *const p_quad) {
 	printi(
 		"	Pos:		x: `%.2ff`,  y: `%.2ff`,\n",
 		p_quad->pos.x, p_quad->pos.y
@@ -148,9 +161,18 @@ void quadDebug(struct Quad const *const p_quad) {
 		"	Texcoords:	x1: `%.2ff`, y2: `%.2ff`, w: `%.2ff`, h: `%.2ff`.\n",
 		p_quad->texRect.x, p_quad->texRect.y, p_quad->texRect.z, p_quad->texRect.w
 	);
+
+	return p_quad;
 }
 
-void quadCtxDraw(struct QuadCtx const *const p_ctx) {
+size_t quadCreate(struct QuadCtx *const p_ctx, size_t const p_count) {
+	size_t const ret = p_ctx->list->size;
+	listExpand(p_ctx->list, p_count);
+	p_ctx->list->size += p_count;
+	return ret;
+}
+
+struct QuadCtx const *const quadCtxDraw(struct QuadCtx const *const p_ctx) {
 	ERRGL(glActiveTexture(GL_TEXTURE0));
 	ERRGL(glBindVertexArray(p_ctx->vao));
 	ERRGL(glUseProgram(g_shaderGlIds[SHADER_QUADS]));
@@ -175,29 +197,13 @@ void quadCtxDraw(struct QuadCtx const *const p_ctx) {
 
 	ERRGL(glEnable(GL_BLEND));
 	ERRGL(glFrontFace(GL_CCW));
-	ERRGL(glClearDepthf(1.0f));
+	// ERRGL(glClearDepthf(100.0f));
 	ERRGL(glDisable(GL_CULL_FACE));
 	ERRGL(glDisable(GL_DEPTH_TEST));
 	ERRGL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 	ERRGL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, p_ctx->list->size));
-}
 
-struct QuadCtx* quadCtxDelete(struct QuadCtx *p_ctx) {
-	ERRGL(glDeleteBuffers(3, ((GLuint[]) {
-		/**/p_ctx->vboVertTexcoords,
-			p_ctx->vboVertPos,
-			p_ctx->vboInst,
-	})));
-	p_ctx->list = listDelete(p_ctx->list);
-	free(p_ctx);
-	return NULL;
-}
-
-size_t quadCreate(struct QuadCtx *const p_ctx, size_t const p_count) {
-	size_t const ret = p_ctx->list->size;
-	listExpand(p_ctx->list, p_count);
-	p_ctx->list->size += p_count;
-	return ret;
+	return p_ctx;
 }
 
 void quadTexture(struct Quad *const p_quad, enum AtlasName const p_atlas, enum TextureName p_texture) {

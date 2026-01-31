@@ -104,7 +104,7 @@ struct SmlMat44* cameraMakePersp(
 
 	p_out->r44 = 0; // In an iden. mat., this is `1`!
 	p_out->r22 = f;
-	p_out->r43 = -1; // Causes perspective divide, apparently.
+	p_out->r43 = -1; // Causes perspective divide, apparently. `+` for left-handed.
 	p_out->r11 = f / p_aspect;
 	p_out->r33 = (p_far + p_near) / (p_near - p_far);		// OpenGL ONLY!
 	p_out->r34 = (2 * p_far * p_near) / (p_near - p_far);	// OpenGL ONLY!
@@ -141,7 +141,7 @@ struct SmlMat44 g_camera2dTransf = { 0 };
 struct SmlVec3 g_camera2dPos = { 0 };
 float g_camera2dRot = 0;
 
-void camera2dUpdate() {
+void camera2dUpdateOrtho() {
 	// TODO: Like the current cam, make a "current window"!
 	float const cx = g_window1Wfb * 0.5f;
 	float const cy = g_window1Hfb * 0.5f;
@@ -166,6 +166,34 @@ void camera2dUpdate() {
 		&g_camera2dTransf
 
 	);
+}
+
+void camera2dUpdatePersp() {
+	struct SmlVec3 pos = g_camera2dPos;
+	float const w = g_window1Wfb;
+	float const h = g_window1Hfb;
+	pos.z = 100;
+
+	smlMat44Mult(
+
+		cameraMakePersp(
+			SML_RADIANS(90),
+			100.0f, 0.1f,
+			w / h,
+			&g_cameraCurrentTransf
+		),
+
+		cameraMake2d(
+			&pos,
+			smlMat44Ptr(),
+			g_camera2dRot
+		),
+
+		&g_camera2dTransf
+
+	);
+
+
 }
 
 void camera2dApply() {

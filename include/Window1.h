@@ -9,14 +9,14 @@ extern int g_window1W;
 extern int g_window1H;
 extern int g_window1Wfb; // "Framebuffer"!
 extern int g_window1Hfb; // "Framebuffer"!
+#define g_window1HDef 720 // "Default".
 extern char g_window1Full;
+#define g_window1WDef 1280 // "Default".
 extern int g_window1XUnFull;
 extern int g_window1YUnFull;
 extern int g_window1WUnFull;
 extern int g_window1HUnFull;
 extern GLFWwindow *g_window1;
-#define g_window1WDef /* 640 */ 500 // "Default".
-#define g_window1HDef /* 480 */ 500 // "Default".
 #pragma endregion
 
 void window1Create();

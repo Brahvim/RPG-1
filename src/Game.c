@@ -12,10 +12,10 @@
 #include "Exit.h"
 #include "Log.h"
 
-struct QuadCtx *g_gameQuadCtx;
-double g_gameMillisSetup;
-double g_gameMillisDraw;
 size_t g_gameFrameCount;
+double g_gameMillisDraw;
+double g_gameMillisSetup;
+struct QuadCtx *g_gameQuadCtx;
 
 void gameExit(enum ExitReason const p_reason) {
 	for (size_t i = 0; i < TEXTURE_TOTAL; ++i) {
@@ -115,13 +115,21 @@ void gameSetup() {
 }
 
 void gameDraw() {
+	g_camera2dPos.x = ((sinf(g_gameMillisDraw))) * 250;
+	g_camera2dPos.y = ((cosf(g_gameMillisDraw))) * 15;
+	g_camera2dRot = fabs(((g_gameMillisDraw)));
+
+	// camera2dUpdateOrtho();
+	camera2dUpdatePersp();
+	camera2dApply();
+
 	ERRGL(glDisable(GL_DEPTH_TEST));
 	ERRGL(glClearColor(0.8f, 0.6f, 1.0f, 0.1f));
 	ERRGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));
 	ERRGL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-	smlVec3ScaleSame(&quadListRead(g_gameQuadCtx->list, 1)->scale, 500);
-	smlVec3ScaleSame(&quadListRead(g_gameQuadCtx->list, 0)->scale, 1500);
+	smlVec3ScaleSame(&quadListRead(g_gameQuadCtx->list, 1)->scale, 50);
+	smlVec3ScaleSame(&quadListRead(g_gameQuadCtx->list, 0)->scale, 150);
 
 	quadListRead(g_gameQuadCtx->list, 1)->rotate.z = g_gameMillisDraw * 2;
 	quadListRead(g_gameQuadCtx->list, 0)->pos.x = fabs(sin(g_gameMillisDraw)) - 0.5f;
