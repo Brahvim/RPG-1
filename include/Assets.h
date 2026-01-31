@@ -11,7 +11,7 @@ typedef unsigned char pixel_t;
 #pragma region Current dir!
 extern char g_cwd[FILENAME_MAX];
 extern size_t g_cwdLen;
-void loadCwd(void);
+void loadCwd();
 #pragma endregion
 
 #pragma region Textures.
@@ -46,7 +46,7 @@ enum TextureName {
 };
 #undef T
 
-void loadTextures(void);
+void loadTextures();
 
 extern pixel_t *g_textureData[TEXTURE_TOTAL];
 extern char const *g_texturePaths[TEXTURE_TOTAL];
@@ -81,7 +81,7 @@ enum AtlasName {
 };
 #undef A
 
-void loadMappedAtlases(void);
+void loadMappedAtlases();
 extern struct Atlas g_atlases[ATLAS_TOTAL];
 extern size_t g_atlasTextureCounts[ATLAS_TOTAL];
 extern long long *g_atlasTextureIndices[ATLAS_TOTAL];
@@ -100,7 +100,7 @@ enum ShaderName {
 };
 #undef S
 
-void loadShaders(void);
+void loadShaders();
 
 /*
  * Shaders upto 2 GiB only! If they have more than that many **[AS]C[II] `char`s**, this won't put those in.

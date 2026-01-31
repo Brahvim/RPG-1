@@ -8,8 +8,6 @@ uniform sampler2D u_atlas;
 
 void main() {
 	vec4 texel = texture(u_atlas, v_uv);
-	f_fragment.x = texel.x + v_tint.x;
-	f_fragment.y = texel.y + v_tint.y;
-	f_fragment.z = texel.z + v_tint.z;
+	f_fragment.xyz = texel.xyz + v_tint.xyz;
 	f_fragment.a = texel.a * v_tint.a;
 }

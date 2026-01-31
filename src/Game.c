@@ -115,13 +115,6 @@ void gameSetup() {
 }
 
 void gameDraw() {
-	// g_camera2dPos.x = ((sinf(g_gameMillisDraw))) * 250;
-	// g_camera2dPos.y = ((cosf(g_gameMillisDraw))) * 250;
-	// g_camera2dPos.z = fabs(sinf(g_gameMillisDraw));
-	g_camera2dRot = g_gameMillisDraw;
-	camera2dUpdate();
-	camera2dApply();
-
 	ERRGL(glDisable(GL_DEPTH_TEST));
 	ERRGL(glClearColor(0.8f, 0.6f, 1.0f, 0.1f));
 	ERRGL(glViewport(0, 0, g_window1Wfb, g_window1Hfb));

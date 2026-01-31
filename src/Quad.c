@@ -23,7 +23,7 @@ static struct SmlVec2 s_quadTexcoords[4] = {
 static GLuint s_quadProgramUniformLocationAtlas = 0;
 static GLuint s_quadProgramUniformLocationCamera = 0;
 
-void quadSystemInit(void) {
+void quadSystemInit() {
 #define M(p_varName, p_idenStr) \
 	ERRGL(s_quadProgramUniformLocation ## p_varName \
 	= glGetUniformLocation(g_shaderGlIds[SHADER_QUADS], p_idenStr))
@@ -45,7 +45,10 @@ struct QuadCtx* quadCtxCreate() {
 }
 
 void quadInit(struct Quad *const p_quad) {
-	// p_quad->pos = ;
+	p_quad->tintRgba = smlQuatVal(0, 0, 0, 1);
+	p_quad->scale = smlVec3Val(1, 1);
+	p_quad->texRect = smlQuatVal();
+	p_quad->pos = smlVec3Val();
 }
 
 void quadCtxInit(struct QuadCtx *const p_ctx) {

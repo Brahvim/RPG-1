@@ -12,7 +12,7 @@
 #include "Gl.h"
 
 #pragma region Maps.
-static inline void mapTextures(void) {
+static inline void mapTextures() {
 #define M(p_texture, p_path) g_texturePaths[p_texture] = p_path; g_texturePathLengths[p_texture] = sizeof(p_path)
 	M(TEXTURE_MISSING, "missing.png");
 	M(TEXTURE_BLACK, "black.png");
@@ -21,7 +21,7 @@ static inline void mapTextures(void) {
 #undef M
 }
 
-static inline void mapShaders(void) {
+static inline void mapShaders() {
 #define M(p_shader, p_vert, p_frag)\
 	g_shaderPathsVert[p_shader] = p_vert; g_shaderPathsFrag[p_shader] = p_frag;\
 	g_shaderPathLengthsVert[p_shader] = sizeof(p_vert); g_shaderPathLengthsFrag[p_shader] = sizeof(p_frag)
@@ -361,7 +361,7 @@ static void atlasReverseMapNames(enum AtlasName const p_atlas, long long *const 
 	}
 }
 
-void loadMappedAtlases(void) {
+void loadMappedAtlases() {
 #define M(p_enum, ...) { \
 		static enum TextureName names[] = { __VA_ARGS__ }; \
 		static long long indices[TEXTURE_TOTAL] = { 0 }; \
@@ -384,7 +384,7 @@ void loadMappedAtlases(void) {
 #undef M
 }
 
-void loadTextures(void) {
+void loadTextures() {
 	stbi_set_flip_vertically_on_load(1);
 	mapTextures();
 
@@ -433,7 +433,7 @@ void loadTextures(void) {
 	puti("Textures ready to go!");
 }
 
-void loadShaders(void) {
+void loadShaders() {
 	mapShaders();
 	loadShaderArrays(g_shaderPathsVert, g_shaderPathLengthsVert, g_shaderSourcesVert);
 	loadShaderArrays(g_shaderPathsFrag, g_shaderPathLengthsFrag, g_shaderSourcesFrag);
@@ -486,7 +486,7 @@ void loadShaders(void) {
 	}
 }
 
-void loadCwd(void) {
+void loadCwd() {
 	if (likely(getcwd(g_cwd, sizeof(g_cwd)) != NULL)) {
 
 		printi("Current working directory: `%s`.\n", g_cwd);

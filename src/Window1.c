@@ -17,17 +17,17 @@ int g_window1HUnFull = 0;
 GLFWwindow *g_window1 = NULL;
 #pragma endregion
 
-void window1Create(void) {
+void window1Create() {
 	g_window1 = glfwCreateWindow(g_window1WDef, g_window1HDef, "Role Playing Game", NULL, NULL);
 	glfwSetKeyCallback(g_window1, window1CbckKey);
 	window1Update();
 }
 
-void window1Delete(void) {
+void window1Delete() {
 	glfwDestroyWindow(g_window1);
 }
 
-void window1Update(void) {
+void window1Update() {
 	glfwGetWindowPos(g_window1, &g_window1X, &g_window1Y);
 	glfwGetWindowSize(g_window1, &g_window1W, &g_window1H);
 	glfwGetFramebufferSize(g_window1, &g_window1Wfb, &g_window1Hfb);
