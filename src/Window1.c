@@ -14,7 +14,7 @@ int g_window1XUnFull = 0;
 int g_window1YUnFull = 0;
 int g_window1WUnFull = 0;
 int g_window1HUnFull = 0;
-GLFWwindow *g_window1 = NULL;
+struct GLFWwindow *g_window1 = NULL;
 #pragma endregion
 
 void window1Create() {
@@ -33,7 +33,7 @@ void window1Update() {
 	glfwGetFramebufferSize(g_window1, &g_window1Wfb, &g_window1Hfb);
 }
 
-void window1CbckKey(GLFWwindow *p_window, int p_key, int p_scancode, int p_action, int p_mods) {
+void window1CbckKey(struct GLFWwindow *p_window, int p_key, int p_scancode, int p_action, int p_mods) {
 	// "Likely" so exits are fastest:
 	if (likely(p_key == GLFW_KEY_ESCAPE && p_action == GLFW_PRESS)) { // Will eventually use `GLFW_REPEAT` *kinda' like* `SURVEY_PROGRAM.exe`...!
 

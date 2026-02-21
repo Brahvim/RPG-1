@@ -91,7 +91,7 @@ inline struct SmlVec2* smlVec2Sub(struct SmlVec2 const *const p_first, struct Sm
 
 /* Remember, this always returns a 3D vector! */
 inline struct SmlVec3* smlVec2Cross(struct SmlVec2 const *const p_first, struct SmlVec2 const *const p_second, struct SmlVec3 *const p_destination) {
-	p_destination->x = p_destination->y = 0;
 	p_destination->z = p_first->x * p_second->y - p_first->y * p_second->x;
+	p_destination->x = p_destination->y = 0; // NOW safe even without `restrict`!
 	return p_destination;
 }

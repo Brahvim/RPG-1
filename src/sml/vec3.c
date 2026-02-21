@@ -105,8 +105,13 @@ inline struct SmlVec3* smlVec3Sub(struct SmlVec3 const *const p_first, struct Sm
 }
 
 inline struct SmlVec3* smlVec3Cross(struct SmlVec3 const *const p_first, struct SmlVec3 const *const p_second, struct SmlVec3 *const p_destination) {
-	p_destination->x = p_first->y * p_second->z - p_first->z * p_second->y;
-	p_destination->y = p_first->z * p_second->x - p_first->x * p_second->z;
-	p_destination->z = p_first->x * p_second->y - p_first->y * p_second->x;
+	struct SmlVec3 destination;
+
+	destination.x = p_first->y * p_second->z - p_first->z * p_second->y;
+	destination.y = p_first->z * p_second->x - p_first->x * p_second->z;
+	destination.z = p_first->x * p_second->y - p_first->y * p_second->x;
+
+	*p_destination = destination;
+
 	return p_destination;
 }

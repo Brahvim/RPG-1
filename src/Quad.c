@@ -63,6 +63,23 @@ struct QuadCtx* quadCtxDelete(struct QuadCtx *p_ctx) {
 	return NULL;
 }
 
+struct Quad* quadDebug(struct Quad const *const p_quad) {
+	printi(
+		"	Pos:		x: `%.2ff`,  y: `%.2ff`,\n",
+		p_quad->pos.x, p_quad->pos.y
+	);
+	printi(
+		"	Scale:		x: `%.2ff`,  y: `%.2ff`,\n",
+		p_quad->scale.x, p_quad->scale.y
+	);
+	printi(
+		"	Texcoords:	x: `%.2ff`, y: `%.2ff`, w: `%.2ff`, h: `%.2ff`.\n",
+		p_quad->texRect.x, p_quad->texRect.y, p_quad->texRect.z, p_quad->texRect.w
+	);
+
+	return (struct Quad*) p_quad;
+}
+
 struct QuadCtx* quadCtxInit(struct QuadCtx *const p_ctx) {
 	ERRGL(glGenVertexArrays(1, &p_ctx->vao));
 	ERRGL(glBindVertexArray(p_ctx->vao));
@@ -148,21 +165,8 @@ struct QuadCtx* quadCtxInit(struct QuadCtx *const p_ctx) {
 	return p_ctx;
 }
 
-struct Quad const* const quadDebug(struct Quad const *const p_quad) {
-	printi(
-		"	Pos:		x: `%.2ff`,  y: `%.2ff`,\n",
-		p_quad->pos.x, p_quad->pos.y
-	);
-	printi(
-		"	Scale:		x: `%.2ff`,  y: `%.2ff`,\n",
-		p_quad->scale.x, p_quad->scale.y
-	);
-	printi(
-		"	Texcoords:	x1: `%.2ff`, y2: `%.2ff`, w: `%.2ff`, h: `%.2ff`.\n",
-		p_quad->texRect.x, p_quad->texRect.y, p_quad->texRect.z, p_quad->texRect.w
-	);
-
-	return p_quad;
+struct QuadCtx* quadCtxDraw(struct QuadCtx const *const p_ctx) {
+	return quadCtxDrawRange(p_ctx, 0, p_ctx->list->size);
 }
 
 size_t quadCreate(struct QuadCtx *const p_ctx, size_t const p_count) {
@@ -172,41 +176,7 @@ size_t quadCreate(struct QuadCtx *const p_ctx, size_t const p_count) {
 	return ret;
 }
 
-struct QuadCtx const *const quadCtxDraw(struct QuadCtx const *const p_ctx) {
-	ERRGL(glActiveTexture(GL_TEXTURE0));
-	ERRGL(glBindVertexArray(p_ctx->vao));
-	ERRGL(glUseProgram(g_shaderGlIds[SHADER_QUADS]));
-	ERRGL(glBindTexture(GL_TEXTURE_2D, g_atlases[ATLAS_DEFAULT].glTextureId));
-	ERRGL(glUniform1i(s_quadProgramUniformLocationAtlas, GL_TEXTURE0 - GL_TEXTURE0));
-	ERRGL(glUniformMatrix4fv(s_quadProgramUniformLocationCamera, 1, GL_TRUE, (GLfloat const*) &g_cameraCurrentTransf));
-
-	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst));
-	// "Orphan" previous buffer. Let it "be GCd" for a new one:
-	ERRGL(glBufferData(
-		GL_ARRAY_BUFFER,
-		listBytesSize(p_ctx->list),
-		NULL,
-		GL_STREAM_DRAW
-	));
-	ERRGL(glBufferData(
-		GL_ARRAY_BUFFER,
-		listBytesSize(p_ctx->list),
-		p_ctx->list->data,
-		GL_STREAM_DRAW
-	));
-
-	ERRGL(glEnable(GL_BLEND));
-	ERRGL(glFrontFace(GL_CCW));
-	// ERRGL(glClearDepthf(100.0f));
-	ERRGL(glDisable(GL_CULL_FACE));
-	ERRGL(glDisable(GL_DEPTH_TEST));
-	ERRGL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-	ERRGL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, p_ctx->list->size));
-
-	return p_ctx;
-}
-
-void quadTexture(struct Quad *const p_quad, enum AtlasName const p_atlas, enum TextureName p_texture) {
+struct Quad* quadTexture(struct Quad *const p_quad, enum AtlasName const p_atlas, enum TextureName p_texture) {
 	size_t const rid = g_atlasTextureIndices[p_atlas][p_texture];
 	struct Atlas *atlas = g_atlases + p_atlas;
 	float const tx = atlas->rects[rid].x;
@@ -236,4 +206,40 @@ void quadTexture(struct Quad *const p_quad, enum AtlasName const p_atlas, enum T
 	p_quad->texRect.y = (ty + 0.5f) * ahi; // Texture AABB `y`,
 	p_quad->texRect.z = (tx + tw - 1.0f) * awi; // Texture AABB `w`,
 	p_quad->texRect.w = (ty + th - 1.0f) * ahi; // Texture AABB `h`.
+
+	return p_quad;
+}
+
+struct QuadCtx* quadCtxDrawRange(struct QuadCtx const *const p_ctx, size_t const p_start, size_t const p_count) {
+	ERRGL(glActiveTexture(GL_TEXTURE0));
+	ERRGL(glBindVertexArray(p_ctx->vao));
+	ERRGL(glUseProgram(g_shaderGlIds[SHADER_QUADS]));
+	ERRGL(glBindTexture(GL_TEXTURE_2D, g_atlases[ATLAS_DEFAULT].glTextureId));
+	ERRGL(glUniform1i(s_quadProgramUniformLocationAtlas, GL_TEXTURE0 - GL_TEXTURE0));
+	ERRGL(glUniformMatrix4fv(s_quadProgramUniformLocationCamera, 1, GL_TRUE, (GLfloat const*) &g_cameraCurrentTransf));
+
+	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst));
+	// "Orphan" previous buffer. Let it "be GCd" for a new one:
+	// ERRGL(glBufferData(
+	// 	GL_ARRAY_BUFFER,
+	// 	p_count * p_ctx->list->stride,
+	// 	NULL,
+	// 	GL_STREAM_DRAW
+	// ));
+	ERRGL(glBufferData(
+		GL_ARRAY_BUFFER,
+		p_count * p_ctx->list->stride,
+		p_ctx->list->data + p_start,
+		GL_STREAM_DRAW
+	));
+
+	ERRGL(glFrontFace(GL_CCW));
+	// ERRGL(glEnable(GL_BLEND));
+	// // ERRGL(glClearDepthf(100.0f));
+	// ERRGL(glDisable(GL_CULL_FACE));
+	// ERRGL(glDisable(GL_DEPTH_TEST));
+	// ERRGL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+	ERRGL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, p_count));
+
+	return (struct QuadCtx*) p_ctx;
 }

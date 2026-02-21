@@ -16,10 +16,10 @@ extern int g_window1XUnFull;
 extern int g_window1YUnFull;
 extern int g_window1WUnFull;
 extern int g_window1HUnFull;
-extern GLFWwindow *g_window1;
+extern struct GLFWwindow *g_window1;
 #pragma endregion
 
 void window1Create();
 void window1Delete();
 void window1Update();
-void window1CbckKey(GLFWwindow *const window, int const key, int const scancode, int const action, int const mods);
+void window1CbckKey(struct GLFWwindow *const window, int const key, int const scancode, int const action, int const mods);
