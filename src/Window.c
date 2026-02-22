@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 struct List g_windowList;
-struct Window const *s_windowCurrent;
+struct Window *s_windowCurrent;
 
 size_t windowGetIndex() {
 
@@ -18,7 +18,7 @@ struct Window* windowDelete(struct Window *const p_window) {
 	return NULL;
 }
 
-struct Window* windowSet(struct Window const *const p_window) {
+struct Window* windowSet(struct Window *const p_window) {
 	struct Window *prev = s_windowCurrent;
 	glfwMakeContextCurrent(p_window->glfw);
 	s_windowCurrent = p_window;

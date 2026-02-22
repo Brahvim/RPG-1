@@ -48,43 +48,43 @@ My current worry is making a dynamic texture system, TBH, threading contracts *a
 Current system simply uses some macro tricks to keep everything 100% static:  
 ```c
 static void atlasReverseMapNames(enum AtlasName const p_atlas, long long *const p_indices) {
-    for (size_t i = 0; i < TEXTURE_TOTAL; ++i) {
+	for (size_t i = 0; i < TEXTURE_TOTAL; ++i) {
 
-        g_atlasTextureIndices[p_atlas] = p_indices;
+		g_atlasTextureIndices[p_atlas] = p_indices;
 
-        for (size_t j = 0; j < g_atlasTextureCounts[p_atlas]; j++) {
+		for (size_t j = 0; j < g_atlasTextureCounts[p_atlas]; j++) {
 
-            if (i == g_atlasTextureNames[p_atlas][j]) {
+			if (i == g_atlasTextureNames[p_atlas][j]) {
 
-                g_atlasTextureIndices[p_atlas][i] = j;
-                break;
+				g_atlasTextureIndices[p_atlas][i] = j;
+				break;
 
-            }
+			}
 
-        }
+		}
 
-    }
+	}
 }
 
 void loadMappedAtlases() {
 #define M(p_enum, ...) { \
-        static enum TextureName names[] = { __VA_ARGS__ }; \
-        static long long indices[TEXTURE_TOTAL] = { 0 }; \
-        g_atlasTextureCounts[p_enum] = sizearr(names); \
-        memset(indices, -1, sizeof(indices)); \
-        g_atlasTextureNames[p_enum] = names; \
-        atlasReverseMapNames(p_enum, indices); \
-        atlasCreate(p_enum); \
-    }
+		static enum TextureName names[] = { __VA_ARGS__ }; \
+		static long long indices[TEXTURE_TOTAL] = { 0 }; \
+		g_atlasTextureCounts[p_enum] = sizearr(names); \
+		memset(indices, -1, sizeof(indices)); \
+		g_atlasTextureNames[p_enum] = names; \
+		atlasReverseMapNames(p_enum, indices); \
+		atlasCreate(p_enum); \
+	}
 
-    M(ATLAS_DEFAULT,
+	M(ATLAS_DEFAULT,
 
-    TEXTURE_GRID,
-    TEXTURE_BLACK,
-    TEXTURE_WHITE,
-    TEXTURE_MISSING,
+	TEXTURE_GRID,
+	TEXTURE_BLACK,
+	TEXTURE_WHITE,
+	TEXTURE_MISSING,
 
-    );
+	);
 
 #undef M
 }

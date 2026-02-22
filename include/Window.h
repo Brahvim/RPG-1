@@ -32,8 +32,8 @@ extern struct List g_windowList;
 
 size_t windowGetIndex();
 struct Window* windowGet();
+struct Window* windowSet(struct Window *const window); // Calls `glfwMakeContextCurrent()`.
 struct Window* windowDelete(struct Window *const window);
-struct Window* windowSet(struct Window const *const window); // Calls `glfwMakeContextCurrent()`.
 struct Window *const windowCreate(struct Window *const storage);
 
 #define windowVal(...)							((struct Window) { __VA_ARGS__ } )
