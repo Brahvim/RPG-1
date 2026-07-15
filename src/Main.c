@@ -1,6 +1,7 @@
 #define __USE_XOPEN
 #include <stb/stb_image.h>
 #include <glad/gles2.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -46,6 +47,9 @@ print:
 
 int main(int const p_argCount, char const **p_argValues) {
 	cliFlagGpu(p_argCount, p_argValues);
+
+	void* arr = ((void*) { "Brahvim" });
+	puti((char const *const) arr);
 
 	glfwInit();
 	window1Create();

@@ -1,16 +1,9 @@
-#include "Window.h"
 #include <stdlib.h>
+#include "Window.h"
+#include "Macros.h"
+#include <stdio.h>
 
-struct List g_windowList;
-struct Window *s_windowCurrent;
-
-size_t windowGetIndex() {
-
-}
-
-struct Window* windowGet() {
-	return s_windowCurrent;
-}
+size_t s_windowCount = 0;
 
 struct Window* windowDelete(struct Window *const p_window) {
 	glfwDestroyWindow(p_window->glfw);
@@ -18,14 +11,10 @@ struct Window* windowDelete(struct Window *const p_window) {
 	return NULL;
 }
 
-struct Window* windowSet(struct Window *const p_window) {
-	struct Window *prev = s_windowCurrent;
-	glfwMakeContextCurrent(p_window->glfw);
-	s_windowCurrent = p_window;
-	return prev;
-}
-
-struct Window *const windowCreate(struct Window *const p_storage) {
-	p_storage->glfw = glfwCreateWindow(p_storage->wd, p_storage->hd, NULL, NULL, NULL);
-	return p_storage;
+struct Window *const windowCreate(struct Window *const p_window) {
+	char title[64];
+	++s_windowCount;
+	snprintf(title, sizearr(title), "RPG Window %zu", s_windowCount);
+	p_window->glfw = glfwCreateWindow(p_window->wd, p_window->hd, title, NULL, NULL);
+	return p_window;
 }

@@ -191,17 +191,19 @@ struct Quad* quadTexture(struct Quad *const p_quad, enum AtlasName const p_atlas
 	// p_quad->texRect.z = (tx + tw) / aw; // Texture AABB `w`,
 	// p_quad->texRect.w = (ty + th) / ah; // Texture AABB `h`.
 	//
-	// Done!
+	// *Done!*
 	//
-	// ...But wait!
+	// ...
+	//
+	// *But wait!*
 	// Textures in an atlas can BLEED into each other after mipmapping!
-	// ...To fix that, we limit their exact bounds by half a pixel or so, as done below...!:
+	// ...To fix that, we limit their exact bounds by half a pixel or so, as done below:
 
 	// Inversion:
 	float const ahi = 1.0f / ah;
 	float const awi = 1.0f / aw;
 
-	// Offsetting:
+	// Offsetting (prevents bleeds):
 	p_quad->texRect.x = (tx + 0.5f) * awi; // Texture AABB `x`,
 	p_quad->texRect.y = (ty + 0.5f) * ahi; // Texture AABB `y`,
 	p_quad->texRect.z = (tx + tw - 1.0f) * awi; // Texture AABB `w`,

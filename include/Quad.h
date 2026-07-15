@@ -35,12 +35,12 @@ struct QuadCtx* quadCtxInit(struct QuadCtx *const ctx);
 struct QuadCtx* quadCtxDraw(struct QuadCtx const *const ctx);
 struct QuadCtx* quadCtxDrawRange(struct QuadCtx const *const ctx, size_t const start, size_t const count);
 
-#define quadDefPtr() (&quadDef())
 #define quadPtr(...) (&quadVal(__VA_ARGS__))
+#define quadDefPtr(...) (&quadDef(__VA_ARGS__))
 #define quadVal(...) ((struct Quad) { __VA_ARGS__ })
 #define quadCtxNew(p_ctx) quadCtxAppend(p_ctx, quadDef())
 size_t quadCreate(struct QuadCtx *const ctx, size_t const count);
-#define quadDef(...) ((struct Quad) { .scale = { 1, 1 }, __VA_ARGS__ })
+#define quadDef(...) ((struct Quad) { .scale = { 1, 1 }, .tintRgba = { 0, 0, 0, 1 }, __VA_ARGS__ })
 
 #define quadCtxTail(p_ctx) quadListTail(p_ctx->list)
 #define quadListTail(p_list) quadListRead(p_list, p_list->size - 1)

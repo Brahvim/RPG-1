@@ -350,6 +350,23 @@ testfn adjugateSame() {
 	return passing;
 }
 
+testfn transposeToNew() {
+	bool passing = true;
+	struct SmlMat44 out;
+	struct SmlMat44 m = smlMat44Val(
+		1, 2, 3, 4,
+		5, 6, 7, 8,
+		9, 10, 11, 12,
+		13, 14, 15, 16
+	);
+
+	smlMat44Transpose(&m, &out);
+	testCheckFloat(passing |=, out.r44, 1.0f);
+	testCheckFloat(passing |=, out.r11, 16.0f);
+
+	return passing;
+}
+
 testfn invertUnchecked() {
 	bool passing = true;
 	struct SmlMat44 out;
@@ -366,23 +383,6 @@ testfn invertUnchecked() {
 	testCheckFloat(passing |=, out.r22, 1.0f / 3.0f);
 	testCheckFloat(passing |=, out.r33, 1.0f / 4.0f);
 	testCheckFloat(passing |=, out.r44, 1.0f / 5.0f);
-
-	return passing;
-}
-
-testfn transposeToNew() {
-	bool passing = true;
-	struct SmlMat44 out;
-	struct SmlMat44 m = smlMat44Val(
-		1, 2, 3, 4,
-		5, 6, 7, 8,
-		9, 10, 11, 12,
-		13, 14, 15, 16
-	);
-
-	smlMat44Transpose(&m, &out);
-	testCheckFloat(passing |=, out.r44, 1.0f);
-	testCheckFloat(passing |=, out.r11, 16.0f);
 
 	return passing;
 }
@@ -411,9 +411,8 @@ int main(int const p_count, char *p_values[]) {
 	return testRunTestsArray(testCreateArray(
 
 		testCreateTest(invertGivenInvertedDeterminant),
-		testCreateTest(transposeToNew),
 		testCreateTest(invertUnchecked),
-		testCreateTest(transpose),
+		testCreateTest(transposeToNew),
 		testCreateTest(adjugateSame),
 		testCreateTest(determinant),
 		testCreateTest(multMembers),
@@ -423,6 +422,7 @@ int main(int const p_count, char *p_values[]) {
 		testCreateTest(subScalar),
 		testCreateTest(divScalar),
 		testCreateTest(addScalar),
+		testCreateTest(transpose),
 		testCreateTest(cofactors),
 		testCreateTest(identity),
 		testCreateTest(adjugate),

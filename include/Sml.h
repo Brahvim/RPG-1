@@ -370,6 +370,9 @@ struct SmlVec3* smlVec2Cross(struct SmlVec2 const *const first, struct SmlVec2 c
 #define smlVec3Ptr(...) (&smlVec3Val(__VA_ARGS__))
 #define smlVec3Val(...) ((struct SmlVec3) { __VA_ARGS__ })
 
+#define smlVec3PtrOne() (&smlVec3ValOne())
+#define smlVec3ValOne() ((struct SmlVec3) { 1, 1, 1 })
+
 #define smlVec3MultSame(vector, scalar) smlVec3Mult(vector, scalar, vector)
 #define smlVec3ScaleSame(vector, scalar) smlVec3Scale(vector, scalar, vector)
 #define smlVec3NormalizeSame(vector, scalar) smlVec3Normalize(vector, scalar, vector)

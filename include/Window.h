@@ -1,10 +1,8 @@
-#pragma once
-
-#include "List.h"
-#include <stddef.h>
-#include <stdbool.h>
 #define GLFW_INCLUDE_NONE 1
 #include <GLFW/glfw3.h>
+#include <stdbool.h>
+#include <stddef.h>
+#pragma once
 
 struct Window {
 
@@ -28,17 +26,12 @@ struct Window {
 
 };
 
-extern struct List g_windowList;
-
-size_t windowGetIndex();
-struct Window* windowGet();
-struct Window* windowSet(struct Window *const window); // Calls `glfwMakeContextCurrent()`.
 struct Window* windowDelete(struct Window *const window);
-struct Window *const windowCreate(struct Window *const storage);
+struct Window* windowCreate(struct Window *const storage);
 
 #define windowVal(...)							((struct Window) { __VA_ARGS__ } )
 #define windowPtr(...)							(&((struct Window*) { __VA_ARGS__ } ))
 #define windowListTail(p_list)					windowListRead(p_list, p_list->size - 1)
 #define windowListRead(p_list, p_id)			((struct Window*) listRead(p_list, p_id))
-#define windowListAppend(p_list, p_window)		*(((struct Window*) p_list->data) + p_list->size++) = (p_window)
 #define windowListSet(p_list, p_id, p_window)	*(((struct Window*) p_list->data) + p_id) = (p_window)
+#define windowListAppend(p_list, p_window)		*(((struct Window*) p_list->data) + p_list->size++) = (p_window)

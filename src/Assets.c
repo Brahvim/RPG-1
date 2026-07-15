@@ -14,10 +14,12 @@
 #pragma region Maps.
 static inline void mapTextures() {
 #define M(p_texture, p_path) g_texturePaths[p_texture] = p_path; g_texturePathLengths[p_texture] = sizeof(p_path)
+
 	M(TEXTURE_MISSING, "missing.png");
 	M(TEXTURE_BLACK, "black.png");
 	M(TEXTURE_WHITE, "white.png");
 	M(TEXTURE_GRID, "grid.png");
+
 #undef M
 }
 
@@ -25,7 +27,9 @@ static inline void mapShaders() {
 #define M(p_shader, p_vert, p_frag)\
 	g_shaderPathsVert[p_shader] = p_vert; g_shaderPathsFrag[p_shader] = p_frag;\
 	g_shaderPathLengthsVert[p_shader] = sizeof(p_vert); g_shaderPathLengthsFrag[p_shader] = sizeof(p_frag)
+
 	M(SHADER_QUADS, "quad.vert", "quad.frag");
+
 #undef M
 }
 #pragma endregion
@@ -236,11 +240,12 @@ struct Atlas* atlasCreate(enum AtlasName const p_atlas) {
 	// ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 	// ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 
+	// TODO: Investigate!
+	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-	ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR));
 
+	// ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 	// ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
-	// ERRGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST));
 
 	ERRGL(glTexImage2D(
 		GL_TEXTURE_2D,

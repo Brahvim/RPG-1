@@ -6,7 +6,7 @@
 
 typedef unsigned char pixel_t;
 
-struct RegistryTextures {
+struct TextureStore {
 
 	pixel_t **images;
 	size_t capacity;
@@ -37,11 +37,11 @@ struct Atlas {
 	// These last 2 are all 8 bytes:
 
 	struct Rect *rects; // `x`, `y`, `w`, `h`. Ordered like `Atlas::textures`!
-	struct RegistryTextures *textures; // What textures does thou hold...?!
+	struct TextureStore *textures; // What textures does thou hold...?!
 
 };
 
-struct RegistryTextures* registryTexturesCreate();
-struct Texture* registryTexturesRemove(size_t const id);
-// struct RegistryTextures* registryTexturesDelete(struct RegistryTextures const *const registry);
-struct RegistryTextures* registryTexturesAppend(struct RegistryTextures const *const registry, struct Texture const *const texture);
+struct TextureStore* textureStoreCreate();
+struct Texture textureStoreRemove(size_t const id);
+// struct TextureStore* textureStoreDelete(struct textureStore const *const store);
+struct TextureStore* textureStoreAppend(struct TextureStore const *const store, struct Texture const *const texture);

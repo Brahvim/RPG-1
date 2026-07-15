@@ -40,42 +40,6 @@ void gameExit(enum ExitReason const p_reason) {
 
 	}
 
-	switch (p_reason) {
-
-		default: return;
-
-		case EXIT_REASON_SUCCESS: {
-
-			puti("Exiting just fine this time :)!");
-
-		} break;
-
-		case EXIT_REASON_FAILURE: {
-
-			pute("Exiting for no good reason! Check meee!");
-
-		} break;
-
-		case EXIT_REASON_REALLOC: {
-
-			pute("Exiting because some `realloc()` call failed.");
-
-		} break;
-
-		case EXIT_REASON_MALLOC: {
-
-			pute("Exiting because `malloc()` call failed. Again.");
-
-		} break;
-
-		case EXIT_REASON_CALLOC: {
-
-			pute("Exiting because `calloc()` call failed. Again.");
-
-		} break;
-
-	}
-
 	gameShutdown();
 	window1Delete();
 	glfwTerminate();
@@ -98,19 +62,26 @@ void gameSetup() {
 	struct QuadCtx *qc = g_gameQuadCtx = quadCtxCreate();
 	struct QuadCtx *bg = g_gameQuadCtxBg = quadCtxCreate();
 
-	quadCtxNew(bg);
+	quadCtxAppend(bg, quadDef(
+
+		// .scale = { 1, 1 },
+		// .tintRgba = { 0, 0, 0, 1 }
+
+	));
+
 	g_gameQuadBg = quadListTail(bg->list);
+	g_gameQuadBg->scale = smlVec3Val(1.0f, 1.0f, 1.0f);
+	// quadTexture(g_gameQuadBg, ATLAS_DEFAULT, TEXTURE_GRID);
 	g_gameQuadBg->tintRgba = smlQuatVal(0.8f, 0.6f, 1.0f, 0.1f); // *Strawberry milk!*
 	// g_gameQuadBg->tintRgba = smlQuatVal(0.8f, 0.6f, 1.0f, 1); // Texture-missing purple.
 
 	listExpand(qc->list, 2);
 
 	quadCtxAppend(
-		qc,
-		quadVal(
-			.tintRgba = smlQuatVal(0, 0, 0, 1),
-			.scale = (*smlVec3ScaleSame(smlVec3Ptr(1.25f, 1), 50))
-		)
+	   qc,
+	   quadDef(
+		   .scale = (*smlVec3ScaleSame(smlVec3Ptr(1.25f, 1), 50))
+	   )
 	);
 	quadTexture(quadListTail(qc->list), ATLAS_DEFAULT, TEXTURE_GRID);
 
@@ -118,7 +89,7 @@ void gameSetup() {
 		qc,
 		quadVal(
 			.tintRgba = smlQuatVal(1, 0, 0, 0.25f),
-			.scale = (*smlVec3ScaleSame(smlVec3Ptr(1, 1, 1), 15))
+			.scale = (*smlVec3ScaleSame(smlVec3PtrOne(), 15))
 		)
 	);
 	// quadTexture(quadListTail(qc->list), ATLAS_DEFAULT, TEXTURE_MISSING);
@@ -144,8 +115,9 @@ void gameDraw() {
 	camera2dUpdatePersp();
 	camera2dApply();
 
-	quadListRead(g_gameQuadCtx->list, 1)->rotate.z = g_gameMillisDraw * 2;
 	quadListRead(g_gameQuadCtx->list, 0)->pos.x = fabs(sin(g_gameMillisDraw)) - 0.5f;
+	quadListRead(g_gameQuadCtx->list, 0)->pos.z = fabs(sin(g_gameMillisDraw)) * 50;
+	quadListRead(g_gameQuadCtx->list, 1)->rotate.z = g_gameMillisDraw * 2;
 
 	ERRGL(glDisable(GL_DEPTH_TEST));
 	ERRGL(glDisable(GL_CULL_FACE));
