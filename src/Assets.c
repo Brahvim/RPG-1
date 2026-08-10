@@ -285,7 +285,7 @@ struct Atlas* atlasCreate(enum AtlasName const p_atlas) {
 	}
 
 	ERRGL(glGenerateMipmap(GL_TEXTURE_2D));
-	ERRGL(glBindTexture(GL_TEXTURE_2D, 0)); // Cleaning up? Us? HAH!
+	// ERRGL(glBindTexture(GL_TEXTURE_2D, 0)); // Cleaning up? Us? HAH!
 
 	free(rects);
 	return atlas;

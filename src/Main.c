@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include "Window1.h"
+#include "Window.h"
 #include "Macros.h"
 #include "Assets.h"
 #include "Game.h"

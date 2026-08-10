@@ -29,7 +29,7 @@ struct Window {
 struct Window* windowDelete(struct Window *const window);
 struct Window* windowCreate(struct Window *const storage);
 
-#define windowVal(...)							((struct Window) { __VA_ARGS__ } )
+#define windowVal(...)							((struct Window) { __VA_ARGS__ })
 #define windowPtr(...)							(&((struct Window*) { __VA_ARGS__ } ))
 #define windowListTail(p_list)					windowListRead(p_list, p_list->size - 1)
 #define windowListRead(p_list, p_id)			((struct Window*) listRead(p_list, p_id))

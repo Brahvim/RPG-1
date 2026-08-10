@@ -115,8 +115,35 @@ void gameDraw() {
 	camera2dUpdatePersp();
 	camera2dApply();
 
+	struct SmlVec2 mouse = smlVec2Val();
+	{
+		double x, y;
+		glfwGetCursorPos(g_window1, &x, &y);
+		mouse.x = x;
+		mouse.y = y;
+	}
+
+	struct SmlQuat mouseOnQuad0 = smlQuatVal(
+		(2.0f * (mouse.x / g_window1Wfb)) - 1.0f,
+		1.0f - (2.0f * (mouse.y / g_window1Hfb)),
+		-1.0f, // quadListRead(g_gameQuadCtx->list, 0)->pos.z,
+		1.0f
+	);
+
+	struct SmlMat44 cameraInv;
+	smlMat44Invert(&g_cameraCurrentTransf, &cameraInv);
+	smlMat44MultQuat(&cameraInv, &mouseOnQuad0, &mouseOnQuad0);
+	// smlQuatMultScalar(&mouseOnQuad0, 1.0 / mouseOnQuad0.w, &mouseOnQuad0); // TODO `smlQuadDivScalar()`!
+
+	// quadListRead(g_gameQuadCtx->list, 0)->pos.x = mouseOnQuad0.x;
+	// quadListRead(g_gameQuadCtx->list, 0)->pos.y = mouseOnQuad0.y;
+
+	// quadListRead(g_gameQuadCtx->list, 0)->tintRgba = smlQuatVal(0.5, 0, 0, 1);
+	// quadListRead(g_gameQuadCtx->list, 1)->tintRgba = smlQuatVal(0, 0, 0.5, 0.5);
 	quadListRead(g_gameQuadCtx->list, 0)->pos.x = fabs(sin(g_gameMillisDraw)) - 0.5f;
+	// quadListRead(g_gameQuadCtx->list, 0)->pos.x = fabs(sin(g_gameMillisDraw)) * 50;
 	quadListRead(g_gameQuadCtx->list, 0)->pos.z = fabs(sin(g_gameMillisDraw)) * 50;
+	// quadListRead(g_gameQuadCtx->list, 1)->pos.z = fabs(sin(g_gameMillisDraw)) * 50;
 	quadListRead(g_gameQuadCtx->list, 1)->rotate.z = g_gameMillisDraw * 2;
 
 	ERRGL(glDisable(GL_DEPTH_TEST));

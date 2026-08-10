@@ -6,16 +6,6 @@
 
 typedef unsigned char pixel_t;
 
-struct TextureStore {
-
-	pixel_t **images;
-	size_t capacity;
-	size_t count;
-	int *heights;
-	int *widths;
-
-};
-
 struct Texture {
 
 	pixel_t *image;
@@ -40,8 +30,3 @@ struct Atlas {
 	struct TextureStore *textures; // What textures does thou hold...?!
 
 };
-
-struct TextureStore* textureStoreCreate();
-struct Texture textureStoreRemove(size_t const id);
-// struct TextureStore* textureStoreDelete(struct textureStore const *const store);
-struct TextureStore* textureStoreAppend(struct TextureStore const *const store, struct Texture const *const texture);

@@ -12,6 +12,12 @@
 #define IDENTITY(x) x
 #define IDENTITY2(x) IDENTITY(x)
 
+// No autocomplete in these...! C gives you syntax, just write it:
+// #define VAL(p_type, ...) ((p_type) { __VA_ARGS__ })
+// #define PTR(p_type, ...) (&((p_type*) { __VA_ARGS__ }))
+// #define VALS(p_struct, ...) ((struct p_struct) { __VA_ARGS__ })
+// #define PTRS(p_struct, ...) (&((struct p_struct*) { __VA_ARGS__ }))
+
 #define asarr(p_type, p_body) 	((p_type[]) p_body)
 #define sizearr(p_array) 		(sizeof(p_array) / sizeof(p_array[0]))
 #define likely(p_condition) 	__builtin_expect((long) (p_condition), 1)

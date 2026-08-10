@@ -192,8 +192,6 @@ void camera2dUpdatePersp() {
 		&g_camera2dTransf
 
 	);
-
-
 }
 
 void camera2dApply() {
