@@ -77,22 +77,16 @@ void gameSetup() {
 
 	listExpand(qc->list, 2);
 
-	quadCtxAppend(
-	   qc,
-	   quadDef(
-		   .scale = (*smlVec3ScaleSame(smlVec3Ptr(1.25f, 1), 50))
-	   )
-	);
+	quadCtxAppend(qc, quadDef(
+		.scale = (*smlVec3ScaleSame(smlVec3Ptr(1.25f, 1), 50))
+	));
 	quadTexture(quadListTail(qc->list), ATLAS_DEFAULT, TEXTURE_GRID);
 
-	quadCtxAppend(
-		qc,
-		quadVal(
-			.tintRgba = smlQuatVal(1, 0, 0, 0.25f),
-			.scale = (*smlVec3ScaleSame(smlVec3PtrOne(), 15))
-		)
-	);
-	// quadTexture(quadListTail(qc->list), ATLAS_DEFAULT, TEXTURE_MISSING);
+	quadCtxAppend(qc, quadVal(
+		.tintRgba = smlQuatVal(1, 0, 0, 0.25f),
+		.scale = (*smlVec3ScaleSame(smlVec3PtrOne(), 15))
+	));
+;	quadTexture(quadListTail(qc->list), ATLAS_DEFAULT, TEXTURE_MISSING);
 }
 
 void gameDraw() {
