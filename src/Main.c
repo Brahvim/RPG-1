@@ -49,9 +49,6 @@ print:
 int main(int const p_argCount, char const **p_argValues) {
 	cliFlagGpu(p_argCount, p_argValues);
 
-	void* arr = ((void*) { "Brahvim" });
-	puti((char const *const) arr);
-
 	glfwInit();
 	window1Create();
 	glfwSwapInterval(0);

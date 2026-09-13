@@ -1,0 +1,3 @@
+[submodule "src/sss"]
+	path = src/sss
+	url = https://codeberg.org/Brahvim/Simple-Storage-Structures.git

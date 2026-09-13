@@ -6,18 +6,20 @@ uniform mat4 u_camera;
 out vec4 v_tint;
 out vec2 v_uv;
 
-// Attributes.
+// region Attributes.
 
-// Vertex attributes.
+// Vertex attributes:
 layout(location = 0) in vec3 a0_vPos;
 layout(location = 1) in vec2 a1_vTexcoords;
 
-// Instance attributes.
+// Instance attributes:
 layout(location = 2) in vec3 a2_iPos;
 layout(location = 3) in vec4 a3_iTint;
 layout(location = 4) in vec3 a4_iScale;
 layout(location = 5) in vec3 a5_iRotation;
 layout(location = 6) in vec4 a6_iTexcoords; // `(x, y, w, h)` of texture rect.
+
+// endregion
 
 mat3 mat3RotateX(float p_angle) {
 	float c = cos(p_angle);
@@ -41,9 +43,9 @@ void main() {
 	v_tint = a3_iTint;
 
 	mat3 mat3Rotate 
-		/**/ = mat3RotateX(a5_iRotation.x) 
-		/**/ * mat3RotateY(a5_iRotation.y)
-		/**/ * mat3RotateZ(a5_iRotation.z);
+	/**/ = mat3RotateX(a5_iRotation.x) 
+	/**/ * mat3RotateY(a5_iRotation.y)
+	/**/ * mat3RotateZ(a5_iRotation.z);
 
 	// `a0_vPos` is the *local* coord.
 	//

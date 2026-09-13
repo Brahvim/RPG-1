@@ -62,37 +62,34 @@ void gameSetup() {
 	struct QuadCtx *qc = g_gameQuadCtx = quadCtxCreate();
 	struct QuadCtx *bg = g_gameQuadCtxBg = quadCtxCreate();
 
-	quadCtxAppend(bg, quadDef(
+	listAppend(bg->list, 1, quadDefPtr(
 
 		// .scale = { 1, 1 },
 		// .tintRgba = { 0, 0, 0, 1 }
 
 	));
 
-	g_gameQuadBg = quadListTail(bg->list);
+	g_gameQuadBg = listTail(bg->list);
 	g_gameQuadBg->scale = smlVec3Val(1.0f, 1.0f, 1.0f);
 	// quadTexture(g_gameQuadBg, ATLAS_DEFAULT, TEXTURE_GRID);
 	g_gameQuadBg->tintRgba = smlQuatVal(0.8f, 0.6f, 1.0f, 0.1f); // *Strawberry milk!*
 	// g_gameQuadBg->tintRgba = smlQuatVal(0.8f, 0.6f, 1.0f, 1); // Texture-missing purple.
 
 	listExpand(qc->list, 2);
+	listAppend(qc->list, 1, quadDefPtr(
 
-	quadCtxAppend(
-	   qc,
-	   quadDef(
-		   .scale = (*smlVec3ScaleSame(smlVec3Ptr(1.25f, 1), 50))
-	   )
-	);
-	quadTexture(quadListTail(qc->list), ATLAS_DEFAULT, TEXTURE_GRID);
+		.scale = (*smlVec3ScaleSame(smlVec3Ptr(1.25f, 1), 50))
 
-	quadCtxAppend(
-		qc,
-		quadVal(
-			.tintRgba = smlQuatVal(1, 0, 0, 0.25f),
-			.scale = (*smlVec3ScaleSame(smlVec3PtrOne(), 15))
-		)
-	);
-	// quadTexture(quadListTail(qc->list), ATLAS_DEFAULT, TEXTURE_MISSING);
+	));
+	quadTexture(listTail(qc->list), ATLAS_DEFAULT, TEXTURE_GRID);
+
+	listAppend(qc->list, 1, quadPtr(
+
+		.tintRgba = smlQuatVal(1, 0, 0, 0.25f),
+		.scale = (*smlVec3ScaleSame(smlVec3PtrOne(), 15))
+
+	));
+	quadTexture(listTail(qc->list), ATLAS_DEFAULT, TEXTURE_MISSING);
 }
 
 void gameDraw() {
@@ -126,7 +123,7 @@ void gameDraw() {
 	struct SmlQuat mouseOnQuad0 = smlQuatVal(
 		(2.0f * (mouse.x / g_window1Wfb)) - 1.0f,
 		1.0f - (2.0f * (mouse.y / g_window1Hfb)),
-		-1.0f, // quadListRead(g_gameQuadCtx->list, 0)->pos.z,
+		-1.0f, // listRead(g_gameQuadCtx->list, 0)->pos.z,
 		1.0f
 	);
 
@@ -135,16 +132,16 @@ void gameDraw() {
 	smlMat44MultQuat(&cameraInv, &mouseOnQuad0, &mouseOnQuad0);
 	// smlQuatMultScalar(&mouseOnQuad0, 1.0 / mouseOnQuad0.w, &mouseOnQuad0); // TODO `smlQuadDivScalar()`!
 
-	// quadListRead(g_gameQuadCtx->list, 0)->pos.x = mouseOnQuad0.x;
-	// quadListRead(g_gameQuadCtx->list, 0)->pos.y = mouseOnQuad0.y;
+	// listRead(g_gameQuadCtx->list, 0)->pos.x = mouseOnQuad0.x;
+	// listRead(g_gameQuadCtx->list, 0)->pos.y = mouseOnQuad0.y;
 
-	// quadListRead(g_gameQuadCtx->list, 0)->tintRgba = smlQuatVal(0.5, 0, 0, 1);
-	// quadListRead(g_gameQuadCtx->list, 1)->tintRgba = smlQuatVal(0, 0, 0.5, 0.5);
-	quadListRead(g_gameQuadCtx->list, 0)->pos.x = fabs(sin(g_gameMillisDraw)) - 0.5f;
-	// quadListRead(g_gameQuadCtx->list, 0)->pos.x = fabs(sin(g_gameMillisDraw)) * 50;
-	quadListRead(g_gameQuadCtx->list, 0)->pos.z = fabs(sin(g_gameMillisDraw)) * 50;
-	// quadListRead(g_gameQuadCtx->list, 1)->pos.z = fabs(sin(g_gameMillisDraw)) * 50;
-	quadListRead(g_gameQuadCtx->list, 1)->rotate.z = g_gameMillisDraw * 2;
+	// listRead(g_gameQuadCtx->list, 0)->tintRgba = smlQuatVal(0.5, 0, 0, 1);
+	// listRead(g_gameQuadCtx->list, 1)->tintRgba = smlQuatVal(0, 0, 0.5, 0.5);
+	listRead(g_gameQuadCtx->list, 0)->pos.x = fabs(sin(g_gameMillisDraw)) - 0.5f;
+	// listRead(g_gameQuadCtx->list, 0)->pos.x = fabs(sin(g_gameMillisDraw)) * 50;
+	listRead(g_gameQuadCtx->list, 0)->pos.z = fabs(sin(g_gameMillisDraw)) * 50;
+	// listRead(g_gameQuadCtx->list, 1)->pos.z = fabs(sin(g_gameMillisDraw)) * 50;
+	listRead(g_gameQuadCtx->list, 1)->rotate.z = g_gameMillisDraw * 2;
 
 	ERRGL(glDisable(GL_DEPTH_TEST));
 	ERRGL(glDisable(GL_CULL_FACE));

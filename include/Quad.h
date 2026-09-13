@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Gl.h"
 #include "Sml.h"
 #include "List.h"
@@ -22,7 +21,7 @@ struct QuadCtx {
 	GLuint vboVertPos;
 	GLuint vboVertTexcoords;
 
-	struct List *list;
+	struct List(struct Quad) *list;
 
 };
 
@@ -38,20 +37,9 @@ struct QuadCtx* quadCtxDrawRange(struct QuadCtx const *const ctx, size_t const s
 #define quadPtr(...) (&quadVal(__VA_ARGS__))
 #define quadDefPtr(...) (&quadDef(__VA_ARGS__))
 #define quadVal(...) ((struct Quad) { __VA_ARGS__ })
-#define quadCtxNew(p_ctx) quadCtxAppend(p_ctx, quadDef())
+#define quadCtxNew(p_ctx) listAppend(p_ctx, quadDef())
 size_t quadCreate(struct QuadCtx *const ctx, size_t const count);
 #define quadDef(...) ((struct Quad) { .scale = { 1, 1 }, .tintRgba = { 0, 0, 0, 1 }, __VA_ARGS__ })
 
-#define quadCtxTail(p_ctx) quadListTail(p_ctx->list)
-#define quadListTail(p_list) quadListRead(p_list, p_list->size - 1)
-
-#define quadCtxRead(p_ctx, p_id) quadListRead(p_ctx->list, p_id)
-#define quadListRead(p_list, p_id) ((struct Quad*) listRead(p_list, p_id))
-
-#define quadCtxSet(p_ctx, p_id, p_quad) quadListSet(p_ctx->list, p_id, p_quad)
-#define quadListSet(p_list, p_id, p_quad) *(((struct Quad*) p_list->data) + p_id) = (p_quad)
-
 struct Quad* quadTexture(struct Quad *const quad, enum AtlasName const atlas, enum TextureName texture);
 
-#define quadCtxAppend(p_ctx, p_quad) quadListAppend(p_ctx->list, p_quad)
-#define quadListAppend(p_list, p_quad) (*(((struct Quad*) p_list->data) + p_list->size++) = (p_quad))

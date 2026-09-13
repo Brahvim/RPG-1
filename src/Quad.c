@@ -118,7 +118,7 @@ struct QuadCtx* quadCtxInit(struct QuadCtx *const p_ctx) {
 	ERRGL(glVertexAttribDivisor(attrib, 0));
 
 	ERRGL(glBindBuffer(GL_ARRAY_BUFFER, p_ctx->vboInst));
-	ERRGL(glBufferData(GL_ARRAY_BUFFER, listBytesSize(p_ctx->list), p_ctx->list->data, GL_STREAM_DRAW));
+	ERRGL(glBufferData(GL_ARRAY_BUFFER, listSizeBytes(p_ctx->list), p_ctx->list->data, GL_STREAM_DRAW));
 #pragma endregion
 
 	attrib = 2; // `a2_iPos`.
